@@ -2,6 +2,55 @@ import struct
 import re
 import binascii
 
+class Register:
+    def __init__(self, initial_value):
+        if type(initial_value) == Register:
+            self.ival = initial_value.ival
+            self.bval = initial_value.bval
+        elif type(initial_value) == bytes:
+            self.bval = initial_value
+            self.ival = struct.unpack('<l', initial_value)[0]
+        elif type(initial_value) == str:
+            self.ival = int(initial_value, 0)
+            self.bval = struct.pack('<l', self.ival)
+        else:
+            self.ival = int(initial_value)
+            self.bval = struct.pack('<l', self.ival)
+
+    @staticmethod
+    def __get_ival(other):
+        if type(other) == Register:
+            other_ival = other.ival
+        elif type(other) == bytes:
+            other_ival = struct.unpack('<l', other)[0]
+        elif type(other) == str:
+            other_ival = int(other, 0)
+        else:
+            other_ival = int(other)
+        return other_ival
+
+
+    def __add__(self, other): # +
+        return Register(self.ival + self.__get_ival(other))
+
+    def __sub__(self, other): # –
+        return Register(self.ival - self.__get_ival(other))
+
+    def __and__(self, other): # &
+        return Register(self.ival & self.__get_ival(other))
+
+    def __or__(self, other): # |
+        return Register(self.ival | self.__get_ival(other))
+
+    def __xor__(self, other): # ^
+        return Register(self.ival ^ self.__get_ival(other))
+
+
+    def __eq__(self, other): # ==
+        return self.ival == self.__get_ival(other)
+
+    def __ne__(self, other): # !=
+        return self.ival != self.__get_ival(other)
 
 class ProgramStatus:
     def __init__(self):
@@ -21,38 +70,57 @@ class ProgramStatus:
         self.Q = flags.get('Q', self.Q)
 
     def __str__(self):
-        return f'N: {int(self.N)} | Z: {int(self.Z)} | C: {int(self.C)} | V: {int(self.V)} | Q: {int(self.Q)}'
+        ge_bits = ''.join(str(int(v)) for v in self.GE)
+        return f'N: {int(self.N)} | Z: {int(self.Z)} | C: {int(self.C)} | V: {int(self.V)} | Q: {int(self.Q)} | GE: {ge_bits[::-1]}'
 
 class Core:
-    def __init__(self, pc, sp):
-        self.R = {i:self.Field(0) for i in range(13)}
-        self.PC = self.Field(pc)
-        self.SP = self.Field(sp)
-        self.LR = self.Field(0xffffffff)
+    def __init__(self):
+        self.R = {i:self.Field(0) for i in range(16)}
+        self.R[14] = self.Field(0xffffffff) # initial LR
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
         self.reg_num.update({'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
         self.APSR = ProgramStatus()
+        self.bytes_to_Uint = ['', '<B', '<H', '', '<L']
+        
 
         self.instructions = {
             'ADC' : [
-                (re.compile(r'ADC(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)', re.I), self.aarch32_ADC_i_T1_A, {'S':'0'}),
+                (re.compile(r'^ADC(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_ADC_i_T1_A, {'S':'0'}),
                 ],
             'ADCS' : [
-                (re.compile(r'ADCS(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)', re.I), self.aarch32_ADC_i_T1_A, {'S':'1'}),
+                (re.compile(r'^ADCS(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_ADC_i_T1_A, {'S':'1'}),
                 ],
+            'LDR' : [
+                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:,\s#(?P<imm32>[+]?\d+))?\]$', re.I), self.aarch32_LDR_i_T1_A, {}),
+                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:,\s#-(?P<imm32>\d+))?\]$', re.I), self.aarch32_LDR_i_T4_A, {'P':'1','U':'0','W':'0'}),
+                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)\],\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_LDR_i_T4_A, {'P':'0','W':'1'}),
+                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)\]!$', re.I), self.aarch32_LDR_i_T4_A, {'P':'1','W':'1'}),
+            ]
         }
+
+    def configure(self, pc, sp, mem):
+        self.memory = mem
+        self.R[15] = self.Field(pc & 0xfffffffe)
+        self.R[13] = self.Field(sp)
+
+    def getPC(self):
+        return self.UInt(self.R[15])
+
+    def incPC(self, step):
+        self.R[15] = self.R[15] + step
 
     def showRegisters(self):
         for i in range(13):
-            print(f'r{i}: {binascii.hexlify(self.R[i])}', end='  ')
+            print(f'r{i}: {hex(self.UInt(self.R[i]))}', end='  ')
             if i%4 == 3:
                 print('')
-        print(f'sp\t{binascii.hexlify(self.SP)}', end='  ')
-        print(f'lr\t{binascii.hexlify(self.LR)}', end='  ')
-        print(f'pc\t{binascii.hexlify(self.PC)}')
+        print(f'sp: {hex(self.UInt(self.R[13]))}', end='  ')
+        print(f'lr: {hex(self.UInt(self.R[14]))}', end='  ')
+        print(f'pc: {hex(self.UInt(self.R[15]))}')
         print(self.APSR)
 
     def getExec(self, mnem, args, expected_pc):
+        m = None
         for pat, action, bitdiffs in self.instructions.get(mnem.upper(), []):
             m = pat.match(f'{mnem} {args}')
             if m is not None:
@@ -60,7 +128,7 @@ class Core:
         if m is not None:
             instr_exec = action(m, bitdiffs)
             def mnem_exec():
-                assert(expected_pc == self.UInt(self.PC))
+                assert(expected_pc == self.UInt(self.R[15]))
                 instr_exec()
             return mnem_exec
         def debug_exec():
@@ -72,22 +140,26 @@ class Core:
     def Field(self, value, msb=31, lsb=0):
         mask = (0xffffffff >> (31 - msb + lsb)) << lsb
         val = (value & mask) >> lsb
-        return struct.pack('<L', val)
+        return Register(struct.pack('<L', val))
 
-    def UInt(self, bval):
-        if type(bval) == str or type(bval) == int:
-            bval = struct.pack('<l', int(bval, 0))
-        if type(bval) == bytes:
-            return struct.unpack('<L', bval)[0]
-        return int(bval)
+    def UInt(self, value):
+        if type(value) == Register:
+            value = value.bval
+        elif type(value) == str or type(value) == int:
+            value = struct.pack('<l', int(value, 0))
+        if type(value) == bytes:
+            return struct.unpack('<L', value)[0]
+        return int(value)
         
 
-    def SInt(self, bval):
-        if type(bval) == str or type(bval) == int:
-            bval = struct.pack('<l', int(bval, 0))
-        if type(bval) == bytes:
-            return struct.unpack('<l', bval)[0]
-        return int(bval)
+    def SInt(self, value):
+        if type(value) == Register:
+            return value.ival
+        elif type(value) == str or type(value) == int:
+            value = struct.pack('<l', int(value, 0))
+        if type(value) == bytes:
+            return struct.unpack('<l', value)[0]
+        return int(value)
 
     def Bit(self, value, bit_pos=31):
         if type(value) == bytes:
@@ -95,7 +167,9 @@ class Core:
         return (value & (1 << bit_pos)) != 0
 
     def IsZero(self, value):
-        if type(value) == bytes:
+        if type(value) == Register:
+            return (value.ival == 0)
+        elif type(value) == bytes:
             return (self.UInt(value) == 0)
         return (int(value) == 0)
 
@@ -103,6 +177,13 @@ class Core:
     def ConditionPassed(self, cond):
         return True
 
+    def ReadMemU(self, address, size):
+        assert(size in [1,2,4])
+        print(f'Read {size} bytes from {hex(address.ival)}')
+        byte_seq = b''.join(self.memory[i] for i in range(address.ival, address.ival + size))
+        # load as unsigned
+        value = struct.unpack(self.bytes_to_Uint[size], byte_seq)[0]
+        return Register(struct.pack('<L', value))
 
     def Shift(self, value, srtype, amount, carry_in):
         (result, _) = self.Shift_C(value, srtype, amount, carry_in)
@@ -143,7 +224,7 @@ class Core:
                 'V' : self.SInt(result) != signed_sum
                 }
         carry_out = nzcv['C']
-        print(f'Carry is {carry_out} because result {binascii.hexlify(result)} vs {unsigned_sum}')
+        print(f'Carry is {carry_out} because result {binascii.hexlify(result.bval)} vs {unsigned_sum}')
         return (result, nzcv)
 
     #pattern ADC{<c>}{<q>} {<Rd>,} <Rn>, #<const> with bitdiffs=[('S', '0')]
@@ -178,32 +259,90 @@ class Core:
                         self.APSR.update(nzcv)
         return aarch32_ADC_i_T1_A_exec
 
-    #def ADC(self, setflags=False, cond=None, d=None, n=None, dn=None, m=None, imm32=None, shift_t=None, shift_n=None):
-    #    if d is None and n is None:
-    #        d = dn
-    #        n = dn
-    #    if self.ConditionPassed(cond):
-    #        if imm32 is not None:
-    #            (result,carry,overflow ) = self.AddWithCarry(self.R[n],imm32,self.APSR.C)
-    #        else:
-    #            shifted = self.Shift(self.R[m],shift_t,shift_n,self.APSR.C)
-    #            (result,carry,overflow ) = self.AddWithCarry(self.R[n],shifted,self.APSR.C)
-    #        self.R[d] = result
-    #        if setflags:
-    #            self.APSR.N=(result>>31)!=0
-    #            self.APSR.Z= (result == 0)
-    #            self.APSR.C= carry
-    #            self.APSR.V= overflow
+    #pattern LDR{<c>}{<q>} <Rt>, [<Rn> {, #{+}<imm>}] with bitdiffs=
+    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:, #(?P<imm32>[+]?\d+))?\]
+    def aarch32_LDR_i_T1_A(self, regex_match, bitdiffs):
+        # decode 
+        Rt = regex_match.group('Rt')
+        Rn = regex_match.group('Rn')
+        cond = regex_match.group('c')
+        imm32 = regex_match.group('imm32')
+        if imm32 is None:
+            imm32 = '0'
+        print(f'aarch32_LDR_i_T1_A {Rt}, [{Rn}, #{imm32}]')
+        t = self.reg_num[Rt]; n = self.reg_num[Rn]
+        index = True; add = True; wback = False;
+
+        def aarch32_LDR_i_T1_A_exec():
+            # execute
+            offset_addr = (self.R[n] + imm32) if add else (self.R[n] - imm32);
+            address = offset_addr if index else self.R[n];
+            data = self.ReadMemU(address,4);
+            if wback : self.R[n] = offset_addr;
+            if t == 15 :
+                if self.Field(address,1,0) == 0:
+                    pass #self.LoadWritePC(data);
+                else:
+                    raise Exception('UNPREDICTABLE');
+            else:
+                self.R[t] = data;
+
+        return aarch32_LDR_i_T1_A_exec
+
+
+    #pattern LDR{<c>}{<q>} <Rt>, [<Rn> {, #-<imm>}] with bitdiffs=P == 1 && U == 0 && W == 0
+    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:, #-(?P<imm32>\d+))?\]
+    #pattern LDR{<c>}{<q>} <Rt>, [<Rn>], #{+/-}<imm> with bitdiffs=P == 0 && W == 1
+    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)\],\s#(?P<imm32>[+-]?\d+)
+    #pattern LDR{<c>}{<q>} <Rt>, [<Rn>, #{+/-}<imm>]! with bitdiffs=P == 1 && W == 1
+    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)\]!
+    def aarch32_LDR_i_T4_A(self, regex_match, bitdiffs):
+        # decode 
+        Rt = regex_match.group('Rt')
+        Rn = regex_match.group('Rn')
+        cond = regex_match.group('c')
+        imm32 = regex_match.group('imm32')
+        P = bitdiffs.get('P', '0')
+        W = bitdiffs.get('W', '0')
+        U = bitdiffs.get('U', '1')
+        if imm32 is None:
+            imm32 = '0'
+        print(f'aarch32_LDR_i_T4_A {Rt}, [{Rn}, #{imm32}] ({bitdiffs})')
+        t = self.reg_num[Rt]; n = self.reg_num[Rn]
+        index = (P == '1'); add = (U == '1'); wback = (W == '1');
+
+        def aarch32_LDR_i_T4_A_exec():
+            # execute
+            offset_addr = (self.R[n] + imm32) if add else (self.R[n] - imm32);
+            address = offset_addr if index else self.R[n];
+            data = self.ReadMemU(address,4);
+            if wback : self.R[n] = offset_addr;
+            if t == 15 :
+                if self.Field(address,1,0) == 0:
+                    pass #self.LoadWritePC(data);
+                else:
+                    raise Exception('UNPREDICTABLE');
+            else:
+                self.R[t] = data;
+
+        return aarch32_LDR_i_T4_A_exec
+        
 
 if __name__ == '__main__':
-    c = Core(0, 0x20001000)
-    step1 = c.getExec('adc', 'r0, #10', 0)
-    step2 = c.getExec('adcs', 'r1, r0, #-10', 0)
-    step3 = c.getExec('adcs', 'r1, #1', 0)
+    initial_mem = {i:struct.pack('B',i) for i in range(256)}
+    c = Core()
+    c.configure(0, 0x20001000, initial_mem)
+    steps = []
+    steps += [c.getExec('adc', 'r0, #10', 0)]
+    steps += [c.getExec('adcs', 'r1, r0, #-10', 0)]
+    steps += [c.getExec('adcs', 'r1, #1', 0)]
+    steps += [c.getExec('ldr', 'r5, [pc, #28]', 0)]
+    steps += [c.getExec('ldr', 'r4, [r4]', 0)]
+    steps += [c.getExec('ldr', 'r3, [r1, #-1]', 0)]
+    steps += [c.getExec('ldr', 'r3, [r1, #-1]!', 0)]
+    steps += [c.getExec('ldr', 'r2, [r1], #+3', 0)]
 
-    step1()
-    c.showRegisters()
-    step2()
-    c.showRegisters()
-    step3()
-    c.showRegisters()
+    for s in steps:
+        s()
+        c.showRegisters()
+        print('-'*20)
