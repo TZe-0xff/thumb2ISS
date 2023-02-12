@@ -1,6 +1,8 @@
 import re
 import logging
-
+import binascii
+import struct
+from core import Core
 
 class Architecture:
     CortexM0 = 0
@@ -38,7 +40,16 @@ class Simulator(object):
 
     def genIsn(self, address, mnemonic, args, encoding):
         self.log.getChild('genIsn').debug(f'Creating instruction <{mnemonic}({args})>@{hex(address)}')
-        self.memory[address] = mnemonic
+        lowWord, highWord = encoding
+        data = binascii.unhexlify(lowWord)[::-1]
+        if highWord:
+            data+= binascii.unhexlify(highWord)[::-1]
+
+        self.log.getChild('genIsn').debug(f'Got {len(data)} from {hex(address)} to {hex(address+len(data)-1)}')
+        for i in range(len(data)):
+            self.memory[address+i] = data[i:i+1]
+
+        self.code[address] = (self.core.getExec(mnemonic, args, address+len(data)), len(data))
 
     def genConst(self, address, value_str, data_type):
         self.log.getChild('genConst').debug(f'Creating Constant @{hex(address)} : {value_str}')
@@ -56,19 +67,30 @@ class Simulator(object):
                     data+= raw_data
         self.log.getChild('genConst').debug(f'Got {len(data)} from {hex(address)} to {hex(address+len(data)-1)}')
         for i in range(len(data)):
-            self.memory[address+i] = data[i]
+            self.memory[address+i] = data[i:i+1]
 
     def load(self, disassembly):
         self.labels = {}
         self.memory = {}
+        self.code   = {}
+        self.core = Core()
         for line in disassembly:
             for pat, action in self.dis_patt:
                 m = pat.match(line.lower())
                 if m is not None:
                     action(m)
                     break
-
+        if '__vectors' in self.labels:
+            # get initial sp & inital pc from vector table
+            byte_seq = b''.join(self.memory[i] for i in range(self.labels['__vectors'], self.labels['__vectors'] + 8))
+            initial_sp, initial_pc = struct.unpack('<LL', byte_seq)
+            self.core.configure(initial_pc, initial_sp, self.memory)
         return True
+
+    def step(self):
+        ex, pc_step = self.code[self.core.getPC()]
+        self.core.incPC(pc_step)
+        ex()
 
 
 tst_str = open('dis.log', 'r').read()
@@ -77,7 +99,8 @@ logging.basicConfig(filename='debug.log', filemode='w', encoding='utf-8', level=
 s = Simulator()
 s.load([l for l in tst_str.splitlines() if len(l) > 1])
 
-for i in list(range(0x9c, 0xa0)):
-    print(hex(int(s.memory[i])))
-
+s.core.showRegisters()
+for _ in range(4):
+    s.step()
+    s.core.showRegisters()
 #print(' '.join(  + list()))
