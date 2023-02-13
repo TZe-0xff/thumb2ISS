@@ -49,7 +49,7 @@ class Simulator(object):
         for i in range(len(data)):
             self.memory[address+i] = data[i:i+1]
 
-        self.code[address] = (self.core.getExec(mnemonic, args, address+len(data)), len(data))
+        self.code[address] = (self.core.getExec(mnemonic, args, address), len(data))
 
     def genConst(self, address, value_str, data_type):
         self.log.getChild('genConst').debug(f'Creating Constant @{hex(address)} : {value_str}')
@@ -89,8 +89,8 @@ class Simulator(object):
 
     def step(self):
         ex, pc_step = self.code[self.core.getPC()]
-        self.core.incPC(pc_step)
         ex()
+        self.core.incPC(pc_step)
 
 
 tst_str = open('dis.log', 'r').read()

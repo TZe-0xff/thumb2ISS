@@ -60,6 +60,7 @@ class ProgramStatus:
         self.V = False
         self.Q = False
         self.GE = [False] * 4
+    
 
     def update(self, flags):
         print(flags)
@@ -91,12 +92,37 @@ class Core:
                 (re.compile(r'^ADCS(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_ADC_i_T1_A, {'S':'1'}),
                 ],
             'LDR' : [
+                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[PC, #(?P<imm32>[+-]?\d+)\]$', re.I), self.aarch32_LDR_l_T2_A, {}),
                 (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:,\s#(?P<imm32>[+]?\d+))?\]$', re.I), self.aarch32_LDR_i_T1_A, {}),
                 (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:,\s#-(?P<imm32>\d+))?\]$', re.I), self.aarch32_LDR_i_T4_A, {'P':'1','U':'0','W':'0'}),
                 (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)\],\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_LDR_i_T4_A, {'P':'0','W':'1'}),
                 (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)\]!$', re.I), self.aarch32_LDR_i_T4_A, {'P':'1','W':'1'}),
             ]
         }
+
+    @property
+    def PC(self):
+        return self.R[15] + 4
+
+    @PC.setter
+    def PC(self, value):
+        self.R[15] = value
+
+    @property
+    def SP(self):
+        return self.R[13]
+
+    @SP.setter
+    def SP(self, value):
+        self.R[13] = value
+
+    @property
+    def LR(self):
+        return self.R[14]
+
+    @LR.setter
+    def LR(self, value):
+        self.R[14] = value
 
     def configure(self, pc, sp, mem):
         self.memory = mem
@@ -184,6 +210,10 @@ class Core:
         # load as unsigned
         value = struct.unpack(self.bytes_to_Uint[size], byte_seq)[0]
         return Register(struct.pack('<L', value))
+
+    def Align(self, reg_value, boundary):
+        address = self.UInt(reg_value) & ~(boundary-1)
+        return Register(struct.pack('<L', address))
 
     def Shift(self, value, srtype, amount, carry_in):
         (result, _) = self.Shift_C(value, srtype, amount, carry_in)
@@ -326,6 +356,35 @@ class Core:
                 self.R[t] = data;
 
         return aarch32_LDR_i_T4_A_exec
+
+
+    #pattern LDR{<c>}.W <Rt>, <label> with bitdiffs=[]
+    #pattern LDR{<c>}{<q>} <Rt>, <label> with bitdiffs=[]
+    #pattern LDR{<c>}{<q>} <Rt>, [PC, #{+/-}<imm>] with bitdiffs=[]
+    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[PC, #(?P<imm32>[+-]?\d+))?\]
+    def aarch32_LDR_l_T2_A(self, regex_match, bitdiffs):
+        # decode
+        Rt = regex_match.group('Rt')
+        cond = regex_match.group('c')
+        imm32 = regex_match.group('imm32')
+        U = bitdiffs.get('U', '1')
+        
+        t = self.reg_num[Rt];  add = (U == '1');
+
+        def aarch32_LDR_l_T2_A_exec():
+            # execute
+            base = self.Align(self.PC,4);
+            address = (base + imm32) if add else (base - imm32);
+            data = self.ReadMemU(address,4);
+            if t == 15 :
+                if self.Field(address,1,0) == 0:
+                    pass #self.LoadWritePC(data);
+                else:
+                    raise Exception('UNPREDICTABLE');
+            else:
+                self.R[t] = data;
+
+        return aarch32_LDR_l_T2_A_exec
         
 
 if __name__ == '__main__':
@@ -343,6 +402,7 @@ if __name__ == '__main__':
     steps += [c.getExec('ldr', 'r2, [r1], #+3', 0)]
 
     for s in steps:
+        print(s)
         s()
         c.showRegisters()
         print('-'*20)
