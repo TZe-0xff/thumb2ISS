@@ -16,7 +16,7 @@ import re
 import string
 import sys
 import xml.etree.cElementTree as ET
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from itertools import takewhile
 
 include_regex = None
@@ -126,12 +126,13 @@ def deslash(nm):
 class Instruction:
     '''Representation of Instructions'''
 
-    def __init__(self, name, encs, post, conditional, exec):
+    def __init__(self, name, encs, post, conditional, exec, mnems):
         self.name = name
         self.encs = encs
         self.post = post
         self.conditional = conditional
         self.exec = exec
+        self.mnems = mnems
         
     def emit_python_syntax(self, ofile):
         print("__instruction "+ deslash(self.name), file=ofile)
@@ -611,6 +612,7 @@ def readInstruction(xml,names,sailhack):
 
 
     # for each encoding, read instructions encoding, matching decode ASL and index
+    mnems = []
     encs = []
     for iclass in xml.findall('.//classes/iclass'):
         encoding = iclass.find('regdiagram')
@@ -672,10 +674,14 @@ def readInstruction(xml,names,sailhack):
         for encoding in iclass.findall('encoding'):
             bitdiffs = re.findall(r'(\S+) == (\d+)', encoding.attrib.get('bitdiffs', ''))
             for asmtemplate in encoding.findall('asmtemplate'):
-                patterns.append(("".join(asmtemplate.itertext()), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
+                iterator = asmtemplate.itertext()
+                mnem = next(iterator)
+                if mnem not in mnems:
+                    mnems.append(mnem)
+                patterns.append((mnem+"".join(iterator), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
         encs.append((name, insn_set, fields2, dec_asl, patterns))
 
-    return (Instruction(exec.name, encs, post, conditional, exec), top)
+    return (Instruction(exec.name, encs, post, conditional, exec, mnems), top)
 
 ########################################################################
 # Reachability analysis
@@ -893,15 +899,26 @@ def main():
 
     live_chunks = [ shared[x] for x in live if x in shared ]
 
-    pyth_file  = args.output + "_instrs.py"
+
+    instr_by_mnem = OrderedDict()
+    # grouping instructions by title mnemonic
+    for i in instrs:
+        if len(i.encs) > 0:
+            title_mnem = i.mnems[0]
+            if title_mnem not in instr_by_mnem:
+                instr_by_mnem[title_mnem] = [i]
+            else:
+                instr_by_mnem[title_mnem] += [i]
+
     comm_file  = args.output + "_common.py"
 
 
-    if args.verbose > 0: print("Writing instructions to", pyth_file)
-    with open(pyth_file, "w") as outf:
-        for i in instrs:
-            i.emit_python_syntax(outf)
-            print(file=outf)
+    if args.verbose > 0: print("Writing instructions to", args.output)
+    for title_mnem, i_list in instr_by_mnem.items():
+        with open(args.output + title_mnem.lower() + '.py', "w") as outf:
+            for i in i_list:
+                i.emit_python_syntax(outf)
+                print(file=outf)
 
     if args.verbose > 0: print("Writing common definitions to", comm_file)
     with open(comm_file, "w") as outf:
