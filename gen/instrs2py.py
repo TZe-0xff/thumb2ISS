@@ -142,6 +142,10 @@ class Instruction:
                 for pat,bitdiffs in pats:
                     print("    pattern "+ pat + " with bitdiffs=%s"%(bitdiffs), file=ofile)
                 print(file=ofile)
+                print("        __decode", file=ofile)
+                dec.patchTypeVar()
+                dec.put(ofile, 12)
+                print(file=ofile)
                 if self.conditional:
                     print("    __execute __conditional", file=ofile)
                 else:
@@ -666,8 +670,9 @@ def readInstruction(xml,names,sailhack):
         name = dec_asl.name if insn_set in ["T16","T32","A32"] else encoding.attrib['psname']
         patterns = []
         for encoding in iclass.findall('encoding'):
-            bitdiffs = encoding.attrib.get('bitdiffs', '')
-            patterns.append(("".join(encoding.find('asmtemplate').itertext()), bitdiffs))
+            bitdiffs = re.findall(r'(\S+) == (\d+)', encoding.attrib.get('bitdiffs', ''))
+            for asmtemplate in encoding.findall('asmtemplate'):
+                patterns.append(("".join(asmtemplate.itertext()), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
         encs.append((name, insn_set, fields2, dec_asl, patterns))
 
     return (Instruction(exec.name, encs, post, conditional, exec), top)
