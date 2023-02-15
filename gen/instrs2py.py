@@ -22,6 +22,78 @@ from itertools import takewhile
 include_regex = None
 exclude_regex = None
 
+subst = [
+    # re?       search                                  replace
+    (False,         '[',                                r'\['),
+    (False,         ']',                                r'\]'),
+    (False,       '{+}',                                r'[+]?'),
+    (False,     '{+/-}',                                r'[+-]?'),
+    (True,  re.compile(r'\{?<c>\}?'),                   r'(?P<c>[ACEGHLMNPV][CEILQST])?'),
+    (False,     '{<q>}',                                r'(?:\.[NW])?'),
+    (False, '{<x>{<y>{<z>}}}',                          r'(?P<mask>[ET]*)'),
+    (False,    '<cond>',                                r'(?P<firstcond>\w\w)'),
+    (False,   '<label>',                                r'(?P<address>[a-f\d]*)\s*.*'),
+    (False,  '<iflags>',                                r'(?P<iflags>[if]{1,2})'),
+    (False,     '.<dt>',                                r'\.F(?P<esize>\d+)'),
+    (False, '<shift> #<amount>',                        r'(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+)'),
+    (False, 'LSL #<imm>',                               r'(?P<shift_t>LSL)\s#(?P<shift_n>\d+)'),
+    (False, 'LSL #<amount>',                            r'(?P<shift_t>LSL)\s#(?P<shift_n>\d+)'),
+    (False, 'LSR #<amount>',                            r'(?P<shift_t>LSR)\s#(?P<shift_n>\d+)'),
+    (False, 'ASR #<amount>',                            r'(?P<shift_t>ASR)\s#(?P<shift_n>\d+)'),
+    (False, 'ROR #<amount>',                            r'(?P<shift_t>ROR)\s#(?P<rotation>\d+)'),
+    (False, 'RRX',                                      r'(?P<shift_t>RRX)'),
+    (True,  re.compile(r'<([QDR]\w+)>'),                r'(?P<\1>\\w+)'),
+    (True,  re.compile(r'\{(.*), ?\}\s?'),              r'|?:\1,\\s|?'),
+    (True,  re.compile(r' ?\{, ?(.*)\}\s?'),            r'|?:,\\s\1|?'),
+    (True,  re.compile(r'#((?:\[.*\]\?)?)<imm\d*>'),    r'#(?P<imm32>\1\\d+)'),
+    (True,  re.compile(r'#-<imm\d*>'),                  r'#-(?P<imm32>\\d+)'),
+    (False,  '#<const>',                                r'#(?P<imm32>\d+)'),
+    (False,  '{#}<imm>',                                r'#?(?P<imm32>[xa-f\d]+)'),
+    (True,  re.compile(r'#<(\w+)>'),                    r'#(?P<\1>\\d+)'),
+    (False,         ' ',                                r'\s')
+]
+
+base_mnem = ['ADC', 'ADCS', 'ADD', 'ADDS', 'ADR', 'AND', 'ANDS', 'ASR', 'ASRS', 'B', 'BFC', 'BFI', 'BIC', 'BICS', 'BKPT', 'BL', 'BLX', 'BX', 'CBNZ', 'CBZ', 'CLREX', 'CLZ', 'CMN', 'CMP', 'CPSID', 'CPSIE', 'DMB', 'DSB', 'EOR', 'EORS', 'ISB', 'IT', 'LDM', 'LDMDB', 'LDMEA', 'LDMFD', 'LDMIA', 'LDR', 'LDRB', 'LDRBT', 'LDRD', 'LDREX', 'LDREXB', 'LDREXH', 'LDRH', 'LDRHT', 'LDRSB', 'LDRSBT', 'LDRSH', 'LDRSHT', 'LDRT', 'LSL', 'LSLS', 'LSR', 'LSRS', 'MLA', 'MLS', 'MOV', 'MOVS', 'MOVT', 'MRS', 'MSR', 'MUL', 'MULS', 'MVN', 'MVNS', 'NOP', 'ORN', 'ORNS', 'ORR', 'ORRS', 'PKHBT', 'PKHTB', 'POP', 'PUSH', 'QADD', 'QADD16', 'QADD8', 'QASX', 'QDADD', 'QDSUB', 'QSAX', 'QSUB', 'QSUB16', 'QSUB8', 'RBIT', 'REV', 'REV16', 'REVSH', 'ROR', 'RORS', 'RRX', 'RRXS', 'RSB', 'RSBS', 'SADD16', 'SADD8', 'SASX', 'SBC', 'SBCS', 'SBFX', 'SDIV', 'SEL', 'SEL', 'SEV', 'SHADD16', 'SHADD8', 'SHASX', 'SHSAX', 'SHSUB16', 'SHSUB8', 'SMLABB', 'SMLABT', 'SMLAD', 'SMLADX', 'SMLAL', 'SMLALBB', 'SMLALBT', 'SMLALD', 'SMLALDX', 'SMLALTB', 'SMLALTT', 'SMLATB', 'SMLATT', 'SMLAWB', 'SMLAWT', 'SMLSD', 'SMLSDX', 'SMLSLD', 'SMLSLDX', 'SMMLA', 'SMMLAR', 'SMMLS', 'SMMLSR', 'SMMUL', 'SMMULR', 'SMUAD', 'SMUADX', 'SMULBB', 'SMULBT', 'SMULL', 'SMULTB', 'SMULTT', 'SMULWB', 'SMULWT', 'SMUSD', 'SMUSDX', 'SSAT', 'SSAT16', 'SSAX', 'SSUB16', 'SSUB8', 'STM', 'STMDB', 'STMEA', 'STMFD', 'STMIA', 'STR', 'STRB', 'STRBT', 'STRD', 'STREX', 'STREXB', 'STREXH', 'STRH', 'STRHT', 'STRT', 'SUB', 'SUBS', 'SVC', 'SXTAB', 'SXTAB16', 'SXTAH', 'SXTB', 'SXTB16', 'SXTH', 'TBB', 'TBH', 'TEQ', 'TST', 'UADD16', 'UADD8', 'UASX', 'UBFX', 'UDIV', 'UHADD16', 'UHADD8', 'UHASX', 'UHSAX', 'UHSUB16', 'UHSUB8', 'UMAAL', 'UMLAL', 'UMULL', 'UQADD16', 'UQADD8', 'UQASX', 'UQSAX', 'UQSUB16', 'UQSUB8', 'USAD8', 'USADA8', 'USAT', 'USAT16', 'USAX', 'USUB16', 'USUB8', 'UXTAB', 'UXTAB16', 'UXTAH', 'UXTB', 'UXTB16', 'UXTH', 'WFE', 'WFI']
+
+extended_mnem = ['ASRL', 'AUT', 'AUTG', 'BF', 'BFL', 'BFLX', 'BFX', 'BLXNS', 'BTI', 'BXAUT', 'BXNS', 'CDP', 'CDP2', 'CINC', 'CINV', 'CLRM', 'CNEG', 'CSDB', 'CSEL', 'CSET', 'CSETM', 'CSINC', 'CSINV', 'CSNEG', 'CX1', 'CX1D', 'CX2', 'CX2D', 'CX3', 'CX3D', 'DBG', 'DLS', 'DLSTP', 'ESB', 'FLDMDBX', 'FLDMIAX', 'FSTMDBX', 'FSTMIAX', 'LCTP', 'LDA', 'LDAB', 'LDAEX', 'LDAEXB', 'LDAEXH', 'LDAH', 'LDC', 'LDC2', 'LE', 'LETP', 'LSLL', 'LSRL', 'MCR', 'MCR2', 'MCRR', 'MCRR2', 'MEA', 'MRC', 'MRC2', 'MRRC', 'MRRC2', 'PAC', 'PACBTI', 'PACG', 'PLD', 'PLDW', 'PLI', 'PSSBB', 'SG', 'SORSHRL', 'SQRSHR', 'SQSHL', 'SQSHLL', 'SRSHR', 'SRSHRL', 'SSBB', 'STC', 'STC2', 'STL', 'STLB', 'STLEX', 'STLEXB', 'STLEXH', 'STLH', 'TT', 'TTA', 'TTAT', 'TTT', 'UDF', 'UQRSHL', 'UQRSHLL', 'UQSHL', 'UQSHLL', 'URSHR', 'URSHRL', 'VABAV', 'VABD', 'VABS', 'VADC', 'VADD', 'VADDLV', 'VADDV', 'VAND', 'VASD', 'VASS', 'VBIC', 'VBRSR', 'VCADD', 'VCLS', 'VCLZ', 'VCMLA', 'VCMP', 'VCMP', 'VCMPE', 'VCMUL', 'VCTP', 'VCVT', 'VCVTA', 'VCVTB', 'VCVTM', 'VCVTN', 'VCVTP', 'VCVTR', 'VCVTT', 'VCX1', 'VCX2', 'VCX3', 'VDDUP', 'VDIV', 'VDNOT', 'VDOD', 'VDSEL', 'VDST', 'VDT', 'VDUP', 'VDUSH', 'VDWDUP', 'VEOR', 'VFMA', 'VFMAS', 'VFMS', 'VFNMA', 'VFNMS', 'VHADD', 'VHCADD', 'VHSUB', 'VIDRD', 'VIDUP', 'VINS', 'VIWDUP', 'VLD2', 'VLD4', 'VLDM', 'VLDR', 'VLDRB', 'VLDRH', 'VLDRW', 'VLLDM', 'VLSTM', 'VMAX', 'VMAXA', 'VMAXAV', 'VMAXNM', 'VMAXNMA', 'VMAXNMAV', 'VMAXNMV', 'VMAXV', 'VMIN', 'VMINA', 'VMINNM', 'VMINNMA', 'VMINNMAV', 'VMINNMV', 'VMINV', 'VMLA', 'VMLADAV', 'VMLALDAV', 'VMLALV', 'VMLAS', 'VMLAV', 'VMLS', 'VMLSDAV', 'VMLSLDAV', 'VMNAV', 'VMOV', 'VMOVL', 'VMOVN', 'VMOVX', 'VMRS', 'VMSR', 'VMUL', 'VMULH', 'VMULL', 'VMVN', 'VNEG', 'VNMLA', 'VNMLS', 'VNMUL', 'VORN', 'VORR', 'VQABS', 'VQADD', 'VQDMLADH', 'VQDMLAH', 'VQDMLASH', 'VQDMLSDH', 'VQDMULH', 'VQDMULL', 'VQMOVN', 'VQMOVUN', 'VQNEG', 'VQRDMLADH', 'VQRDMLAH', 'VQRDMLASH', 'VQRDMLSDH', 'VQRDMULH', 'VQRSHL', 'VQRSHRN', 'VQRSHRUN', 'VQSHL', 'VQSHLU', 'VQSHRN', 'VQSHRUN', 'VQSUB', 'VREV16', 'VREV32', 'VREV64', 'VRHADD', 'VRINT', 'VRINTA', 'VRINTM', 'VRINTN', 'VRINTP', 'VRINTR', 'VRINTX', 'VRINTZ', 'VRMLALDAVH', 'VRMLALVH', 'VRMLSLDAVH', 'VRMULH', 'VRSHL', 'VRSHR', 'VRSHRN', 'VSBC', 'VSCCLRM', 'VSEL', 'VSELEQ', 'VSELGE', 'VSELGT', 'VSELVS', 'VSHL', 'VSHLC', 'VSHLL', 'VSHR', 'VSHRN', 'VSLI', 'VSQRT', 'VSRI', 'VST2', 'VST4', 'VSTM', 'VSTR', 'VSTRB', 'VSTRD', 'VSTRH', 'VSTRW', 'VSUB', 'WLS', 'WLSTP', 'YIELD']
+
+allowed_mnem = base_mnem
+
+def BuildPattern(inpat):
+    working = '^'+inpat+'$'
+    for isRe, pat, new in subst:
+        if isRe:
+            working = pat.sub(new, working)
+        else:
+            working = working.replace(pat, new)
+
+    fields = re.findall(r'\(\?P<(\w+)>', working)
+    if len(set(fields)) != len(fields):
+        # Multiple instance of same field
+        for f in ['Rdm', 'Rdn']:
+            if fields.count(f) > 1:
+                # ignore trailing optional argument
+                candidate = working.replace(r'|?:,\s(?P<%s>\w+)|?'%(f), r'|?:,\s(?:\w+)|?', 1)
+                if candidate == working:
+                    # ignore leading optional argument
+                    candidate = working.replace(r'|?:(?P<%s>\w+),\s|?'%(f), r'|?:(?:\w+),\s|?', 1)
+                if candidate == working:
+                    # ignore leading mandatory argument
+                    candidate = working.replace(r'(?P<%s>\w+)'%(f), r'(?:\w+)', 1)
+                working = candidate
+        fields = re.findall(r'\(\?P<(\w+)>', working)
+
+    if len(set(fields)) != len(fields):
+        print('Multiple instance of same field', inpat, fields)
+    opt_seq = re.findall(r'\|\?:([^|]*)\|\?', working)
+    opt_fields = []
+    for seq in opt_seq:
+        opt_fields += re.findall(r'\(\?P<(\w+)>', seq)
+    working = working.replace('|?:', '(?:')
+    working = working.replace('|?', ')?')
+
+    return working, fields, opt_fields
+
 ########################################################################
 # Tag file support
 ########################################################################
@@ -122,7 +194,7 @@ def hasField(fields, nm):
 # and remove dots from "LDNT1D_Z.P.BR_Contiguous"
 def deslash(nm):
     return nm.replace("/instrs","").replace("/", "_").replace("-","_").replace(".","_")
-
+default_flag_value = defaultdict(lambda : 0, {'U' : 1})
 class Instruction:
     '''Representation of Instructions'''
 
@@ -135,15 +207,51 @@ class Instruction:
         self.mnems = mnems
         
     def emit_python_syntax(self, ofile):
-        print("__instruction "+ deslash(self.name), file=ofile)
+        print("# instruction "+ deslash(self.name), file=ofile)
         
+        all_patterns = []
+
         for (inm,insn_set,fields,dec,pats) in self.encs:
             if insn_set.startswith('T'):
-                print("    method "+ deslash(inm), file=ofile)
-                for pat,bitdiffs in pats:
-                    print("    pattern "+ pat + " with bitdiffs=%s"%(bitdiffs), file=ofile)
-                print(file=ofile)
-                print("        __decode", file=ofile)
+                all_fields = []
+                all_opt_fields = []
+                all_bitdiffs = []
+                for mnem,pat,bitdiffs in pats:
+                    print("# pattern "+ pat + " with bitdiffs=%s"%(bitdiffs), file=ofile)
+                    reg_pat, fields, opt_fields = BuildPattern(pat)
+                    print("# regex "+ reg_pat + " : " + " ".join(f+('*' if f in opt_fields else '') for f in fields), file=ofile)
+                    all_patterns.append((mnem, len(fields), reg_pat, deslash(inm), bitdiffs))
+                    all_fields += [f for f in fields if f not in all_fields]
+                    all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
+                    all_bitdiffs += [b[0] for b in bitdiffs if b[0] not in all_bitdiffs]
+                print("def ", deslash(inm), '(core, regex_match, bitdiffs):', sep='', file=ofile)
+                for f in all_fields:
+                    print(f"    {f} = regex_match.group('{f}')", file=ofile)
+                for b in all_bitdiffs:
+                    print(f"    {b} = bitdiffs.get('{b}', '{default_flag_value[b]}')", file=ofile)
+
+                if 'Rd' in all_opt_fields and 'Rn' in all_fields:
+                    print('    if Rd is None:', file=ofile)
+                    print('        Rd = Rn', file=ofile)
+
+                if 'Rm' in all_opt_fields and 'Rd' in all_fields:
+                    print('    if Rm is None:', file=ofile)
+                    print('        Rm = Rd', file=ofile)
+
+                if 'shift_n' in all_opt_fields:
+                    print('    if shift_n is None:', file=ofile)
+                    print("        shift_n = '0'", file=ofile)
+
+                if 'rotation' in all_opt_fields:
+                    print('    if rotation is None:', file=ofile)
+                    print("        rotation = '0'", file=ofile)
+
+                for f in all_opt_fields:
+                    if f not in ['shift_t', 'shift_n', 'imm32', 'Rd', 'Rm', 'rotation']:
+                        print('opt :',f, all_patterns[0][0])
+
+
+                print("    # decode", file=ofile)
                 dec.patchTypeVar()
                 dec.put(ofile, 12)
                 print(file=ofile)
@@ -153,6 +261,9 @@ class Instruction:
                     print("    __execute", file=ofile)
                 self.exec.patchTypeVar()
                 self.exec.put(ofile, 8)
+                print(file=ofile)
+
+        return all_patterns
 
     def __str__(self):
         encs = "["+ ", ".join([inm for (inm,_,_,_) in self.encs]) +"]"
@@ -676,9 +787,14 @@ def readInstruction(xml,names,sailhack):
             for asmtemplate in encoding.findall('asmtemplate'):
                 iterator = asmtemplate.itertext()
                 mnem = next(iterator)
-                if mnem not in mnems:
-                    mnems.append(mnem)
-                patterns.append((mnem+"".join(iterator), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
+                categ = mnem.split('.')[0]
+                if categ not in allowed_mnem:
+                    with open('discarded.log', 'a') as f:
+                        print(categ, file=f)
+                    continue
+                if categ not in mnems:
+                    mnems.append(categ)
+                patterns.append((mnem, mnem+"".join(iterator), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
         encs.append((name, insn_set, fields2, dec_asl, patterns))
 
     return (Instruction(exec.name, encs, post, conditional, exec, mnems), top)
@@ -903,7 +1019,7 @@ def main():
     instr_by_mnem = OrderedDict()
     # grouping instructions by title mnemonic
     for i in instrs:
-        if len(i.encs) > 0:
+        if len(i.encs) > 0 and len(i.mnems) > 0:
             title_mnem = i.mnems[0]
             if title_mnem not in instr_by_mnem:
                 instr_by_mnem[title_mnem] = [i]
@@ -912,13 +1028,32 @@ def main():
 
     comm_file  = args.output + "_common.py"
 
-
     if args.verbose > 0: print("Writing instructions to", args.output)
     for title_mnem, i_list in instr_by_mnem.items():
         with open(args.output + title_mnem.lower() + '.py', "w") as outf:
+            all_patterns = []
             for i in i_list:
-                i.emit_python_syntax(outf)
+                all_patterns += i.emit_python_syntax(outf)
                 print(file=outf)
+
+            #organize patterns per mnemonic
+            org_patterns = {}
+            for decode_pat in all_patterns:
+                mnem = decode_pat[0]
+                if mnem not in org_patterns:
+                    org_patterns[mnem] = []
+                org_patterns[mnem].append(decode_pat)
+
+            print('patterns = {', file=outf)
+            # sort them by ascending complexity
+            for mnem in org_patterns:
+                print(f"    '{mnem}': [", file=outf)
+                for _,_,pat,method,bitdiff in sorted(org_patterns[mnem], key=lambda decode_pat : decode_pat[1]):
+                    print(" "*8, "(re.compile(r'", pat, "', re.I), ", method, ', ', dict(bitdiff), '),', sep='', file=outf)
+                print("    ],", file=outf)
+            print("}", file=outf)
+
+
 
     if args.verbose > 0: print("Writing common definitions to", comm_file)
     with open(comm_file, "w") as outf:
