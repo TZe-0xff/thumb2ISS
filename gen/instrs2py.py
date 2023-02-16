@@ -22,7 +22,7 @@ from itertools import takewhile
 include_regex = None
 exclude_regex = None
 
-subst = [
+assembly_subst = [
     # re?       search                                  replace
     (False,         '[',                                r'\['),
     (False,         ']',                                r'\]'),
@@ -33,7 +33,7 @@ subst = [
     (False, '{<x>{<y>{<z>}}}',                          r'(?P<mask>[ET]*)'),
     (False,    '<cond>',                                r'(?P<firstcond>\w\w)'),
     (False,   '<label>',                                r'(?P<address>[a-f\d]*)\s*.*'),
-    (False,  '<iflags>',                                r'(?P<iflags>[if]{1,2})'),
+    (False,  '<iflags>',                                r'(?P<iflags>[if]+)'),
     (False,     '.<dt>',                                r'\.F(?P<esize>\d+)'),
     (False, '<shift> #<amount>',                        r'(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+)'),
     (False, 'LSL #<imm>',                               r'(?P<shift_t>LSL)\s#(?P<shift_n>\d+)'),
@@ -49,8 +49,65 @@ subst = [
     (True,  re.compile(r'#-<imm\d*>'),                  r'#-(?P<imm32>\\d+)'),
     (False,  '#<const>',                                r'#(?P<imm32>\d+)'),
     (False,  '{#}<imm>',                                r'#?(?P<imm32>[xa-f\d]+)'),
+    (True,  re.compile(r'\{(.*?)\}'),                   r'|?:\1|?'),
     (True,  re.compile(r'#<(\w+)>'),                    r'#(?P<\1>\\d+)'),
+    (False,  '<registers>',                             r'\{(?P<registers>[^}]+)\}'),
     (False,         ' ',                                r'\s')
+]
+
+dec_subst = [
+    # re?       search                                  replace
+    (True, re.compile(r'([a-z]) = UInt\(R\1\);'),       r'\1 = core.reg_num[R\1];'), # register number extraction
+    (True, re.compile(r'(if .*then SEE.*)\n'),          r''),        # SEE references removal
+    (True, re.compile(r"(.*?cond == '1111'.*\n)"),      r''),        # test of impossible condition removal
+
+    (True, re.compile(r'(if .*)then'),                  r'\1:'),     # if then syntax conversion
+    (True, re.compile(r'(\w+\()'),                      r'core.\1'), # subroutine calls
+    (True, re.compile(r'(.*?)//(.*)'),                  r'\1#\2'),   # comment conversion
+    (False, 'UNPREDICTABLE',                            "raise Exception('UNPREDICTABLE')"),
+    (False, 'UNDEFINED',                                "raise Exception('UNDEFINED')"),
+    (True, re.compile(r'registers<([^>]+)>'),            r'registers[\1]'),
+    (False, 'core.BitCount(registers)',                 "registers.count('1')"),
+    (True, re.compile(r'SRType_(\w\w\w)'),              r"'\1'"),
+    (True, re.compile('!([^=])'),                       r'not \1'),
+    (False, '||',                                       'or'),
+    (False, '&&',                                       'and'),
+    (False, 'PSTATE',                                   'core.APSR'),
+]
+
+exec_subst = [
+    # re?       search                                  replace
+    (True, re.compile(r'(\s*)if CurrentInstrSet\(\) == InstrSet_A32 then.*\n\1else', re.S), r'\1if True:'),
+    (True, re.compile(r'(\s*)if BigEndian\(AccessType_GPR\) then.*\n\1else', re.S), r'\1if True:'),
+    (True, re.compile(r'bits\((\d+)\) (\w+);'),         r'\2 = 0;'),
+    (True, re.compile(r'if (.*?) then (.*?) else'),     r'\2 if \1 else'),  # inline if else syntax conversion
+    (True, re.compile(r'(if.*) then'),                  r'\1:'),            # if then syntax conversion
+    (True, re.compile(r'(\s*else)[^\w]*\n'),            r'\1:\n'),          # if else syntax conversion
+    (True, re.compile(r'(\w+\()'),                      r'core.\1'),        # subroutine calls
+    (True, re.compile(r'(for[^=]+)= +(\d+) to (\d+)'),  r'\1in range(\2,\3+1):'), # for loop syntax conversion
+    (True, re.compile(r'(.*?)//(.*)'),                  r'\1#\2'),          # comment conversion
+    (True, re.compile(r'(R\[[^]]+\])'),                 r'core.\1' ),
+    (True, re.compile(r'(Mem\w)\[([^]]+)\] = (.*?);'),  r'core.Write\1(\2, \3);' ),
+    (True, re.compile(r'(Mem\w)\[([^]]+)\]'),           r'core.Read\1(\2)' ),
+    (True, re.compile(r'registers<([^>]+)>'),           r'registers[\1]'),
+    (True, re.compile(r'SRType_(\w\w\w)'),              r"'\1'"),
+    (True, re.compile('!([^=])'),                       r'not \1'),
+    (True, re.compile(r'PSTATE\.<[^>]*?> = (\w+);'),    r'core.APSR.update(\1);'),
+    (True, re.compile(r'(\S*[\w\[\]]+)<(\d+):(\d+)> += (.*);'), r'\1 = core.SetField(\1,\2,\3,\4);'),
+    (True, re.compile(r'(\S*\w+)<(\d+)> += (.*);'),        r'\1 = core.SetBit(\1,\2,\3)'),
+    (True, re.compile(r'([.\w\[\]]+)<(\d+):(\d+)>'),    r'core.Field(\1,\2,\3)'),
+    (True, re.compile(r'([.\w]+)<(\d+)>'),              r'core.Bit(\1,\2)'),
+    (False, 'core.BitCount(registers)',                 "registers.count('1')"),
+    (False, 'UNPREDICTABLE',                            "raise Exception('UNPREDICTABLE')"),
+    (False, '||',                                       'or'),
+    (False, '&&',                                       'and'),
+    (False, 'PSTATE',                                   'core.APSR'),
+    (True, re.compile(r"(APSR\.[NZCVQ] = )'([01])'"),   r'\1bool(\2)'),
+    (False, 'TRUE',                                     'True'),
+    (False, 'FALSE',                                    'False'),
+    (False, 'core.bits(32) UNKNOWN',                    'core.Field(0xdeadbeef)'),
+    (False, 'AArch32.core',                             'core'),
+    (True, re.compile(r'( +)(core\.R\[([^]]+)\] = (\w+);)'), r"\1\2 log.info(f'Setting R{\3}={hex(core.UInt(\4))}')"),
 ]
 
 base_mnem = ['ADC', 'ADCS', 'ADD', 'ADDS', 'ADR', 'AND', 'ANDS', 'ASR', 'ASRS', 'B', 'BFC', 'BFI', 'BIC', 'BICS', 'BKPT', 'BL', 'BLX', 'BX', 'CBNZ', 'CBZ', 'CLREX', 'CLZ', 'CMN', 'CMP', 'CPSID', 'CPSIE', 'DMB', 'DSB', 'EOR', 'EORS', 'ISB', 'IT', 'LDM', 'LDMDB', 'LDMEA', 'LDMFD', 'LDMIA', 'LDR', 'LDRB', 'LDRBT', 'LDRD', 'LDREX', 'LDREXB', 'LDREXH', 'LDRH', 'LDRHT', 'LDRSB', 'LDRSBT', 'LDRSH', 'LDRSHT', 'LDRT', 'LSL', 'LSLS', 'LSR', 'LSRS', 'MLA', 'MLS', 'MOV', 'MOVS', 'MOVT', 'MRS', 'MSR', 'MUL', 'MULS', 'MVN', 'MVNS', 'NOP', 'ORN', 'ORNS', 'ORR', 'ORRS', 'PKHBT', 'PKHTB', 'POP', 'PUSH', 'QADD', 'QADD16', 'QADD8', 'QASX', 'QDADD', 'QDSUB', 'QSAX', 'QSUB', 'QSUB16', 'QSUB8', 'RBIT', 'REV', 'REV16', 'REVSH', 'ROR', 'RORS', 'RRX', 'RRXS', 'RSB', 'RSBS', 'SADD16', 'SADD8', 'SASX', 'SBC', 'SBCS', 'SBFX', 'SDIV', 'SEL', 'SEL', 'SEV', 'SHADD16', 'SHADD8', 'SHASX', 'SHSAX', 'SHSUB16', 'SHSUB8', 'SMLABB', 'SMLABT', 'SMLAD', 'SMLADX', 'SMLAL', 'SMLALBB', 'SMLALBT', 'SMLALD', 'SMLALDX', 'SMLALTB', 'SMLALTT', 'SMLATB', 'SMLATT', 'SMLAWB', 'SMLAWT', 'SMLSD', 'SMLSDX', 'SMLSLD', 'SMLSLDX', 'SMMLA', 'SMMLAR', 'SMMLS', 'SMMLSR', 'SMMUL', 'SMMULR', 'SMUAD', 'SMUADX', 'SMULBB', 'SMULBT', 'SMULL', 'SMULTB', 'SMULTT', 'SMULWB', 'SMULWT', 'SMUSD', 'SMUSDX', 'SSAT', 'SSAT16', 'SSAX', 'SSUB16', 'SSUB8', 'STM', 'STMDB', 'STMEA', 'STMFD', 'STMIA', 'STR', 'STRB', 'STRBT', 'STRD', 'STREX', 'STREXB', 'STREXH', 'STRH', 'STRHT', 'STRT', 'SUB', 'SUBS', 'SVC', 'SXTAB', 'SXTAB16', 'SXTAH', 'SXTB', 'SXTB16', 'SXTH', 'TBB', 'TBH', 'TEQ', 'TST', 'UADD16', 'UADD8', 'UASX', 'UBFX', 'UDIV', 'UHADD16', 'UHADD8', 'UHASX', 'UHSAX', 'UHSUB16', 'UHSUB8', 'UMAAL', 'UMLAL', 'UMULL', 'UQADD16', 'UQADD8', 'UQASX', 'UQSAX', 'UQSUB16', 'UQSUB8', 'USAD8', 'USADA8', 'USAT', 'USAT16', 'USAX', 'USUB16', 'USUB8', 'UXTAB', 'UXTAB16', 'UXTAH', 'UXTB', 'UXTB16', 'UXTH', 'WFE', 'WFI']
@@ -59,13 +116,17 @@ extended_mnem = ['ASRL', 'AUT', 'AUTG', 'BF', 'BFL', 'BFLX', 'BFX', 'BLXNS', 'BT
 
 allowed_mnem = base_mnem
 
-def BuildPattern(inpat):
-    working = '^'+inpat+'$'
-    for isRe, pat, new in subst:
+def applyReplacement(org_str, repl_table):
+    working = org_str
+    for isRe, pat, new in repl_table:
         if isRe:
             working = pat.sub(new, working)
         else:
             working = working.replace(pat, new)
+    return working
+
+def BuildPattern(inpat):
+    working = applyReplacement('^'+inpat+'$', assembly_subst)
 
     fields = re.findall(r'\(\?P<(\w+)>', working)
     if len(set(fields)) != len(fields):
@@ -194,6 +255,36 @@ def hasField(fields, nm):
 # and remove dots from "LDNT1D_Z.P.BR_Contiguous"
 def deslash(nm):
     return nm.replace("/instrs","").replace("/", "_").replace("-","_").replace(".","_")
+
+
+def emitDecoder(dec, ofile, existing_vars, indent=0):
+    # convert ASL code to python decoding paragraph
+    working = dec.code
+
+    if 'UInt(Ra)' in working and 'Ra' not in existing_vars:
+        working = working.replace('UInt(Ra)', '15')
+    # remove affectation of existing vars
+    if 'shift_n' in existing_vars and 'shift_t' in existing_vars:
+        working = re.sub(rf'\(shift_t, shift_n\) = [^;]+; ?', '', working)
+
+    for var in existing_vars:
+        working = re.sub(rf'({var}) = [^;]+; ?', '', working)
+
+    working = applyReplacement(working, dec_subst)
+
+    for line in working.splitlines():
+        if len(line.strip()) > 0:
+            print(' '*indent, line, sep='', file=ofile)
+
+def emitExecute(exec, ofile, indent=0):
+    # convert ASL code to python execute paragraph
+    working = applyReplacement(exec.code, exec_subst)
+
+    for line in working.splitlines():
+        if len(line.strip()) > 0:
+            print(' '*indent, line, sep='', file=ofile)
+
+
 default_flag_value = defaultdict(lambda : 0, {'U' : 1})
 class Instruction:
     '''Representation of Instructions'''
@@ -226,7 +317,16 @@ class Instruction:
                     all_bitdiffs += [b[0] for b in bitdiffs if b[0] not in all_bitdiffs]
                 print("def ", deslash(inm), '(core, regex_match, bitdiffs):', sep='', file=ofile)
                 for f in all_fields:
-                    print(f"    {f} = regex_match.group('{f}')", file=ofile)
+                    if f == 'c':
+                        print(f"    cond = regex_match.group('c')", file=ofile)
+                    elif f == 'registers':
+                        print("    reg_list = [reg_num[reg.strip()] for reg in regex_match.group('registers').split(',')]", file=ofile)
+                        print("    registers = ['1' if reg in reg_list else '0' for reg in range(16)]", file=ofile)
+                    else:
+                        print(f"    {f} = regex_match.group('{f}')", file=ofile)
+                if 'c' in all_fields:
+                    all_fields.remove('c')
+                    all_fields.append('cond')
                 for b in all_bitdiffs:
                     print(f"    {b} = bitdiffs.get('{b}', '{default_flag_value[b]}')", file=ofile)
 
@@ -238,29 +338,47 @@ class Instruction:
                     print('    if Rm is None:', file=ofile)
                     print('        Rm = Rd', file=ofile)
 
-                if 'shift_n' in all_opt_fields:
-                    print('    if shift_n is None:', file=ofile)
-                    print("        shift_n = '0'", file=ofile)
+                zero_default_fields = ['imm32', 'shift_n', 'rotation']
 
-                if 'rotation' in all_opt_fields:
-                    print('    if rotation is None:', file=ofile)
-                    print("        rotation = '0'", file=ofile)
+                for f in zero_default_fields:
+                    if f in all_opt_fields:
+                        print(f'    if {f} is None:', file=ofile)
+                        print(f"        {f} = '0'", file=ofile)
+
+                if 'shift_t' in all_opt_fields:
+                    print('    if shift_t is None:', file=ofile)
+                    print("        shift_t = 'LSL'", file=ofile)
+
 
                 for f in all_opt_fields:
-                    if f not in ['shift_t', 'shift_n', 'imm32', 'Rd', 'Rm', 'rotation']:
+                    if f not in ['shift_t', 'Rd', 'Rm'] + zero_default_fields:
                         print('opt :',f, all_patterns[0][0])
 
+                print_list = [f for f in all_fields if f != 'registers']
+                if 'registers' in all_fields:
+                    print_list.append('reg_list')
 
+                print(f"    log.debug(f'{deslash(inm)} "+" ".join(f+'={'+f+'}' for f in print_list)+"')", file=ofile)
                 print("    # decode", file=ofile)
                 dec.patchTypeVar()
-                dec.put(ofile, 12)
+                emitDecoder(dec, ofile, all_fields, indent=4)
                 print(file=ofile)
+
+                exec_routine = deslash(inm)+'_exec'
+                print("    def ", exec_routine, '():', sep='', file=ofile)
+                indent = 8
+                print(" "*indent, '# execute', sep='', file=ofile)
                 if self.conditional:
-                    print("    __execute __conditional", file=ofile)
-                else:
-                    print("    __execute", file=ofile)
+                    print(" "*indent, 'if core.ConditionPassed(cond):', sep='', file=ofile)
+                    indent += 4
                 self.exec.patchTypeVar()
-                self.exec.put(ofile, 8)
+                emitExecute(self.exec, ofile, indent)
+
+                if self.conditional:
+                    indent-=4
+                    print(" "*indent, 'else:', sep='', file=ofile)
+                    print(" "*(indent+4), f"log.debug(f'{exec_routine} skipped')", sep='', file=ofile)
+                print(f'    return {exec_routine}', file=ofile)
                 print(file=ofile)
 
         return all_patterns
@@ -1031,6 +1149,9 @@ def main():
     if args.verbose > 0: print("Writing instructions to", args.output)
     for title_mnem, i_list in instr_by_mnem.items():
         with open(args.output + title_mnem.lower() + '.py', "w") as outf:
+            # header
+            print(f'import re, logging\n', file=outf)
+            print(f"log = logging.getLogger('Mnem.{title_mnem}')", file=outf)
             all_patterns = []
             for i in i_list:
                 all_patterns += i.emit_python_syntax(outf)
