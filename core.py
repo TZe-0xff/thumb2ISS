@@ -1,6 +1,8 @@
 import struct
 import re
 import binascii
+import importlib
+import logging
 
 class Register:
     def __init__(self, initial_value):
@@ -60,9 +62,9 @@ class ProgramStatus:
         self.V = False
         self.Q = False
         self.GE = [False] * 4
+    
 
     def update(self, flags):
-        print(flags)
         self.N = flags.get('N', self.N)
         self.Z = flags.get('Z', self.Z)
         self.C = flags.get('C', self.C)
@@ -78,25 +80,38 @@ class Core:
         self.R = {i:self.Field(0) for i in range(16)}
         self.R[14] = self.Field(0xffffffff) # initial LR
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
-        self.reg_num.update({'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
+        self.reg_num.update({'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
         self.APSR = ProgramStatus()
         self.bytes_to_Uint = ['', '<B', '<H', '', '<L']
+        self.log = logging.getLogger('Core')
         
+        self.instructions = {}
+        for mnem in ['adc', 'ldr']:
+            self.instructions.update(importlib.import_module('instructions.'+mnem).patterns)
 
-        self.instructions = {
-            'ADC' : [
-                (re.compile(r'^ADC(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_ADC_i_T1_A, {'S':'0'}),
-                ],
-            'ADCS' : [
-                (re.compile(r'^ADCS(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_ADC_i_T1_A, {'S':'1'}),
-                ],
-            'LDR' : [
-                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:,\s#(?P<imm32>[+]?\d+))?\]$', re.I), self.aarch32_LDR_i_T1_A, {}),
-                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:,\s#-(?P<imm32>\d+))?\]$', re.I), self.aarch32_LDR_i_T4_A, {'P':'1','U':'0','W':'0'}),
-                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)\],\s#(?P<imm32>[+-]?\d+)$', re.I), self.aarch32_LDR_i_T4_A, {'P':'0','W':'1'}),
-                (re.compile(r'^LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)\]!$', re.I), self.aarch32_LDR_i_T4_A, {'P':'1','W':'1'}),
-            ]
-        }
+    @property
+    def PC(self):
+        return self.R[15] + 4 # In Thumb state: the value of the PC is the address of the current instruction plus 4 bytes
+
+    @PC.setter
+    def PC(self, value):
+        self.R[15] = value
+
+    @property
+    def SP(self):
+        return self.R[13]
+
+    @SP.setter
+    def SP(self, value):
+        self.R[13] = value
+
+    @property
+    def LR(self):
+        return self.R[14]
+
+    @LR.setter
+    def LR(self, value):
+        self.R[14] = value
 
     def configure(self, pc, sp, mem):
         self.memory = mem
@@ -109,15 +124,17 @@ class Core:
     def incPC(self, step):
         self.R[15] = self.R[15] + step
 
-    def showRegisters(self):
+    def showRegisters(self, indent=0):
         for i in range(13):
+            if i%4 == 0 and indent:
+                print(' '*indent, end='')
             print(f'r{i}: {hex(self.UInt(self.R[i]))}', end='  ')
             if i%4 == 3:
                 print('')
         print(f'sp: {hex(self.UInt(self.R[13]))}', end='  ')
         print(f'lr: {hex(self.UInt(self.R[14]))}', end='  ')
         print(f'pc: {hex(self.UInt(self.R[15]))}')
-        print(self.APSR)
+        print(' '*indent, self.APSR, sep='')
 
     def getExec(self, mnem, args, expected_pc):
         m = None
@@ -126,13 +143,13 @@ class Core:
             if m is not None:
                 break
         if m is not None:
-            instr_exec = action(m, bitdiffs)
+            instr_exec = action(self, m, bitdiffs)
             def mnem_exec():
                 assert(expected_pc == self.UInt(self.R[15]))
                 instr_exec()
             return mnem_exec
         def debug_exec():
-            print(f'Unsupported {mnem} execution')
+            self.log.warning(f'Unsupported {mnem} executed as NOP')
         return debug_exec
 
 
@@ -179,11 +196,19 @@ class Core:
 
     def ReadMemU(self, address, size):
         assert(size in [1,2,4])
-        print(f'Read {size} bytes from {hex(address.ival)}')
-        byte_seq = b''.join(self.memory[i] for i in range(address.ival, address.ival + size))
+        try:
+            byte_seq = b''.join(self.memory[i] for i in range(address.ival, address.ival + size))
+        except KeyError:
+            raise Exception(f'Illegal memory access between {hex(address.ival)} and {hex(address.ival + size - 1)}')
+
         # load as unsigned
         value = struct.unpack(self.bytes_to_Uint[size], byte_seq)[0]
+        self.log.info(f'Read {size} bytes as unsigned from {hex(address.ival)} : {hex(value)}')
         return Register(struct.pack('<L', value))
+
+    def Align(self, reg_value, boundary):
+        address = self.UInt(reg_value) & (-boundary)
+        return Register(struct.pack('<L', address))
 
     def Shift(self, value, srtype, amount, carry_in):
         (result, _) = self.Shift_C(value, srtype, amount, carry_in)
@@ -215,7 +240,6 @@ class Core:
 
     def AddWithCarry(self, x, y, carry_in):
         unsigned_sum = self.UInt(x) + self.UInt(y) + self.UInt(carry_in)
-        print(self.UInt(x), self.UInt(y))
         signed_sum = self.SInt(x) + self.SInt(y) + self.UInt(carry_in);
         result = self.Field(unsigned_sum, 31, 0) # same value as signed_sum<N-1:0>
         nzcv = {'N': self.Bit(result, 31),
@@ -224,125 +248,7 @@ class Core:
                 'V' : self.SInt(result) != signed_sum
                 }
         carry_out = nzcv['C']
-        print(f'Carry is {carry_out} because result {binascii.hexlify(result.bval)} vs {unsigned_sum}')
+        self.log.debug(f'Carry is {carry_out} because result {hex(self.UInt(result))} vs {hex(unsigned_sum)}')
         return (result, nzcv)
-
-    #pattern ADC{<c>}{<q>} {<Rd>,} <Rn>, #<const> with bitdiffs=[('S', '0')]
-    #ADC(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)
-    #pattern ADCS{<c>}{<q>} {<Rd>,} <Rn>, #<const> with bitdiffs=[('S', '1')]
-    #ADCS(?P<c>\w\w)?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)
-    def aarch32_ADC_i_T1_A(self, regex_match, bitdiffs):
-        # decode
-        Rd = regex_match.group('Rd')
-        Rn = regex_match.group('Rn')
-        cond = regex_match.group('c')
-        imm32 = regex_match.group('imm32')
-        S = bitdiffs.get('S', '0')
-        if Rd is None:
-            Rd = Rn
-        print(f'aarch32_ADC_i_T1_A {Rd}, {Rn}, {cond}, {imm32}, {S}')
-
-        d = self.reg_num[Rd]; n = self.reg_num[Rn]; setflags = (S == '1')
-
-        def aarch32_ADC_i_T1_A_exec():
-            # execute
-            if self.ConditionPassed(cond):
-                (result, nzcv) = self.AddWithCarry(self.R[n], imm32, self.APSR.C);
-                if d == 15:          # Can only occur for A32 encoding
-                    if setflags:
-                        raise Exception(f'ALUExceptionReturn({result})')
-                    else:
-                        pass #self.ALUWritePC(result);
-                else:
-                    self.R[d] = result
-                    if setflags:
-                        self.APSR.update(nzcv)
-        return aarch32_ADC_i_T1_A_exec
-
-    #pattern LDR{<c>}{<q>} <Rt>, [<Rn> {, #{+}<imm>}] with bitdiffs=
-    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:, #(?P<imm32>[+]?\d+))?\]
-    def aarch32_LDR_i_T1_A(self, regex_match, bitdiffs):
-        # decode 
-        Rt = regex_match.group('Rt')
-        Rn = regex_match.group('Rn')
-        cond = regex_match.group('c')
-        imm32 = regex_match.group('imm32')
-        if imm32 is None:
-            imm32 = '0'
-        print(f'aarch32_LDR_i_T1_A {Rt}, [{Rn}, #{imm32}]')
-        t = self.reg_num[Rt]; n = self.reg_num[Rn]
-        index = True; add = True; wback = False;
-
-        def aarch32_LDR_i_T1_A_exec():
-            # execute
-            offset_addr = (self.R[n] + imm32) if add else (self.R[n] - imm32);
-            address = offset_addr if index else self.R[n];
-            data = self.ReadMemU(address,4);
-            if wback : self.R[n] = offset_addr;
-            if t == 15 :
-                if self.Field(address,1,0) == 0:
-                    pass #self.LoadWritePC(data);
-                else:
-                    raise Exception('UNPREDICTABLE');
-            else:
-                self.R[t] = data;
-
-        return aarch32_LDR_i_T1_A_exec
-
-
-    #pattern LDR{<c>}{<q>} <Rt>, [<Rn> {, #-<imm>}] with bitdiffs=P == 1 && U == 0 && W == 0
-    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)(?:, #-(?P<imm32>\d+))?\]
-    #pattern LDR{<c>}{<q>} <Rt>, [<Rn>], #{+/-}<imm> with bitdiffs=P == 0 && W == 1
-    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+)\],\s#(?P<imm32>[+-]?\d+)
-    #pattern LDR{<c>}{<q>} <Rt>, [<Rn>, #{+/-}<imm>]! with bitdiffs=P == 1 && W == 1
-    #LDR(?P<c>\w\w)?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+),\s#(?P<imm32>[+-]?\d+)\]!
-    def aarch32_LDR_i_T4_A(self, regex_match, bitdiffs):
-        # decode 
-        Rt = regex_match.group('Rt')
-        Rn = regex_match.group('Rn')
-        cond = regex_match.group('c')
-        imm32 = regex_match.group('imm32')
-        P = bitdiffs.get('P', '0')
-        W = bitdiffs.get('W', '0')
-        U = bitdiffs.get('U', '1')
-        if imm32 is None:
-            imm32 = '0'
-        print(f'aarch32_LDR_i_T4_A {Rt}, [{Rn}, #{imm32}] ({bitdiffs})')
-        t = self.reg_num[Rt]; n = self.reg_num[Rn]
-        index = (P == '1'); add = (U == '1'); wback = (W == '1');
-
-        def aarch32_LDR_i_T4_A_exec():
-            # execute
-            offset_addr = (self.R[n] + imm32) if add else (self.R[n] - imm32);
-            address = offset_addr if index else self.R[n];
-            data = self.ReadMemU(address,4);
-            if wback : self.R[n] = offset_addr;
-            if t == 15 :
-                if self.Field(address,1,0) == 0:
-                    pass #self.LoadWritePC(data);
-                else:
-                    raise Exception('UNPREDICTABLE');
-            else:
-                self.R[t] = data;
-
-        return aarch32_LDR_i_T4_A_exec
         
 
-if __name__ == '__main__':
-    initial_mem = {i:struct.pack('B',i) for i in range(256)}
-    c = Core()
-    c.configure(0, 0x20001000, initial_mem)
-    steps = []
-    steps += [c.getExec('adc', 'r0, #10', 0)]
-    steps += [c.getExec('adcs', 'r1, r0, #-10', 0)]
-    steps += [c.getExec('adcs', 'r1, #1', 0)]
-    steps += [c.getExec('ldr', 'r5, [pc, #28]', 0)]
-    steps += [c.getExec('ldr', 'r4, [r4]', 0)]
-    steps += [c.getExec('ldr', 'r3, [r1, #-1]', 0)]
-    steps += [c.getExec('ldr', 'r3, [r1, #-1]!', 0)]
-    steps += [c.getExec('ldr', 'r2, [r1], #+3', 0)]
-
-    for s in steps:
-        s()
-        c.showRegisters()
-        print('-'*20)
