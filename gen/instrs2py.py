@@ -57,7 +57,7 @@ assembly_subst = [
 
 dec_subst = [
     # re?       search                                  replace
-    (True, re.compile(r'([a-z]) = UInt\(D?\:?R\1\);'),       r'\1 = core.reg_num[R\1];'), # register number extraction
+    (True, re.compile(r'([a-z]) = UInt\(D?\:?(Rd?\1n?)\);'),       r'\1 = core.reg_num[\2];'), # register number extraction
     (True, re.compile(r'(if .*then SEE.*)\n'),          r''),        # SEE references removal
     (True, re.compile(r"(.*?cond == '1111'.*\n)"),      r''),        # test of impossible condition removal
     (True, re.compile(r'(\s*)(.*;) *(if .*)'),          r'\1\2\n\1\3'),     # if on new lines only
@@ -74,6 +74,7 @@ dec_subst = [
     (False, '||',                                       'or'),
     (False, '&&',                                       'and'),
     (False, 'PSTATE',                                   'core.APSR'),
+    (False, 'EOR',                                      '^'),
     (False, 'TRUE',                                     'True'),
     (False, 'FALSE',                                    'False'),
 ]
@@ -97,6 +98,7 @@ exec_subst = [
     (True, re.compile(r'SRType_(\w\w\w)'),              r"'\1'"),
     (True, re.compile('!([^=])'),                       r'not \1'),
     (True, re.compile(r'PSTATE\.<[^>]*?> = (\w+);'),    r'core.APSR.update(\1);'),
+    (False, 'PSTATE.IT<7:0> = firstcond:mask;',         'core.APSR.ITcond = firstcond; core.APSR.ITsteps = len(mask)'),
     (True, re.compile(r'(\S*[\w\[\]]+)<(\d+):(\d+)> += (.*);'), r'\1 = core.SetField(\1,\2,\3,\4);'),
     (True, re.compile(r'(\S*\w+)<(\d+)> += (.*);'),        r'\1 = core.SetBit(\1,\2,\3)'),
     (True, re.compile(r'([.\w\[\]]+)<(\d+):(\d+)>'),    r'core.Field(\1,\2,\3)'),
@@ -108,6 +110,7 @@ exec_subst = [
     (False, '&&',                                       'and'),
     (False, 'PSTATE',                                   'core.APSR'),
     (True, re.compile(r"(APSR\.[NZCVQ] = )'([01])'"),   r'\1bool(\2)'),
+    (False, 'EOR',                                      '^'),
     (False, 'TRUE',                                     'True'),
     (False, 'FALSE',                                    'False'),
     (False, 'core.bits(32) UNKNOWN',                    'core.Field(0xdeadbeef)'),
@@ -290,7 +293,7 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
         if len(line.strip()) > 0:
             print(' '*indent, line, sep='', file=ofile)
 
-def emitExecute(exec, ofile, existing_vars, indent=0):
+def emitExecute(exec, ofile, existing_vars=[], indent=0):
     # convert ASL code to python execute paragraph
     working = applyReplacement(exec.code, exec_subst)
 
@@ -947,6 +950,8 @@ def readInstruction(xml,names,sailhack):
         for encoding in iclass.findall('encoding'):
             bitdiffs = re.findall(r'(\w+) == (\d+)', encoding.attrib.get('bitdiffs', ''))
 
+            bitdiffs = [ (k,v) for k,v in bitdiffs if not re.match(r'R[a-z]', k) ]
+
             for asmtemplate in encoding.findall('asmtemplate'):
                 iterator = asmtemplate.itertext()
                 mnem = next(iterator)
@@ -1224,9 +1229,9 @@ def main():
     if args.verbose > 0: print("Writing common definitions to", comm_file)
     with open(comm_file, "w") as outf:
         print(file=outf)
-        print('\n'.join([ t for t in tops ]), file=outf)
-        print('-'*50, file=outf)
-        print('\n'.join([ x.code for x in live_chunks ]), file=outf)
+        for x in live_chunks:
+            emitExecute(x,outf)
+        
     return
 
 if __name__ == "__main__":

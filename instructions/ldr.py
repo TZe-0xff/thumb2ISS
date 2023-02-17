@@ -14,7 +14,7 @@ def aarch32_LDR_i_T1_A(core, regex_match, bitdiffs):
         imm32 = '0'
     log.debug(f'aarch32_LDR_i_T1_A Rt={Rt} Rn={Rn} imm32={imm32} cond={cond}')
     # decode
-    t = core.reg_num[Rt];  n = core.reg_num[Rn];
+    t = core.reg_num[Rt];  n = core.reg_num[Rn];  
     index = True;  add = True;  wback = False;
 
     def aarch32_LDR_i_T1_A_exec():
@@ -45,7 +45,7 @@ def aarch32_LDR_i_T2_A(core, regex_match, bitdiffs):
         imm32 = '0'
     log.debug(f'aarch32_LDR_i_T2_A Rt={Rt} imm32={imm32} cond={cond}')
     # decode
-    t = core.reg_num[Rt];  n = 13;
+    t = core.reg_num[Rt];  n = 13;  
     index = True;  add = True;  wback = False;
 
     def aarch32_LDR_i_T2_A_exec():
@@ -75,7 +75,6 @@ def aarch32_LDR_i_T3_A(core, regex_match, bitdiffs):
     Rt = regex_groups.get('Rt', None)
     Rn = regex_groups.get('Rn', None)
     imm32 = regex_groups.get('imm32', None)
-    n = bitdiffs.get('n', '0')
     if imm32 is None:
         imm32 = '0'
     log.debug(f'aarch32_LDR_i_T3_A Rt={Rt} Rn={Rn} imm32={imm32} cond={cond}')
@@ -117,7 +116,6 @@ def aarch32_LDR_i_T4_A(core, regex_match, bitdiffs):
     P = bitdiffs.get('P', '0')
     U = bitdiffs.get('U', '1')
     W = bitdiffs.get('W', '0')
-    n = bitdiffs.get('n', '0')
     if imm32 is None:
         imm32 = '0'
     log.debug(f'aarch32_LDR_i_T4_A Rt={Rt} Rn={Rn} imm32={imm32} cond={cond}')
@@ -264,7 +262,6 @@ def aarch32_LDR_r_T2_A(core, regex_match, bitdiffs):
     Rm = regex_groups.get('Rm', None)
     shift_t = regex_groups.get('shift_t', None)
     shift_n = regex_groups.get('shift_n', None)
-    n = bitdiffs.get('n', '0')
     if shift_n is None:
         shift_n = '0'
     if shift_t is None:

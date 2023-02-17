@@ -141,7 +141,7 @@ if __name__ == '__main__':
             print(f'Memory range : {hex(min(crange))} - {hex(max(crange))}')
 
         s.core.showRegisters()
-        for _ in range(4):
+        for _ in range(10):
             s.step()
             s.core.showRegisters()
     #print(' '.join(  + list()))

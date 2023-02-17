@@ -63,6 +63,8 @@ class ProgramStatus:
         self.V = False
         self.Q = False
         self.GE = [False] * 4
+        self.ITsteps = 0
+        self.ITcond = None
     
 
     def update(self, flags):
@@ -81,7 +83,7 @@ class Core:
         self.R = {i:self.Field(0) for i in range(16)}
         self.R[14] = self.Field(0xffffffff) # initial LR
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
-        self.reg_num.update({'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
+        self.reg_num.update({'FP':11, 'fp':11, 'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
         self.APSR = ProgramStatus()
         self.bytes_to_Uint = ['', '<B', '<H', '', '<L']
         self.log = logging.getLogger('Core')
@@ -125,6 +127,10 @@ class Core:
 
     def incPC(self, step):
         self.R[15] = self.R[15] + step
+        if self.APSR.ITsteps > 0:
+            self.APSR.ITsteps -= 1
+            if self.APSR.ITsteps == 0:
+                self.APSR.ITcond = None
 
     def showRegisters(self, indent=0):
         for i in range(13):
@@ -164,8 +170,12 @@ class Core:
     def UInt(self, value):
         if type(value) == Register:
             value = value.bval
-        elif type(value) == str or type(value) == int:
+        elif value == '0' or value == '1':
+            pass
+        elif type(value) == str:
             value = struct.pack('<l', int(value, 0))
+        elif type(value) == int:
+            value = struct.pack('<l', value)
         if type(value) == bytes:
             return struct.unpack('<L', value)[0]
         return int(value)
@@ -174,15 +184,21 @@ class Core:
     def SInt(self, value):
         if type(value) == Register:
             return value.ival
-        elif type(value) == str or type(value) == int:
+        elif value == '0' or value == '1':
+            pass
+        elif type(value) == str:
             value = struct.pack('<l', int(value, 0))
+        elif type(value) == int:
+            value = struct.pack('<l', value)
         if type(value) == bytes:
             return struct.unpack('<l', value)[0]
         return int(value)
 
     def Bit(self, value, bit_pos=31):
-        if type(value) == bytes:
+        if type(value) == bytes or type(value) == Register:
             return (self.UInt(value) & (1 << bit_pos)) != 0
+        elif type(value) == str:
+            value = int(value, 0)
         return (value & (1 << bit_pos)) != 0
 
     def IsZero(self, value):
@@ -192,6 +208,22 @@ class Core:
             return (self.UInt(value) == 0)
         return (int(value) == 0)
 
+    def IsZeroBit(self, value):
+        return self.IsZero(value)
+
+    def NOT(self, value):
+        if type(value) == Register:
+            print(f'NOT({hex(value.ival)}) = {hex(~value.ival)}')
+            return (~value.ival)
+        elif type(value) == bytes:
+            return ~self.UInt(value)
+        elif type(value) == bool:
+            return not value
+        return ~int(value)
+
+
+    def InITBlock(self):
+        return self.APSR.ITcond is not None
 
     def ConditionPassed(self, cond):
         return True

@@ -48,7 +48,7 @@ def aarch32_SUB_i_T2_A(core, regex_match, bitdiffs):
     imm32 = regex_groups.get('imm32', None)
     log.debug(f'aarch32_SUB_i_T2_A Rdn={Rdn} imm32={imm32} cond={cond}')
     # decode
-    d = core.UInt(Rdn);  n = core.UInt(Rdn);  setflags = not core.InITBlock();  
+    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  setflags = not core.InITBlock();  
 
     def aarch32_SUB_i_T2_A_exec():
         # execute
@@ -82,8 +82,6 @@ def aarch32_SUB_i_T3_A(core, regex_match, bitdiffs):
     Rn = regex_groups.get('Rn', None)
     imm32 = regex_groups.get('imm32', None)
     S = bitdiffs.get('S', '0')
-    d = bitdiffs.get('d', '0')
-    n = bitdiffs.get('n', '0')
     if Rd is None:
         Rd = Rn
     log.debug(f'aarch32_SUB_i_T3_A Rd={Rd} Rn={Rn} imm32={imm32} cond={cond}')
@@ -117,8 +115,6 @@ def aarch32_SUB_i_T4_A(core, regex_match, bitdiffs):
     Rd = regex_groups.get('Rd', None)
     Rn = regex_groups.get('Rn', None)
     imm32 = regex_groups.get('imm32', None)
-    n = bitdiffs.get('n', '0')
-    n = bitdiffs.get('n', '0')
     if Rd is None:
         Rd = Rn
     log.debug(f'aarch32_SUB_i_T4_A Rd={Rd} Rn={Rn} imm32={imm32} cond={cond}')
@@ -144,14 +140,12 @@ def aarch32_SUB_i_T4_A(core, regex_match, bitdiffs):
             log.debug(f'aarch32_SUB_i_T4_A_exec skipped')
     return aarch32_SUB_i_T4_A_exec
 
-# pattern SUBS{<c>}{<q>} PC, LR, #<imm8> with bitdiffs=[('!(Rn', '1110')]
+# pattern SUBS{<c>}{<q>} PC, LR, #<imm8> with bitdiffs=[]
 # regex ^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\sPC,\sLR,\s#(?P<imm32>\d+)$ : c imm32
 def aarch32_SUB_i_T5_AS(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
     imm32 = regex_groups.get('imm32', None)
-    !(Rn = bitdiffs.get('!(Rn', '0')
-    n = bitdiffs.get('n', '0')
     log.debug(f'aarch32_SUB_i_T5_AS imm32={imm32} cond={cond}')
     # decode
     d = 15;  n = core.reg_num[Rn];  setflags = True;  
@@ -237,8 +231,6 @@ def aarch32_SUB_r_T2_A(core, regex_match, bitdiffs):
     shift_n = regex_groups.get('shift_n', None)
     S = bitdiffs.get('S', '0')
     stype = bitdiffs.get('stype', '0')
-    d = bitdiffs.get('d', '0')
-    n = bitdiffs.get('n', '0')
     if Rd is None:
         Rd = Rn
     if shift_n is None:
@@ -313,7 +305,6 @@ def aarch32_SUB_SP_i_T2_A(core, regex_match, bitdiffs):
     Rd = regex_groups.get('Rd', None)
     imm32 = regex_groups.get('imm32', None)
     S = bitdiffs.get('S', '0')
-    d = bitdiffs.get('d', '0')
     log.debug(f'aarch32_SUB_SP_i_T2_A Rd={Rd} imm32={imm32} cond={cond}')
     # decode
     d = core.reg_num[Rd];  setflags = (S == '1');  
@@ -390,7 +381,6 @@ def aarch32_SUB_SP_r_T1_A(core, regex_match, bitdiffs):
     shift_n = regex_groups.get('shift_n', None)
     S = bitdiffs.get('S', '0')
     stype = bitdiffs.get('stype', '0')
-    d = bitdiffs.get('d', '0')
     if shift_n is None:
         shift_n = '0'
     if shift_t is None:
@@ -444,7 +434,7 @@ patterns = {
     'SUBS': [
         (re.compile(r'^SUBS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
         (re.compile(r'^SUBS(?:\.[NW])?\s(?:(?:\w+),\s)?(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
-        (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\sPC,\sLR,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T5_AS, {'!(Rn': '1110'}),
+        (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\sPC,\sLR,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T5_AS, {}),
         (re.compile(r'^SUBS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T1_A, {}),
         (re.compile(r'^SUBS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_SUB_r_T1_A, {}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_SP_i_T2_A, {'S': '1'}),

@@ -7,10 +7,11 @@ log = logging.getLogger('Mnem.ADC')
 # pattern ADCS{<c>}{<q>} {<Rd>,} <Rn>, #<const> with bitdiffs=[('S', '1')]
 # regex ^ADCS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$ : c Rd* Rn imm32
 def aarch32_ADC_i_T1_A(core, regex_match, bitdiffs):
-    cond = regex_match.group('c')
-    Rd = regex_match.group('Rd')
-    Rn = regex_match.group('Rn')
-    imm32 = regex_match.group('imm32')
+    regex_groups = regex_match.groupdict()
+    cond = regex_groups.get('c', None)
+    Rd = regex_groups.get('Rd', None)
+    Rn = regex_groups.get('Rn', None)
+    imm32 = regex_groups.get('imm32', None)
     S = bitdiffs.get('S', '0')
     if Rd is None:
         Rd = Rn
@@ -45,12 +46,13 @@ def aarch32_ADC_i_T1_A(core, regex_match, bitdiffs):
 # pattern ADCS{<q>} {<Rdn>,} <Rdn>, <Rm> with bitdiffs=[]
 # regex ^ADCS(?:\.[NW])?\s(?:(?:\w+),\s)?(?P<Rdn>\w+),\s(?P<Rm>\w+)$ : Rdn Rm
 def aarch32_ADC_r_T1_A(core, regex_match, bitdiffs):
-    cond = regex_match.group('c')
-    Rdn = regex_match.group('Rdn')
-    Rm = regex_match.group('Rm')
+    regex_groups = regex_match.groupdict()
+    cond = regex_groups.get('c', None)
+    Rdn = regex_groups.get('Rdn', None)
+    Rm = regex_groups.get('Rm', None)
     log.debug(f'aarch32_ADC_r_T1_A Rdn={Rdn} Rm={Rm} cond={cond}')
     # decode
-    d = core.UInt(Rdn);  n = core.UInt(Rdn);  m = core.reg_num[Rm];  setflags = not core.InITBlock();
+    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  m = core.reg_num[Rm];  setflags = not core.InITBlock();
     (shift_t, shift_n) = ('LSL', 0);
 
     def aarch32_ADC_r_T1_A_exec():
@@ -85,12 +87,13 @@ def aarch32_ADC_r_T1_A(core, regex_match, bitdiffs):
 # pattern ADCS{<c>}{<q>} {<Rd>,} <Rn>, <Rm> {, <shift> #<amount>} with bitdiffs=[('S', '1'), ('stype', '11')]
 # regex ^ADCS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$ : c Rd* Rn Rm shift_t* shift_n*
 def aarch32_ADC_r_T2_A(core, regex_match, bitdiffs):
-    cond = regex_match.group('c')
-    Rd = regex_match.group('Rd')
-    Rn = regex_match.group('Rn')
-    Rm = regex_match.group('Rm')
-    shift_t = regex_match.group('shift_t')
-    shift_n = regex_match.group('shift_n')
+    regex_groups = regex_match.groupdict()
+    cond = regex_groups.get('c', None)
+    Rd = regex_groups.get('Rd', None)
+    Rn = regex_groups.get('Rn', None)
+    Rm = regex_groups.get('Rm', None)
+    shift_t = regex_groups.get('shift_t', None)
+    shift_n = regex_groups.get('shift_n', None)
     S = bitdiffs.get('S', '0')
     stype = bitdiffs.get('stype', '0')
     if Rd is None:
