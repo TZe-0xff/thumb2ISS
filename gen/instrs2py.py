@@ -32,7 +32,7 @@ assembly_subst = [
     (False,     '{<q>}',                                r'(?:\.[NW])?'),
     (False, '{<x>{<y>{<z>}}}',                          r'(?P<mask>[ET]*)'),
     (False,    '<cond>',                                r'(?P<firstcond>\w\w)'),
-    (False,   '<label>',                                r'(?P<address>[a-f\d]*)\s*.*'),
+    (False,   '<label>',                                r'(?P<abs_address>[a-f\d]+)\s*.*'),
     (False,  '<iflags>',                                r'(?P<iflags>[if]+)'),
     (False,     '.<dt>',                                r'\.F(?P<esize>\d+)'),
     (False, '<shift> #<amount>',                        r'(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+)'),
@@ -60,7 +60,8 @@ dec_subst = [
     (True, re.compile(r'([a-z]) = UInt\(R\1\);'),       r'\1 = core.reg_num[R\1];'), # register number extraction
     (True, re.compile(r'(if .*then SEE.*)\n'),          r''),        # SEE references removal
     (True, re.compile(r"(.*?cond == '1111'.*\n)"),      r''),        # test of impossible condition removal
-
+    (True, re.compile(r'(\s*)(.*;) *(if .*)'),          r'\1\2\n\1\3'),     # if on new lines only
+    (True, re.compile(r'(\s*)(if.*) then *([^;]+;)'),     r'\1\2:\n\1    \3'), # if then syntax conversion
     (True, re.compile(r'(if .*)then'),                  r'\1:'),     # if then syntax conversion
     (True, re.compile(r'(\w+\()'),                      r'core.\1'), # subroutine calls
     (True, re.compile(r'(.*?)//(.*)'),                  r'\1#\2'),   # comment conversion
@@ -73,6 +74,8 @@ dec_subst = [
     (False, '||',                                       'or'),
     (False, '&&',                                       'and'),
     (False, 'PSTATE',                                   'core.APSR'),
+    (False, 'TRUE',                                     'True'),
+    (False, 'FALSE',                                    'False'),
 ]
 
 exec_subst = [
@@ -81,6 +84,7 @@ exec_subst = [
     (True, re.compile(r'(\s*)if BigEndian\(AccessType_GPR\) then.*\n\1else', re.S), r'\1if True:'),
     (True, re.compile(r'bits\((\d+)\) (\w+);'),         r'\2 = 0;'),
     (True, re.compile(r'if (.*?) then (.*?) else'),     r'\2 if \1 else'),  # inline if else syntax conversion
+    (True, re.compile(r'(\s*)(if.*) then([^;]+;)'),     r'\1\2:\n\1    \3'), # if then syntax conversion
     (True, re.compile(r'(if.*) then'),                  r'\1:'),            # if then syntax conversion
     (True, re.compile(r'(\s*else)[^\w]*\n'),            r'\1:\n'),          # if else syntax conversion
     (True, re.compile(r'(\w+\()'),                      r'core.\1'),        # subroutine calls
@@ -98,6 +102,7 @@ exec_subst = [
     (True, re.compile(r'([.\w\[\]]+)<(\d+):(\d+)>'),    r'core.Field(\1,\2,\3)'),
     (True, re.compile(r'([.\w]+)<(\d+)>'),              r'core.Bit(\1,\2)'),
     (False, 'core.BitCount(registers)',                 "registers.count('1')"),
+    (False, 'core.Align(PC',                            'core.Align(core.PC'),
     (False, 'UNPREDICTABLE',                            "raise Exception('UNPREDICTABLE')"),
     (False, '||',                                       'or'),
     (False, '&&',                                       'and'),
@@ -267,7 +272,10 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
     if 'shift_n' in existing_vars and 'shift_t' in existing_vars:
         working = re.sub(rf'\(shift_t, shift_n\) = [^;]+; ?', '', working)
 
-    for var in existing_vars:
+    subst_var = existing_vars
+    if 'abs_address' in existing_vars and 'imm32' not in existing_vars:
+        subst_var += ['imm32']
+    for var in subst_var:
         working = re.sub(rf'({var}) = [^;]+; ?', '', working)
 
     working = applyReplacement(working, dec_subst)
@@ -276,9 +284,17 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
         if len(line.strip()) > 0:
             print(' '*indent, line, sep='', file=ofile)
 
-def emitExecute(exec, ofile, indent=0):
+def emitExecute(exec, ofile, existing_vars, indent=0):
     # convert ASL code to python execute paragraph
     working = applyReplacement(exec.code, exec_subst)
+
+    if 'abs_address' in existing_vars:
+        if 'imm32' not in existing_vars:
+            # remove affectation of address, already computed by disassembler
+            working = re.sub(r'address = [^;]+; ?', 'address = abs_address;', working)
+        else:
+            # both address and imm32 may exist, test if address is already set
+            working = re.sub(r'(\s*)(address = [^;]+; ?)', r'\1if abs_address is None:\n\1    \2\n\1else:\n\1    address = abs_address;', working)
 
     for line in working.splitlines():
         if len(line.strip()) > 0:
@@ -316,19 +332,32 @@ class Instruction:
                     all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
                     all_bitdiffs += [b[0] for b in bitdiffs if b[0] not in all_bitdiffs]
                 print("def ", deslash(inm), '(core, regex_match, bitdiffs):', sep='', file=ofile)
+                print("    regex_groups = regex_match.groupdict()", file=ofile)
                 for f in all_fields:
                     if f == 'c':
-                        print(f"    cond = regex_match.group('c')", file=ofile)
+                        print(f"    cond = regex_groups.get('c', None)", file=ofile)
                     elif f == 'registers':
-                        print("    reg_list = [reg_num[reg.strip()] for reg in regex_match.group('registers').split(',')]", file=ofile)
+                        print("    reg_list = [reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]", file=ofile)
                         print("    registers = ['1' if reg in reg_list else '0' for reg in range(16)]", file=ofile)
                     else:
-                        print(f"    {f} = regex_match.group('{f}')", file=ofile)
+                        print(f"    {f} = regex_groups.get('{f}', None)", file=ofile)
+                        if f == 'abs_address':
+                            if 'imm32' in all_fields:
+                                print("    if abs_address is not None:", file=ofile)
+                                print("        abs_address = int(abs_address, 16)", file=ofile)
+                            else:
+                                print("    abs_address = int(abs_address, 16)", file=ofile)
+
                 if 'c' in all_fields:
                     all_fields.remove('c')
                     all_fields.append('cond')
                 for b in all_bitdiffs:
                     print(f"    {b} = bitdiffs.get('{b}', '{default_flag_value[b]}')", file=ofile)
+
+                # look for single bits that are not decoded before use to give them default value
+                for b in re.findall(r"(\w) [=!]= '", dec.code):
+                    if b not in all_bitdiffs:
+                        print(f"    {b} = bitdiffs.get('{b}', '{default_flag_value[b]}')", file=ofile)
 
                 if 'Rd' in all_opt_fields and 'Rn' in all_fields:
                     print('    if Rd is None:', file=ofile)
@@ -358,7 +387,16 @@ class Instruction:
                 if 'registers' in all_fields:
                     print_list.append('reg_list')
 
-                print(f"    log.debug(f'{deslash(inm)} "+" ".join(f+'={'+f+'}' for f in print_list)+"')", file=ofile)
+                debug_list = []
+                for f in print_list:
+                    if f == 'abs_address':
+                        if 'imm32' in all_fields:
+                            debug_list.append(f+'={hex('+f+') if '+f+' is not None else '+f+'}')
+                        else:
+                            debug_list.append(f+'={hex('+f+')}')
+                    else:
+                        debug_list.append(f+'={'+f+'}')
+                print(f"    log.debug(f'{deslash(inm)} "+" ".join(debug_list)+"')", file=ofile)
                 print("    # decode", file=ofile)
                 dec.patchTypeVar()
                 emitDecoder(dec, ofile, all_fields, indent=4)
@@ -372,7 +410,7 @@ class Instruction:
                     print(" "*indent, 'if core.ConditionPassed(cond):', sep='', file=ofile)
                     indent += 4
                 self.exec.patchTypeVar()
-                emitExecute(self.exec, ofile, indent)
+                emitExecute(self.exec, ofile, all_fields, indent)
 
                 if self.conditional:
                     indent-=4
