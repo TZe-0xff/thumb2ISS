@@ -57,7 +57,7 @@ assembly_subst = [
 
 dec_subst = [
     # re?       search                                  replace
-    (True, re.compile(r'([a-z]) = UInt\(R\1\);'),       r'\1 = core.reg_num[R\1];'), # register number extraction
+    (True, re.compile(r'([a-z]) = UInt\(D?\:?R\1\);'),       r'\1 = core.reg_num[R\1];'), # register number extraction
     (True, re.compile(r'(if .*then SEE.*)\n'),          r''),        # SEE references removal
     (True, re.compile(r"(.*?cond == '1111'.*\n)"),      r''),        # test of impossible condition removal
     (True, re.compile(r'(\s*)(.*;) *(if .*)'),          r'\1\2\n\1\3'),     # if on new lines only
@@ -278,6 +278,12 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
     for var in subst_var:
         working = re.sub(rf'({var}) = [^;]+; ?', '', working)
 
+    if 'imm32' in existing_vars:
+        working = re.sub(r'\(imm32, carry\) = T32ExpandImm_C\([^,]+, ([^)]+)\)', r'carry = \1', working)
+
+    if 'op' not in existing_vars:
+        working = re.sub(r'.*op == .*\n', '', working)
+
     working = applyReplacement(working, dec_subst)
 
     for line in working.splitlines():
@@ -355,7 +361,7 @@ class Instruction:
                     print(f"    {b} = bitdiffs.get('{b}', '{default_flag_value[b]}')", file=ofile)
 
                 # look for single bits that are not decoded before use to give them default value
-                for b in re.findall(r"(\w) [=!]= '", dec.code):
+                for b in re.findall(r"([A-Z]) [=!]= '", dec.code):
                     if b not in all_bitdiffs:
                         print(f"    {b} = bitdiffs.get('{b}', '{default_flag_value[b]}')", file=ofile)
 
@@ -939,7 +945,8 @@ def readInstruction(xml,names,sailhack):
         name = dec_asl.name if insn_set in ["T16","T32","A32"] else encoding.attrib['psname']
         patterns = []
         for encoding in iclass.findall('encoding'):
-            bitdiffs = re.findall(r'(\S+) == (\d+)', encoding.attrib.get('bitdiffs', ''))
+            bitdiffs = re.findall(r'(\w+) == (\d+)', encoding.attrib.get('bitdiffs', ''))
+
             for asmtemplate in encoding.findall('asmtemplate'):
                 iterator = asmtemplate.itertext()
                 mnem = next(iterator)
