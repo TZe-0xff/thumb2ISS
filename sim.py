@@ -69,22 +69,32 @@ class Simulator(object):
         for i in range(len(data)):
             self.memory[address+i] = data[i:i+1]
 
-    def load(self, disassembly):
+    def load(self, disassembly, rom_memory, rom_start, ram_memory, ram_start):
         self.labels = {}
         self.memory = {}
         self.code   = {}
         self.core = Core()
-        for line in disassembly:
-            for pat, action in self.dis_patt:
-                m = pat.match(line.lower())
-                if m is not None:
-                    action(m)
-                    break
+        for line in disassembly.splitlines():
+            if len(line.strip()) > 0:
+                for pat, action in self.dis_patt:
+                    m = pat.match(line.lower())
+                    if m is not None:
+                        action(m)
+                        break
+        self.memory.update({rom_start+i : rom_memory[i:i+1] for i in range(len(rom_memory))})
+        self.memory.update({ram_start+i : ram_memory[i:i+1] for i in range(len(ram_memory))})
+
         if '__vectors' in self.labels:
-            # get initial sp & inital pc from vector table
-            byte_seq = b''.join(self.memory[i] for i in range(self.labels['__vectors'], self.labels['__vectors'] + 8))
-            initial_sp, initial_pc = struct.unpack('<LL', byte_seq)
-            self.core.configure(initial_pc, initial_sp, self.memory)
+            vector_table = self.labels['__vectors']
+        elif '__vector_table' in self.labels:
+            vector_table = self.labels['__vector_table']
+        else:
+            print('__vectors symbol missing')
+            return False
+        # get initial sp & inital pc from vector table
+        byte_seq = b''.join(self.memory[i] for i in range(vector_table, vector_table + 8))
+        initial_sp, initial_pc = struct.unpack('<LL', byte_seq)
+        self.core.configure(initial_pc, initial_sp, self.memory)
         return True
 
     def step(self):
@@ -92,15 +102,46 @@ class Simulator(object):
         ex()
         self.core.incPC(pc_step)
 
+if __name__ == '__main__':
+    from itertools import groupby
+    from intelhex import IntelHex
+    import re,sys
 
-tst_str = open('dis.log', 'r').read()
+    dis_str = open('Hello.log', 'r').read()
 
-logging.basicConfig(filename='debug.log', filemode='w', encoding='utf-8', level=logging.DEBUG)
-s = Simulator()
-s.load([l for l in tst_str.splitlines() if len(l) > 1])
+    # find RAM area
+    sec_str = open('Hello.sec', 'r').read()
 
-s.core.showRegisters()
-for _ in range(4):
-    s.step()
-    s.core.showRegisters()
-#print(' '.join(  + list()))
+    ram_start = 0xFFFFFFFF
+    ram_end = 0
+    for strt,sz in re.findall(r' ([\da-f]+) +[\da-f]+ +([\da-f]+) +[\da-f]+ +W', sec_str):
+        sec_strt = int(strt, 16)
+        sec_size = int(sz, 16)
+        if sec_strt < ram_start:
+            ram_start = sec_strt
+        if sec_strt+sec_size > ram_end:
+            ram_end = sec_strt + sec_size
+
+    ram_memory = b'\x00' * (ram_end+1-ram_start)
+
+
+    ih = IntelHex()
+    ih.loadhex('Hello.hex')
+
+    rom_memory = ih.gets(ih.minaddr(), len(ih))
+
+    logging.basicConfig(filename='debug.log', filemode='w', level=logging.DEBUG)
+    logging.getLogger('Core').addHandler(logging.StreamHandler(sys.stdout))
+    logging.getLogger('Mnem').addHandler(logging.StreamHandler(sys.stdout))
+    s = Simulator()
+    if s.load(dis_str, rom_memory, ih.minaddr(), ram_memory, ram_start):
+        address_ranges = [[v for _,v in g] for _,g in groupby(enumerate(sorted(s.memory.keys())), lambda x:x[0]-x[1])]
+
+        for crange in address_ranges:
+            print(f'Memory range : {hex(min(crange))} - {hex(max(crange))}')
+
+        s.core.showRegisters()
+        for _ in range(4):
+            s.step()
+            s.core.showRegisters()
+    #print(' '.join(  + list()))

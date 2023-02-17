@@ -3,6 +3,7 @@ import re
 import binascii
 import importlib
 import logging
+import glob
 
 class Register:
     def __init__(self, initial_value):
@@ -86,8 +87,9 @@ class Core:
         self.log = logging.getLogger('Core')
         
         self.instructions = {}
-        for mnem in ['adc', 'ldr']:
-            self.instructions.update(importlib.import_module('instructions.'+mnem).patterns)
+        for instr in glob.glob('instructions/[a-z]*.py'):
+            instr_module = instr.replace('\\','.').replace('.py','')
+            self.instructions.update(importlib.import_module(instr_module).patterns)
 
     @property
     def PC(self):
