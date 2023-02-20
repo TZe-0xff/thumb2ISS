@@ -1,0 +1,32 @@
+import re, logging
+
+log = logging.getLogger('Mnem.RBIT')
+# instruction aarch32_RBIT_A
+# pattern RBIT{<c>}{<q>} <Rd>, <Rm> with bitdiffs=[]
+# regex ^RBIT(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$ : c Rd Rm
+def aarch32_RBIT_T1_A(core, regex_match, bitdiffs):
+    regex_groups = regex_match.groupdict()
+    cond = regex_groups.get('c', None)
+    Rd = regex_groups.get('Rd', None)
+    Rm = regex_groups.get('Rm', None)
+    Rn = Rm
+    log.debug(f'aarch32_RBIT_T1_A Rd={Rd} Rm={Rm} cond={cond}')
+    # decode
+    d = core.reg_num[Rd];  m = core.reg_num[Rm];  n = core.reg_num[Rn];
+    if m != n or d == 15 or m == 15:
+        raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
+
+    def aarch32_RBIT_T1_A_exec():
+        # execute
+        if core.ConditionPassed(cond):
+            core.R[d] = core.Field(int(f'{core.UInt(core.R[m]):032b}'[::-1],2))
+        else:
+            log.debug(f'aarch32_RBIT_T1_A_exec skipped')
+    return aarch32_RBIT_T1_A_exec
+
+
+patterns = {
+    'RBIT': [
+        (re.compile(r'^RBIT(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_RBIT_T1_A, {}),
+    ],
+}

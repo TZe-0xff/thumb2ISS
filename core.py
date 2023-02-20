@@ -83,14 +83,16 @@ class Core:
         self.R = {i:self.Field(0) for i in range(16)}
         self.R[14] = self.Field(0xffffffff) # initial LR
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
-        self.reg_num.update({'FP':11, 'fp':11, 'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
+        self.reg_num.update({'SB':0, 'sb':9, 'SL':10, 'sl':10, 'FP':11, 'fp':11, 'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
         self.APSR = ProgramStatus()
         self.bytes_to_Uint = ['', '<B', '<H', '', '<L']
         self.log = logging.getLogger('Core')
+        self.pc_updated = False
         
         self.instructions = {}
         for instr in glob.glob('instructions/[a-z]*.py'):
             instr_module = instr.replace('\\','.').replace('.py','')
+            self.log.info(f'Loading {instr_module}')
             self.instructions.update(importlib.import_module(instr_module).patterns)
 
     @property
@@ -99,6 +101,7 @@ class Core:
 
     @PC.setter
     def PC(self, value):
+        self.pc_updated = True
         self.R[15] = value
 
     @property
@@ -126,11 +129,17 @@ class Core:
         return self.UInt(self.R[15])
 
     def incPC(self, step):
-        self.R[15] = self.R[15] + step
-        if self.APSR.ITsteps > 0:
-            self.APSR.ITsteps -= 1
-            if self.APSR.ITsteps == 0:
-                self.APSR.ITcond = None
+        if not self.pc_updated:
+            self.R[15] = self.R[15] + step
+            if self.APSR.ITsteps > 0:
+                self.APSR.ITsteps -= 1
+                if self.APSR.ITsteps == 0:
+                    self.APSR.ITcond = None
+        else:
+            self.pc_updated = False
+            self.APSR.ITsteps = 0
+            self.APSR.ITcond = None
+
 
     def showRegisters(self, indent=0):
         for i in range(13):
@@ -144,10 +153,19 @@ class Core:
         print(f'pc: {hex(self.UInt(self.R[15]))}')
         print(' '*indent, self.APSR, sep='')
 
-    def getExec(self, mnem, args, expected_pc):
+    def getExec(self, mnem, full_assembly, expected_pc):
         m = None
+        if mnem.upper() not in self.instructions:
+            if mnem.upper() == 'LDMIA' or mnem.upper() == 'STMIA':
+                mnem = mnem[:-2]
+            else:
+                # try to remove trailing condition
+                for legal_cond in ['EQ', 'NE', 'CS', 'CC', 'MI', 'PL', 'VS', 'VC', 'HI', 'LS', 'GE', 'LT', 'GT', 'LE']:
+                    if mnem.upper().endswith(legal_cond):
+                        mnem = mnem[:-2]
+                        break
         for pat, action, bitdiffs in self.instructions.get(mnem.upper(), []):
-            m = pat.match(f'{mnem} {args}')
+            m = pat.match(full_assembly)
             if m is not None:
                 break
         if m is not None:
@@ -167,32 +185,45 @@ class Core:
         val = (value & mask) >> lsb
         return Register(struct.pack('<L', val))
 
-    def UInt(self, value):
+    def UInt(self, value, highValue=None):
         if type(value) == Register:
             value = value.bval
         elif value == '0' or value == '1':
-            pass
+            value = int(value)
         elif type(value) == str:
             value = struct.pack('<l', int(value, 0))
         elif type(value) == int:
             value = struct.pack('<l', value)
+
         if type(value) == bytes:
-            return struct.unpack('<L', value)[0]
-        return int(value)
+            value = struct.unpack('<L', value)[0]
+
+        if highValue is not None:
+            highValue = self.UInt(highValue)
+            combo = struct.pack('<LL', value, highValue)
+            value = struct.unpack('<Q', combo)[0]
+        return value
         
 
-    def SInt(self, value):
+    def SInt(self, value, highValue=None):
         if type(value) == Register:
             return value.ival
         elif value == '0' or value == '1':
-            pass
+            value = int(value)
         elif type(value) == str:
             value = struct.pack('<l', int(value, 0))
         elif type(value) == int:
             value = struct.pack('<l', value)
+
         if type(value) == bytes:
-            return struct.unpack('<l', value)[0]
-        return int(value)
+            value = struct.unpack('<l', value)[0]
+
+        if highValue is not None:
+            highValue = self.UInt(highValue)
+            combo = struct.pack('<lL', value, highValue)
+            value = struct.unpack('<q', combo)[0]
+
+        return value
 
     def Bit(self, value, bit_pos=31):
         if type(value) == bytes or type(value) == Register:
@@ -226,7 +257,24 @@ class Core:
         return self.APSR.ITcond is not None
 
     def ConditionPassed(self, cond):
-        return True
+        if cond is None: return True
+        cond = cond.upper()
+        if cond == 'EQ': return (self.APSR.Z == True)
+        if cond == 'NE': return (self.APSR.Z == False)
+        if cond == 'CS': return (self.APSR.C == True)
+        if cond == 'CC': return (self.APSR.C == False)
+        if cond == 'MI': return (self.APSR.N == True)
+        if cond == 'PL': return (self.APSR.N == False)
+        if cond == 'VS': return (self.APSR.V == True)
+        if cond == 'VC': return (self.APSR.V == False)
+        if cond == 'HI': return (self.APSR.C == True and self.APSR.Z == False)
+        if cond == 'LS': return (self.APSR.C == False or self.APSR.Z == True)
+        if cond == 'GE': return (self.APSR.N == self.APSR.V)
+        if cond == 'LT': return (self.APSR.N != self.APSR.V)
+        if cond == 'GT': return (self.APSR.Z == False and self.APSR.N == self.APSR.V)
+        if cond == 'LE': return (self.APSR.Z == True or self.APSR.N != self.APSR.V)
+        if cond == 'AL' or cond == '': return True
+        raise Exception(f'Illegal condition : {cond}')
 
     def ReadMemU(self, address, size):
         assert(size in [1,2,4])
@@ -239,6 +287,48 @@ class Core:
         value = struct.unpack(self.bytes_to_Uint[size], byte_seq)[0]
         self.log.info(f'Read {size} bytes as unsigned from {hex(address.ival)} : {hex(value)}')
         return Register(struct.pack('<L', value))
+
+    def ReadMemS(self, address, size):
+        return self.ReadMemU(address, size)
+
+    def ReadMemA(self, address, size):
+        return self.ReadMemU(address, size)
+
+    def WriteMemU(self, address, size, value):
+        assert(size in [1,2,4])
+        value = self.UInt(value)
+        self.log.info(f'Write {size} bytes as unsigned to {hex(address.ival)} : {hex(value)}')
+        try:
+            i=0
+            for b in value.to_bytes(size, byteorder='little'):
+                self.memory[address.ival+i] = b
+        except KeyError:
+            raise Exception(f'Illegal memory access between {hex(address.ival)} and {hex(address.ival + size - 1)}')
+
+    def WriteMemA(self, address, size, value):
+        self.WriteMemU(address, size, value)
+
+    def WriteMemS(self, address, size, value):
+        self.WriteMemU(address, size, value)
+
+    def BranchWritePC(self, targetAddress, branchType):
+        if branchType == 'DIRCALL':
+            self.LR = self.R[15] + 4
+        elif branchType == 'INDCALL':
+            self.LR = self.R[15] + 2
+        self.log.info(f'Branching to {hex(self.UInt(targetAddress))}' + (f' with link back to {hex(self.UInt(self.LR))}' if branchType.endswith('CALL') else ''))
+        self.PC = Register(targetAddress)
+
+    def BXWritePC(self, targetAddress, branchType):
+        self.BranchWritePC(targetAddress, branchType)
+
+    def SoftwareBreakpoint(self, value):
+        value = self.UInt(value)
+        if value == 0xab:
+            #semihosting
+            pass
+        else:
+            self.log.info(f'Breakpoint #{hex(value)} executed as NOP')
 
     def Align(self, reg_value, boundary):
         address = self.UInt(reg_value) & (-boundary)

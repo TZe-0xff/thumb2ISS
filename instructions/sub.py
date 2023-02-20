@@ -14,7 +14,7 @@ def aarch32_SUB_i_T1_A(core, regex_match, bitdiffs):
     imm32 = regex_groups.get('imm32', None)
     log.debug(f'aarch32_SUB_i_T1_A Rd={Rd} Rn={Rn} imm32={imm32} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  setflags = not core.InITBlock();  
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  setflags = not (cond is not None);  
 
     def aarch32_SUB_i_T1_A_exec():
         # execute
@@ -36,11 +36,13 @@ def aarch32_SUB_i_T1_A(core, regex_match, bitdiffs):
 # pattern SUB<c>{<q>} <Rdn>, #<imm8> with bitdiffs=[]
 # regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : c Rdn imm32
 # pattern SUB<c>{<q>} {<Rdn>,} <Rdn>, #<imm8> with bitdiffs=[]
-# regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?:\w+),\s)?(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : c Rdn imm32
+# regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$ : c Rdn imm32
+# regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : c Rdn imm32
 # pattern SUBS{<q>} <Rdn>, #<imm8> with bitdiffs=[]
 # regex ^SUBS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : Rdn imm32
 # pattern SUBS{<q>} {<Rdn>,} <Rdn>, #<imm8> with bitdiffs=[]
-# regex ^SUBS(?:\.[NW])?\s(?:(?:\w+),\s)?(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : Rdn imm32
+# regex ^SUBS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$ : Rdn imm32
+# regex ^SUBS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : Rdn imm32
 def aarch32_SUB_i_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -48,7 +50,7 @@ def aarch32_SUB_i_T2_A(core, regex_match, bitdiffs):
     imm32 = regex_groups.get('imm32', None)
     log.debug(f'aarch32_SUB_i_T2_A Rdn={Rdn} imm32={imm32} cond={cond}')
     # decode
-    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  setflags = not core.InITBlock();  
+    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  setflags = not (cond is not None);  
 
     def aarch32_SUB_i_T2_A_exec():
         # execute
@@ -151,8 +153,6 @@ def aarch32_SUB_i_T5_AS(core, regex_match, bitdiffs):
     d = 15;  n = core.reg_num[Rn];  setflags = True;  
     if n != 14:
         raise Exception('UNPREDICTABLE');
-    if core.InITBlock() and not core.LastInITBlock():
-        raise Exception('UNPREDICTABLE');
 
     def aarch32_SUB_i_T5_AS_exec():
         # execute
@@ -187,7 +187,7 @@ def aarch32_SUB_r_T1_A(core, regex_match, bitdiffs):
         Rd = Rn
     log.debug(f'aarch32_SUB_r_T1_A Rd={Rd} Rn={Rn} Rm={Rm} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  m = core.reg_num[Rm];  setflags = not core.InITBlock();
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  m = core.reg_num[Rm];  setflags = not (cond is not None);
     (shift_t, shift_n) = ('LSL', 0);
 
     def aarch32_SUB_r_T1_A_exec():
@@ -415,7 +415,8 @@ patterns = {
     'SUB': [
         (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:SP,\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_SP_i_T1_A, {}),
         (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
-        (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?:\w+),\s)?(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
+        (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
+        (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
         (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_SP_i_T2_A, {'S': '0'}),
         (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_SP_i_T2_A, {'S': '0'}),
         (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_SP_i_T3_A, {}),
@@ -433,19 +434,18 @@ patterns = {
     ],
     'SUBS': [
         (re.compile(r'^SUBS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
-        (re.compile(r'^SUBS(?:\.[NW])?\s(?:(?:\w+),\s)?(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
+        (re.compile(r'^SUBS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
+        (re.compile(r'^SUBS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T2_A, {}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\sPC,\sLR,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T5_AS, {}),
         (re.compile(r'^SUBS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T1_A, {}),
+        (re.compile(r'^SUBS.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T3_A, {'S': '1'}),
         (re.compile(r'^SUBS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_SUB_r_T1_A, {}),
+        (re.compile(r'^SUBS.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_SUB_r_T2_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_SP_i_T2_A, {'S': '1'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T3_A, {'S': '1'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_SUB_SP_r_T1_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_SUB_r_T2_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_SUB_SP_r_T1_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_SUB_r_T2_A, {'S': '1', 'stype': '11'}),
-    ],
-    'SUBS.W ': [
-        (re.compile(r'^SUBS.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T3_A, {'S': '1'}),
-        (re.compile(r'^SUBS.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_SUB_r_T2_A, {'S': '1', 'stype': '11'}),
     ],
 }

@@ -13,7 +13,7 @@ def aarch32_MOV_i_T1_A(core, regex_match, bitdiffs):
     imm32 = regex_groups.get('imm32', None)
     log.debug(f'aarch32_MOV_i_T1_A Rd={Rd} imm32={imm32} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  setflags = not core.InITBlock();   carry = core.APSR.C;
+    d = core.reg_num[Rd];  setflags = not (cond is not None);  carry = core.APSR.C;
 
     def aarch32_MOV_i_T1_A_exec():
         # execute
@@ -124,8 +124,6 @@ def aarch32_MOV_r_T1_A(core, regex_match, bitdiffs):
     # decode
     d = core.reg_num[Rd];  m = core.reg_num[Rm];  setflags = False;
     (shift_t, shift_n) = ('LSL', 0);
-    if d == 15 and core.InITBlock() and not core.LastInITBlock():
-        raise Exception('UNPREDICTABLE');
 
     def aarch32_MOV_r_T1_A_exec():
         # execute
@@ -165,7 +163,7 @@ def aarch32_MOV_r_T2_A(core, regex_match, bitdiffs):
         shift_t = 'LSL'
     log.debug(f'aarch32_MOV_r_T2_A Rd={Rd} Rm={Rm} shift_t={shift_t} shift_n={shift_n} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  m = core.reg_num[Rm];  setflags = not core.InITBlock();
+    d = core.reg_num[Rd];  m = core.reg_num[Rm];  setflags = not (cond is not None);
 
     def aarch32_MOV_r_T2_A_exec():
         # execute
@@ -258,13 +256,11 @@ patterns = {
     ],
     'MOVS': [
         (re.compile(r'^MOVS(?:\.[NW])?\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_MOV_i_T1_A, {}),
+        (re.compile(r'^MOVS.W\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_MOV_i_T2_A, {'S': '1'}),
         (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_MOV_i_T2_A, {'S': '1'}),
         (re.compile(r'^MOVS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_MOV_r_T2_A, {}),
         (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_MOV_r_T3_A, {'S': '1', 'stype': '11'}),
-        (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_MOV_r_T3_A, {'S': '1', 'stype': '11'}),
-    ],
-    'MOVS.W ': [
-        (re.compile(r'^MOVS.W\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_MOV_i_T2_A, {'S': '1'}),
         (re.compile(r'^MOVS.W\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_MOV_r_T3_A, {'S': '1', 'stype': '11'}),
+        (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_MOV_r_T3_A, {'S': '1', 'stype': '11'}),
     ],
 }

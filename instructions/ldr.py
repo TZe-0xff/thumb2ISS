@@ -81,8 +81,6 @@ def aarch32_LDR_i_T3_A(core, regex_match, bitdiffs):
     # decode
     t = core.reg_num[Rt];  n = core.reg_num[Rn];  index = True;  add = True;
     wback = False;
-    if t == 15 and core.InITBlock() and not core.LastInITBlock():
-        raise Exception('UNPREDICTABLE');
 
     def aarch32_LDR_i_T3_A_exec():
         # execute
@@ -124,8 +122,6 @@ def aarch32_LDR_i_T4_A(core, regex_match, bitdiffs):
         raise Exception('UNDEFINED');
     t = core.reg_num[Rt];  n = core.reg_num[Rn];
     index = (P == '1');  add = (U == '1');  wback = (W == '1');
-    if (wback and n == t) or (t == 15 and core.InITBlock() and not core.LastInITBlock()):
-        raise Exception('UNPREDICTABLE');
 
     def aarch32_LDR_i_T4_A_exec():
         # execute
@@ -156,7 +152,7 @@ def aarch32_LDR_l_T1_A(core, regex_match, bitdiffs):
     abs_address = int(abs_address, 16)
     log.debug(f'aarch32_LDR_l_T1_A Rt={Rt} abs_address={hex(abs_address)} cond={cond}')
     # decode
-    t = core.reg_num[Rt];   add = True;
+    t = core.reg_num[Rt];  add = True;
 
     def aarch32_LDR_l_T1_A_exec():
         # execute
@@ -195,9 +191,7 @@ def aarch32_LDR_l_T2_A(core, regex_match, bitdiffs):
     U = bitdiffs.get('U', '1')
     log.debug(f'aarch32_LDR_l_T2_A Rt={Rt} abs_address={hex(abs_address) if abs_address is not None else abs_address} imm32={imm32} cond={cond}')
     # decode
-    t = core.reg_num[Rt];   add = (U == '1');
-    if t == 15 and core.InITBlock() and not core.LastInITBlock():
-        raise Exception('UNPREDICTABLE');
+    t = core.reg_num[Rt];  add = (U == '1');
 
     def aarch32_LDR_l_T2_A_exec():
         # execute
@@ -270,8 +264,6 @@ def aarch32_LDR_r_T2_A(core, regex_match, bitdiffs):
     # decode
     t = core.reg_num[Rt];  n = core.reg_num[Rn];  m = core.reg_num[Rm];
     if m == 15:
-        raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
-    if t == 15 and core.InITBlock() and not core.LastInITBlock():
         raise Exception('UNPREDICTABLE');
 
     def aarch32_LDR_r_T2_A_exec():
@@ -309,20 +301,3 @@ patterns = {
         (re.compile(r'^LDR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rt>\w+),\s\[(?P<Rn>\w+),\s[+]?(?P<Rm>\w+)(?:,\s(?P<shift_t>LSL)\s#(?P<shift_n>\d+))?\]$', re.I), aarch32_LDR_r_T2_A, {}),
     ],
 }
-
-if __name__ == '__main__':
-    from _testing import Core, test
-    import struct
-    logging.basicConfig(level=logging.DEBUG)
-    c = Core()
-
-    steps = []
-    steps += [c.getExec('ldr', 'r5, [pc, #28]', 0)]
-    steps += [c.getExec('ldr', 'r4, [r4]', 0)]
-    steps += [c.getExec('ldr', 'r3, [r1, #+1]!', 0)]
-    steps += [c.getExec('ldr', 'r3, [r1, #-1]', 0)]
-    steps += [c.getExec('ldr', 'r2, [r1], #+3', 0)]
-
-    #initialize some memory
-    initial_mem = {i:struct.pack('B',i) for i in range(256)}
-    test(c, steps, initial_mem)

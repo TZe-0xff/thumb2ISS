@@ -10,8 +10,6 @@ def aarch32_IT_T1_A(core, regex_match, bitdiffs):
     firstcond = regex_groups.get('firstcond', None)
     log.debug(f'aarch32_IT_T1_A mask={mask} firstcond={firstcond}')
     # decode
-    if core.InITBlock():
-        raise Exception('UNPREDICTABLE');
 
     def aarch32_IT_T1_A_exec():
         # execute

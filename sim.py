@@ -32,6 +32,7 @@ class Simulator(object):
             (re.compile(r'^ +(?P<address>[\da-f]+):\t(?P<values>(?:[\da-f]{2} ?)+).*?'),
                 lambda m: self.genConst(int(m.group('address'), 16), m.group('values'), '.table')),
         ]
+        self.mnem_extract = re.compile(r'(?P<mnem>\w+?)(?:[ACEGHLMNPV][CEILQST])?(?:\.[NW])?', re.I)
 
 
     def genLbl(self, label, address):
@@ -46,10 +47,11 @@ class Simulator(object):
             data+= binascii.unhexlify(highWord)[::-1]
 
         self.log.getChild('genIsn').debug(f'Got {len(data)} from {hex(address)} to {hex(address+len(data)-1)}')
-        for i in range(len(data)):
-            self.memory[address+i] = data[i:i+1]
 
-        self.code[address] = (self.core.getExec(mnemonic, args, address), len(data))
+        full_assembly = f'{mnemonic} {args}'
+        mnemonic = mnemonic.split('.')[0]
+        self.log.getChild('genIsn').debug(f'Get Execution for <{mnemonic}> ({full_assembly})')
+        self.code[address] = (self.core.getExec(mnemonic, full_assembly, address), len(data))
 
     def genConst(self, address, value_str, data_type):
         self.log.getChild('genConst').debug(f'Creating Constant @{hex(address)} : {value_str}')
@@ -141,7 +143,7 @@ if __name__ == '__main__':
             print(f'Memory range : {hex(min(crange))} - {hex(max(crange))}')
 
         s.core.showRegisters()
-        for _ in range(10):
+        for _ in range(70):
             s.step()
             s.core.showRegisters()
     #print(' '.join(  + list()))

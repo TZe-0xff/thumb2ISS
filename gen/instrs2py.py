@@ -34,6 +34,7 @@ assembly_subst = [
     (False,    '<cond>',                                r'(?P<firstcond>\w\w)'),
     (False,   '<label>',                                r'(?P<abs_address>[a-f\d]+)\s*.*'),
     (False,  '<iflags>',                                r'(?P<iflags>[if]+)'),
+    (False,  '<spec_reg>',                              r'(?P<spec_reg>\w+)'),
     (False,     '.<dt>',                                r'\.F(?P<esize>\d+)'),
     (False, '<shift> #<amount>',                        r'(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+)'),
     (False, 'LSL #<imm>',                               r'(?P<shift_t>LSL)\s#(?P<shift_n>\d+)'),
@@ -41,6 +42,11 @@ assembly_subst = [
     (False, 'LSR #<amount>',                            r'(?P<shift_t>LSR)\s#(?P<shift_n>\d+)'),
     (False, 'ASR #<amount>',                            r'(?P<shift_t>ASR)\s#(?P<shift_n>\d+)'),
     (False, 'ROR #<amount>',                            r'(?P<shift_t>ROR)\s#(?P<rotation>\d+)'),
+    (False, 'LSL <',                                    r'(?P<shift_t>LSL)\s<'),
+    (False, 'LSR <',                                    r'(?P<shift_t>LSR)\s<'),
+    (False, 'ASR <',                                    r'(?P<shift_t>ASR)\s<'),
+    (False, 'ROR <',                                    r'(?P<shift_t>ROR)\s<'),
+    (False, '<shift> <',                                r'(?P<shift_t>[LAR][SO][LR])\s<'),
     (False, 'RRX',                                      r'(?P<shift_t>RRX)'),
     (True,  re.compile(r'<([QDR]\w+)>'),                r'(?P<\1>\\w+)'),
     (True,  re.compile(r'\{(.*), ?\}\s?'),              r'|?:\1,\\s|?'),
@@ -57,7 +63,7 @@ assembly_subst = [
 
 dec_subst = [
     # re?       search                                  replace
-    (True, re.compile(r'([a-z]) = UInt\(D?\:?(Rd?\1n?)\);'),       r'\1 = core.reg_num[\2];'), # register number extraction
+    (True, re.compile(r'([a-z]\d?) = UInt\(\w*\:?(Rd?\1[nm]?)\);'),       r'\1 = core.reg_num[\2];'), # register number extraction
     (True, re.compile(r'(if .*then SEE.*)\n'),          r''),        # SEE references removal
     (True, re.compile(r"(.*?cond == '1111'.*\n)"),      r''),        # test of impossible condition removal
     (True, re.compile(r'(\s*)(.*;) *(if .*)'),          r'\1\2\n\1\3'),     # if on new lines only
@@ -65,6 +71,11 @@ dec_subst = [
     (True, re.compile(r'(if .*)then'),                  r'\1:'),     # if then syntax conversion
     (True, re.compile(r'(\w+\()'),                      r'core.\1'), # subroutine calls
     (True, re.compile(r'(.*?)//(.*)'),                  r'\1#\2'),   # comment conversion
+    (True, re.compile(r'.*targetInstrSet.*\n'),         r''),
+    (True, re.compile(r'= (!)?core\.InITBlock\(\)'),    r'= \1(cond is not None)'),
+    (True, re.compile(r'[^;]*InITBlock\(\)[^;]*;'),     r''),
+    (True, re.compile(r'.*I1 = .*\n'),                  r''),
+    (True, re.compile(r'.*SYSm = .*\n'),                r''),
     (False, 'UNPREDICTABLE',                            "raise Exception('UNPREDICTABLE')"),
     (False, 'UNDEFINED',                                "raise Exception('UNDEFINED')"),
     (True, re.compile(r'registers<([^>]+)>'),            r'registers[\1]'),
@@ -83,7 +94,12 @@ exec_subst = [
     # re?       search                                  replace
     (True, re.compile(r'(\s*)if CurrentInstrSet\(\) == InstrSet_A32 then.*\n\1else', re.S), r'\1if True:'),
     (True, re.compile(r'(\s*)if BigEndian\(AccessType_GPR\) then.*\n\1else', re.S), r'\1if True:'),
+    (True, re.compile(r'.*targetInstrSet.*\n'),         r''),
+    (True, re.compile(r'.*next_instr_addr.*\n'),        r''),
+    (True, re.compile(r'(\s*)if True:\n\1([^ ])'),      r'\1\2'),
     (True, re.compile(r'bits\((\d+)\) (\w+);'),         r'\2 = 0;'),
+    (True, re.compile(r'integer (\w+);'),               r'\1 = 0;'),
+    (True, re.compile(r'boolean (\w+);'),               r'\1 = False;'),
     (True, re.compile(r'if (.*?) then (.*?) else'),     r'\2 if \1 else'),  # inline if else syntax conversion
     (True, re.compile(r'(\s*)(if.*) then([^;]+;)'),     r'\1\2:\n\1    \3'), # if then syntax conversion
     (True, re.compile(r'(if.*) then'),                  r'\1:'),            # if then syntax conversion
@@ -91,11 +107,13 @@ exec_subst = [
     (True, re.compile(r'(\w+\()'),                      r'core.\1'),        # subroutine calls
     (True, re.compile(r'(for[^=]+)= +(\d+) to (\d+)'),  r'\1in range(\2,\3+1):'), # for loop syntax conversion
     (True, re.compile(r'(.*?)//(.*)'),                  r'\1#\2'),          # comment conversion
+    (True, re.compile(r'Int\((R\[\w+\]):(R\[\w+\])\)'), r'Int(\2, \1)'),
     (True, re.compile(r'(R\[[^]]+\])'),                 r'core.\1' ),
     (True, re.compile(r'(Mem\w)\[([^]]+)\] = (.*?);'),  r'core.Write\1(\2, \3);' ),
     (True, re.compile(r'(Mem\w)\[([^]]+)\]'),           r'core.Read\1(\2)' ),
     (True, re.compile(r'registers<([^>]+)>'),           r'registers[\1]'),
     (True, re.compile(r'SRType_(\w\w\w)'),              r"'\1'"),
+    (True, re.compile(r'BranchType_(\w+)'),             r"'\1'"),
     (True, re.compile('!([^=])'),                       r'not \1'),
     (True, re.compile(r'PSTATE\.<[^>]*?> = (\w+);'),    r'core.APSR.update(\1);'),
     (False, 'PSTATE.IT<7:0> = firstcond:mask;',         'core.APSR.ITcond = firstcond; core.APSR.ITsteps = len(mask)'),
@@ -106,11 +124,15 @@ exec_subst = [
     (False, 'core.BitCount(registers)',                 "registers.count('1')"),
     (False, 'core.Align(PC',                            'core.Align(core.PC'),
     (False, 'UNPREDICTABLE',                            "raise Exception('UNPREDICTABLE')"),
+    (False, 'PC + imm32',                               'abs_address'),
+    (False, '# Do nothing',                             'pass # Do nothing'),
     (False, '||',                                       'or'),
     (False, '&&',                                       'and'),
     (False, 'PSTATE',                                   'core.APSR'),
     (True, re.compile(r"(APSR\.[NZCVQ] = )'([01])'"),   r'\1bool(\2)'),
     (False, 'EOR',                                      '^'),
+    (False, ' OR ',                                     ' | '),
+    (False, 'AND',                                      '&'),
     (False, 'TRUE',                                     'True'),
     (False, 'FALSE',                                    'False'),
     (False, 'core.bits(32) UNKNOWN',                    'core.Field(0xdeadbeef)'),
@@ -122,7 +144,13 @@ base_mnem = ['ADC', 'ADCS', 'ADD', 'ADDS', 'ADR', 'AND', 'ANDS', 'ASR', 'ASRS', 
 
 extended_mnem = ['ASRL', 'AUT', 'AUTG', 'BF', 'BFL', 'BFLX', 'BFX', 'BLXNS', 'BTI', 'BXAUT', 'BXNS', 'CDP', 'CDP2', 'CINC', 'CINV', 'CLRM', 'CNEG', 'CSDB', 'CSEL', 'CSET', 'CSETM', 'CSINC', 'CSINV', 'CSNEG', 'CX1', 'CX1D', 'CX2', 'CX2D', 'CX3', 'CX3D', 'DBG', 'DLS', 'DLSTP', 'ESB', 'FLDMDBX', 'FLDMIAX', 'FSTMDBX', 'FSTMIAX', 'LCTP', 'LDA', 'LDAB', 'LDAEX', 'LDAEXB', 'LDAEXH', 'LDAH', 'LDC', 'LDC2', 'LE', 'LETP', 'LSLL', 'LSRL', 'MCR', 'MCR2', 'MCRR', 'MCRR2', 'MEA', 'MRC', 'MRC2', 'MRRC', 'MRRC2', 'PAC', 'PACBTI', 'PACG', 'PLD', 'PLDW', 'PLI', 'PSSBB', 'SG', 'SORSHRL', 'SQRSHR', 'SQSHL', 'SQSHLL', 'SRSHR', 'SRSHRL', 'SSBB', 'STC', 'STC2', 'STL', 'STLB', 'STLEX', 'STLEXB', 'STLEXH', 'STLH', 'TT', 'TTA', 'TTAT', 'TTT', 'UDF', 'UQRSHL', 'UQRSHLL', 'UQSHL', 'UQSHLL', 'URSHR', 'URSHRL', 'VABAV', 'VABD', 'VABS', 'VADC', 'VADD', 'VADDLV', 'VADDV', 'VAND', 'VASD', 'VASS', 'VBIC', 'VBRSR', 'VCADD', 'VCLS', 'VCLZ', 'VCMLA', 'VCMP', 'VCMP', 'VCMPE', 'VCMUL', 'VCTP', 'VCVT', 'VCVTA', 'VCVTB', 'VCVTM', 'VCVTN', 'VCVTP', 'VCVTR', 'VCVTT', 'VCX1', 'VCX2', 'VCX3', 'VDDUP', 'VDIV', 'VDNOT', 'VDOD', 'VDSEL', 'VDST', 'VDT', 'VDUP', 'VDUSH', 'VDWDUP', 'VEOR', 'VFMA', 'VFMAS', 'VFMS', 'VFNMA', 'VFNMS', 'VHADD', 'VHCADD', 'VHSUB', 'VIDRD', 'VIDUP', 'VINS', 'VIWDUP', 'VLD2', 'VLD4', 'VLDM', 'VLDR', 'VLDRB', 'VLDRH', 'VLDRW', 'VLLDM', 'VLSTM', 'VMAX', 'VMAXA', 'VMAXAV', 'VMAXNM', 'VMAXNMA', 'VMAXNMAV', 'VMAXNMV', 'VMAXV', 'VMIN', 'VMINA', 'VMINNM', 'VMINNMA', 'VMINNMAV', 'VMINNMV', 'VMINV', 'VMLA', 'VMLADAV', 'VMLALDAV', 'VMLALV', 'VMLAS', 'VMLAV', 'VMLS', 'VMLSDAV', 'VMLSLDAV', 'VMNAV', 'VMOV', 'VMOVL', 'VMOVN', 'VMOVX', 'VMRS', 'VMSR', 'VMUL', 'VMULH', 'VMULL', 'VMVN', 'VNEG', 'VNMLA', 'VNMLS', 'VNMUL', 'VORN', 'VORR', 'VQABS', 'VQADD', 'VQDMLADH', 'VQDMLAH', 'VQDMLASH', 'VQDMLSDH', 'VQDMULH', 'VQDMULL', 'VQMOVN', 'VQMOVUN', 'VQNEG', 'VQRDMLADH', 'VQRDMLAH', 'VQRDMLASH', 'VQRDMLSDH', 'VQRDMULH', 'VQRSHL', 'VQRSHRN', 'VQRSHRUN', 'VQSHL', 'VQSHLU', 'VQSHRN', 'VQSHRUN', 'VQSUB', 'VREV16', 'VREV32', 'VREV64', 'VRHADD', 'VRINT', 'VRINTA', 'VRINTM', 'VRINTN', 'VRINTP', 'VRINTR', 'VRINTX', 'VRINTZ', 'VRMLALDAVH', 'VRMLALVH', 'VRMLSLDAVH', 'VRMULH', 'VRSHL', 'VRSHR', 'VRSHRN', 'VSBC', 'VSCCLRM', 'VSEL', 'VSELEQ', 'VSELGE', 'VSELGT', 'VSELVS', 'VSHL', 'VSHLC', 'VSHLL', 'VSHR', 'VSHRN', 'VSLI', 'VSQRT', 'VSRI', 'VST2', 'VST4', 'VSTM', 'VSTR', 'VSTRB', 'VSTRD', 'VSTRH', 'VSTRW', 'VSUB', 'WLS', 'WLSTP', 'YIELD']
 
-allowed_mnem = base_mnem
+excluded_mnem = ['CPSIE', 'CPSID', 'DMB', 'DSB', 'ISB', 'WFE', 'WFI', 'SEV']
+
+excluded_encoding = ['aarch32_MRS_br_T1_AS', 'aarch32_MSR_br_T1_AS']
+
+allowed_mnem = [b for b in base_mnem if b not in excluded_mnem]
+
+
 
 def applyReplacement(org_str, repl_table):
     working = org_str
@@ -135,20 +163,28 @@ def applyReplacement(org_str, repl_table):
 
 def BuildPattern(inpat):
     working = applyReplacement('^'+inpat+'$', assembly_subst)
+    secondary_pattern = None
 
     fields = re.findall(r'\(\?P<(\w+)>', working)
     if len(set(fields)) != len(fields):
         # Multiple instance of same field
         for f in ['Rdm', 'Rdn']:
             if fields.count(f) > 1:
-                # ignore trailing optional argument
-                candidate = working.replace(r'|?:,\s(?P<%s>\w+)|?'%(f), r'|?:,\s(?:\w+)|?', 1)
+                # trailing optional argument : make it match same as first group
+                candidate = working.replace(r'|?:,\s(?P<%s>\w+)|?'%(f), r'|?:,\s(?P=%s)|?'%(f), 1)
                 if candidate == working:
-                    # ignore leading optional argument
-                    candidate = working.replace(r'|?:(?P<%s>\w+),\s|?'%(f), r'|?:(?:\w+),\s|?', 1)
+                    # leading optional argument, build two variants of this pattern
+                    if r'|?:(?P<%s>\w+),\s|?'%(f) in working:
+                        # build secondary pattern with leading argument absent
+                        secondary_pattern = working.replace(r'|?:(?P<%s>\w+),\s|?'%(f), r'', 1)
+                        # build main pattern with both argument present and second one matching first
+                        candidate = working.replace(r'|?:(?P<%s>\w+),\s|?'%(f), r'(?P<%s>\w+),\s'%(f), 1)
+                        working = candidate # force following replacement
                 if candidate == working:
-                    # ignore leading mandatory argument
-                    candidate = working.replace(r'(?P<%s>\w+)'%(f), r'(?:\w+)', 1)
+                    # mandatory double arguments, make trailing match same as first group
+                    tokens = working.split(r'?P<%s>\w+'%(f))
+                    assert(len(tokens) == 3)
+                    candidate = ''.join([tokens[0],r'?P<%s>\w+'%(f),tokens[1],r'?P=%s'%(f),tokens[2]])
                 working = candidate
         fields = re.findall(r'\(\?P<(\w+)>', working)
 
@@ -160,8 +196,12 @@ def BuildPattern(inpat):
         opt_fields += re.findall(r'\(\?P<(\w+)>', seq)
     working = working.replace('|?:', '(?:')
     working = working.replace('|?', ')?')
-
-    return working, fields, opt_fields
+    out_patterns = [(working, fields, opt_fields)]
+    if secondary_pattern is not None:
+        secondary_pattern = secondary_pattern.replace('|?:', '(?:')
+        secondary_pattern = secondary_pattern.replace('|?', ')?')
+        out_patterns += [(secondary_pattern, fields, opt_fields)]
+    return out_patterns
 
 ########################################################################
 # Tag file support
@@ -276,16 +316,32 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
         working = re.sub(rf'\(shift_t, shift_n\) = [^;]+; ?', '', working)
 
     subst_var = existing_vars
+    if 'imm32' in existing_vars:
+        subst_var += ['imm8', 'imm16']
     if 'abs_address' in existing_vars and 'imm32' not in existing_vars:
         subst_var += ['imm32']
+
+    if 'spec_reg' in existing_vars:
+        subst_var += ['write_spsr', 'read_spsr']
+
     for var in subst_var:
-        working = re.sub(rf'({var}) = [^;]+; ?', '', working)
+        working = re.sub(rf'({var}) = [^;]+; *', '', working)
 
     if 'imm32' in existing_vars:
         working = re.sub(r'\(imm32, carry\) = T32ExpandImm_C\([^,]+, ([^)]+)\)', r'carry = \1', working)
 
+    if 'lsb' in existing_vars and 'lsbit' in working:
+        working = re.sub(r'lsbit = [^;]+', r'lsbit = UInt(lsb)', working)
+
+    if 'width' in existing_vars and 'msbit' in working:
+        working = re.sub(r'msbit = [^;]+', r'msbit = UInt(width) + UInt(lsb)', working)
+
     if 'op' not in existing_vars:
         working = re.sub(r'.*op == .*\n', '', working)
+
+    if 'mask' not in existing_vars:
+        working = re.sub(rf'.*mask ==.*\n', '', working)        
+
 
     working = applyReplacement(working, dec_subst)
 
@@ -294,8 +350,14 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
             print(' '*indent, line, sep='', file=ofile)
 
 def emitExecute(exec, ofile, existing_vars=[], indent=0):
+    working = exec.code
+
+    # TB[HB] specific
+    if 'tbb' in exec.name.lower():
+        working = re.sub(r'MemU\[(.*)\]\);', r'ReadMemU(\1));', working)
+
     # convert ASL code to python execute paragraph
-    working = applyReplacement(exec.code, exec_subst)
+    working = applyReplacement(working, exec_subst)
 
     if 'abs_address' in existing_vars:
         if 'imm32' not in existing_vars:
@@ -304,7 +366,29 @@ def emitExecute(exec, ofile, existing_vars=[], indent=0):
         else:
             # both address and imm32 may exist, test if address is already set
             working = re.sub(r'(\s*)(address = [^;]+; ?)', r'\1if abs_address is None:\n\1    \2\n\1else:\n\1    address = abs_address;', working)
+    if 'imm32' in existing_vars and 'imm32' not in working:
+        if 'imm16' in working:
+            working = working.replace('imm16', 'imm32')
+        if 'imm8' in working:
+            working = working.replace('imm8', 'imm32')
+    if 'Replicate' in working:
+        working = re.sub(r'core.R\[(\w+)\]<(\w+):(\w+)> = core.Replicate\([^;]*', r'core.R[\1] = core.R[\1] & ~((0xffffffff >> (31 - \2 + \3)) << \3)', working)
 
+    if 'Extend' in working:
+        working = re.sub(r'Extend\(core.R\[(\w+)\]<(\w+):(\w+)>', r'Extend(core.R[\1], \2, \3', working)
+
+    if 'write_spsr' in working:
+        working = 'core.WriteSpecReg(spec_reg, core.R[n]);'
+    elif 'read_spsr' in working:
+        working = 'core.R[d] = core.ReadSpecReg(spec_reg);'
+
+    # RBIT specific
+    if 'rbit' in exec.name.lower():
+        working = "core.R[d] = core.Field(int(f'{core.UInt(core.R[m]):032b}'[::-1],2))"
+
+    working = re.sub(r'(\s*)core.R\[(?P<dst>\w+)\]<(?P<msbit>\w+):(?P<lsbit>\w+)> = core.R\[(?P<src>\w+)\]<\((?P=msbit)-(?P=lsbit)\):0>;', 
+                     r'\1tmp_R\g<dst> = core.R[\g<dst>] & ~((0xffffffff >> (31 - \g<msbit> + \g<lsbit>)) << \g<lsbit>);\n\1core.R[\g<dst>] = tmp_R\g<dst> | (core.UInt(core.R[\g<src>]) << \g<lsbit>);',
+                     working)
     for line in working.splitlines():
         if len(line.strip()) > 0:
             print(' '*indent, line, sep='', file=ofile)
@@ -328,25 +412,25 @@ class Instruction:
         all_patterns = []
 
         for (inm,insn_set,fields,dec,pats) in self.encs:
-            if insn_set.startswith('T'):
+            if insn_set.startswith('T') and deslash(inm) not in excluded_encoding:
                 all_fields = []
                 all_opt_fields = []
                 all_bitdiffs = []
                 for mnem,pat,bitdiffs in pats:
                     print("# pattern "+ pat + " with bitdiffs=%s"%(bitdiffs), file=ofile)
-                    reg_pat, fields, opt_fields = BuildPattern(pat)
-                    print("# regex "+ reg_pat + " : " + " ".join(f+('*' if f in opt_fields else '') for f in fields), file=ofile)
-                    all_patterns.append((mnem, len(fields), reg_pat, deslash(inm), bitdiffs))
-                    all_fields += [f for f in fields if f not in all_fields]
-                    all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
-                    all_bitdiffs += [b[0] for b in bitdiffs if b[0] not in all_bitdiffs]
+                    for reg_pat, fields, opt_fields in BuildPattern(pat):
+                        print("# regex "+ reg_pat + " : " + " ".join(f+('*' if f in opt_fields else '') for f in fields), file=ofile)
+                        all_patterns.append((mnem, len(fields), reg_pat, deslash(inm), bitdiffs))
+                        all_fields += [f for f in fields if f not in all_fields]
+                        all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
+                        all_bitdiffs += [b[0] for b in bitdiffs if b[0] not in all_bitdiffs]
                 print("def ", deslash(inm), '(core, regex_match, bitdiffs):', sep='', file=ofile)
                 print("    regex_groups = regex_match.groupdict()", file=ofile)
                 for f in all_fields:
                     if f == 'c':
                         print(f"    cond = regex_groups.get('c', None)", file=ofile)
                     elif f == 'registers':
-                        print("    reg_list = [reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]", file=ofile)
+                        print("    reg_list = [core.reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]", file=ofile)
                         print("    registers = ['1' if reg in reg_list else '0' for reg in range(16)]", file=ofile)
                     else:
                         print(f"    {f} = regex_groups.get('{f}', None)", file=ofile)
@@ -375,6 +459,9 @@ class Instruction:
                 if 'Rm' in all_opt_fields and 'Rd' in all_fields:
                     print('    if Rm is None:', file=ofile)
                     print('        Rm = Rd', file=ofile)
+
+                if 'rbit' in mnem.lower():
+                    print('    Rn = Rm', file=ofile)
 
                 zero_default_fields = ['imm32', 'shift_n', 'rotation']
 
@@ -1188,7 +1275,7 @@ def main():
     # grouping instructions by title mnemonic
     for i in instrs:
         if len(i.encs) > 0 and len(i.mnems) > 0:
-            title_mnem = i.mnems[0]
+            title_mnem = i.mnems[0].split('.')[0]
             if title_mnem not in instr_by_mnem:
                 instr_by_mnem[title_mnem] = [i]
             else:
@@ -1210,7 +1297,7 @@ def main():
             #organize patterns per mnemonic
             org_patterns = {}
             for decode_pat in all_patterns:
-                mnem = decode_pat[0]
+                mnem = decode_pat[0].split('.')[0]
                 if mnem not in org_patterns:
                     org_patterns[mnem] = []
                 org_patterns[mnem].append(decode_pat)
