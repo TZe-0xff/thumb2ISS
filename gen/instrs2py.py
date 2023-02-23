@@ -1276,6 +1276,8 @@ def main():
     for i in instrs:
         if len(i.encs) > 0 and len(i.mnems) > 0:
             title_mnem = i.mnems[0].split('.')[0]
+            if title_mnem.endswith('S') and title_mnem not in ['MLS', 'MRS', 'SMMLS']:
+                title_mnem = title_mnem[:-1]
             if title_mnem not in instr_by_mnem:
                 instr_by_mnem[title_mnem] = [i]
             else:

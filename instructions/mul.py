@@ -1,6 +1,6 @@
 import re, logging
 
-log = logging.getLogger('Mnem.MULS')
+log = logging.getLogger('Mnem.MUL')
 # instruction aarch32_MUL_A
 # pattern MUL<c>{<q>} <Rdm>, <Rn>{, <Rdm>} with bitdiffs=[]
 # regex ^MUL(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdm>\w+),\s(?P<Rn>\w+)(?:,\s(?P=Rdm))?$ : c Rdm Rn
