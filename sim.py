@@ -48,7 +48,9 @@ class Simulator(object):
 
         self.log.getChild('genIsn').debug(f'Got {len(data)} from {hex(address)} to {hex(address+len(data)-1)}')
 
-        full_assembly = f'{mnemonic} {args}'
+        full_assembly = f'{mnemonic}'
+        if args is not None:
+            full_assembly+=f' {args}'
         mnemonic = mnemonic.split('.')[0]
         self.log.getChild('genIsn').debug(f'Get Execution for <{mnemonic}> ({full_assembly})')
         self.code[address] = (self.core.getExec(mnemonic, full_assembly, address), len(data))
