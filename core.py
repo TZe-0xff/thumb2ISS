@@ -93,7 +93,10 @@ class Core:
         for instr in glob.glob('instructions/[a-z]*.py'):
             instr_module = instr.replace('\\','.').replace('.py','')
             self.log.info(f'Loading {instr_module}')
-            self.instructions.update(importlib.import_module(instr_module).patterns)
+            for mnem, pat_list in importlib.import_module(instr_module).patterns.items():
+                if mnem not in self.instructions:
+                    self.instructions[mnem] = []
+                self.instructions[mnem] += pat_list
 
     @property
     def PC(self):
