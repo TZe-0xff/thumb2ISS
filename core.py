@@ -161,6 +161,8 @@ class Core:
         if mnem.upper() not in self.instructions:
             if mnem.upper() == 'LDMIA' or mnem.upper() == 'STMIA':
                 mnem = mnem[:-2]
+            elif mnem.upper().startswith('IT'):
+                mnem = 'IT'
             else:
                 # try to remove trailing condition
                 for legal_cond in ['EQ', 'NE', 'CS', 'CC', 'MI', 'PL', 'VS', 'VC', 'HI', 'LS', 'GE', 'LT', 'GT', 'LE']:
@@ -177,6 +179,10 @@ class Core:
                 assert(expected_pc == self.UInt(self.R[15]))
                 instr_exec()
             return mnem_exec
+
+        if mnem.upper() not in ['CPSIE', 'CPSID', 'DMB', 'DSB', 'ISB', 'WFE', 'WFI', 'SEV']:
+            print(self.instructions.get(mnem.upper(), []))
+            raise Exception(f'Unmanaged {mnem} : {full_assembly}')
         def debug_exec():
             self.log.warning(f'Unsupported {mnem} executed as NOP')
         return debug_exec
