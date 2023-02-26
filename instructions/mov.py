@@ -150,6 +150,18 @@ def aarch32_MOV_r_T1_A(core, regex_match, bitdiffs):
 # regex ^MOV(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$ : c Rd Rm shift_t* shift_n*
 # pattern MOVS{<q>} <Rd>, <Rm> {, <shift> #<amount>} with bitdiffs=[]
 # regex ^MOVS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$ : Rd Rm shift_t* shift_n*
+# alias   ASRS{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>ASR)S(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t Rd* Rm shift_n
+# alias   ASR<c>{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   LSLS{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSL)S(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t Rd* Rm shift_n
+# alias   LSL<c>{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   LSRS{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSR)S(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t Rd* Rm shift_n
+# alias   LSR<c>{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
 def aarch32_MOV_r_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -200,6 +212,22 @@ def aarch32_MOV_r_T2_A(core, regex_match, bitdiffs):
 # regex ^MOVS.W\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$ : Rd Rm shift_t* shift_n*
 # pattern MOVS{<c>}{<q>} <Rd>, <Rm> {, <shift> #<amount>} with bitdiffs=[('S', '1'), ('stype', '11')]
 # regex ^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$ : c Rd Rm shift_t* shift_n*
+# alias   ASR<c>.W {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   ASR{<c>}{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   LSL<c>.W {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   LSL{<c>}{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   LSR<c>.W {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   LSR{<c>}{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   ROR{<c>}{<q>} {<Rd>,} <Rm>, #<imm>
+# regex ^(?P<shift_t>ROR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$ : shift_t c Rd* Rm shift_n
+# alias   RRX{<c>}{<q>} {<Rd>,} <Rm>
+# regex ^(?P<shift_t>RRX)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+)$ : shift_t c Rd* Rm
 def aarch32_MOV_r_T3_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -293,6 +321,22 @@ def aarch32_MOV_rr_T1_A(core, regex_match, bitdiffs):
 # regex ^MOV(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>[LAR][SO][LR])\s(?P<Rs>\w+)$ : c Rd Rm shift_t Rs
 # pattern MOV{<c>}{<q>} <Rd>, <Rm>, <shift> <Rs> with bitdiffs=[('S', '0')]
 # regex ^MOV(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>[LAR][SO][LR])\s(?P<Rs>\w+)$ : c Rd Rm shift_t Rs
+# alias   ASR<c>.W {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
+# alias   ASR{<c>}{<q>} {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
+# alias   LSL<c>.W {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
+# alias   LSL{<c>}{<q>} {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
+# alias   LSR<c>.W {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
+# alias   LSR{<c>}{<q>} {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
+# alias   ROR<c>.W {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>ROR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
+# alias   ROR{<c>}{<q>} {<Rd>,} <Rm>, <Rs>
+# regex ^(?P<shift_t>ROR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$ : shift_t c Rd* Rm Rs
 def aarch32_MOV_rr_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     Rd = regex_groups.get('Rd', None)
@@ -357,5 +401,43 @@ patterns = {
         (re.compile(r'^MOVS.W\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>[LAR][SO][LR])\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {'S': '1'}),
         (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_MOV_r_T3_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>[LAR][SO][LR])\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {'S': '1'}),
+    ],
+    'ASRS': [
+        (re.compile(r'^(?P<shift_t>ASR)S(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T2_A, {}),
+    ],
+    'ASR': [
+        (re.compile(r'^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T2_A, {}),
+        (re.compile(r'^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T3_A, {}),
+        (re.compile(r'^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T3_A, {}),
+        (re.compile(r'^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+        (re.compile(r'^(?P<shift_t>ASR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+    ],
+    'LSLS': [
+        (re.compile(r'^(?P<shift_t>LSL)S(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T2_A, {}),
+    ],
+    'LSL': [
+        (re.compile(r'^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T2_A, {}),
+        (re.compile(r'^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T3_A, {}),
+        (re.compile(r'^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T3_A, {}),
+        (re.compile(r'^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+        (re.compile(r'^(?P<shift_t>LSL)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+    ],
+    'LSRS': [
+        (re.compile(r'^(?P<shift_t>LSR)S(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T2_A, {}),
+    ],
+    'LSR': [
+        (re.compile(r'^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T2_A, {}),
+        (re.compile(r'^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T3_A, {}),
+        (re.compile(r'^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T3_A, {}),
+        (re.compile(r'^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+        (re.compile(r'^(?P<shift_t>LSR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+    ],
+    'ROR': [
+        (re.compile(r'^(?P<shift_t>ROR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s#(?P<shift_n>\d+)$', re.I), aarch32_MOV_r_T3_A, {}),
+        (re.compile(r'^(?P<shift_t>ROR)(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+        (re.compile(r'^(?P<shift_t>ROR)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {}),
+    ],
+    'RRX': [
+        (re.compile(r'^(?P<shift_t>RRX)(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rm>\w+)$', re.I), aarch32_MOV_r_T3_A, {}),
     ],
 }

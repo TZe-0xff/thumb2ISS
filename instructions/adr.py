@@ -4,13 +4,17 @@ log = logging.getLogger('Mnem.ADR')
 # instruction aarch32_ADR_A
 # pattern ADR{<c>}{<q>} <Rd>, <label> with bitdiffs=[]
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
+# alias   ADD{<c>}{<q>} <Rd>, PC, #<imm8>
+# regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$ : c Rd imm32
 def aarch32_ADR_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
     Rd = regex_groups.get('Rd', None)
     abs_address = regex_groups.get('abs_address', None)
-    abs_address = int(abs_address, 16)
-    log.debug(f'aarch32_ADR_T1_A Rd={Rd} abs_address={hex(abs_address)} cond={cond}')
+    if abs_address is not None:
+        abs_address = int(abs_address, 16)
+    imm32 = regex_groups.get('imm32', None)
+    log.debug(f'aarch32_ADR_T1_A Rd={Rd} abs_address={hex(abs_address) if abs_address is not None else abs_address} imm32={imm32} cond={cond}')
     # decode
     d = core.reg_num[Rd];  add = True;
 
@@ -29,13 +33,17 @@ def aarch32_ADR_T1_A(core, regex_match, bitdiffs):
 
 # pattern ADR{<c>}{<q>} <Rd>, <label> with bitdiffs=[]
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
+# alias   SUB{<c>}{<q>} <Rd>, PC, #<imm12>
+# regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$ : c Rd imm32
 def aarch32_ADR_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
     Rd = regex_groups.get('Rd', None)
     abs_address = regex_groups.get('abs_address', None)
-    abs_address = int(abs_address, 16)
-    log.debug(f'aarch32_ADR_T2_A Rd={Rd} abs_address={hex(abs_address)} cond={cond}')
+    if abs_address is not None:
+        abs_address = int(abs_address, 16)
+    imm32 = regex_groups.get('imm32', None)
+    log.debug(f'aarch32_ADR_T2_A Rd={Rd} abs_address={hex(abs_address) if abs_address is not None else abs_address} imm32={imm32} cond={cond}')
     # decode
     d = core.reg_num[Rd];  add = False;
     if d == 15:
@@ -58,13 +66,17 @@ def aarch32_ADR_T2_A(core, regex_match, bitdiffs):
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
 # pattern ADR{<c>}{<q>} <Rd>, <label> with bitdiffs=[]
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
+# alias   ADD{<c>}{<q>} <Rd>, PC, #<imm12>
+# regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$ : c Rd imm32
 def aarch32_ADR_T3_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
     Rd = regex_groups.get('Rd', None)
     abs_address = regex_groups.get('abs_address', None)
-    abs_address = int(abs_address, 16)
-    log.debug(f'aarch32_ADR_T3_A Rd={Rd} abs_address={hex(abs_address)} cond={cond}')
+    if abs_address is not None:
+        abs_address = int(abs_address, 16)
+    imm32 = regex_groups.get('imm32', None)
+    log.debug(f'aarch32_ADR_T3_A Rd={Rd} abs_address={hex(abs_address) if abs_address is not None else abs_address} imm32={imm32} cond={cond}')
     # decode
     d = core.reg_num[Rd];  add = True;
     if d == 15:
@@ -90,5 +102,12 @@ patterns = {
         (re.compile(r'^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$', re.I), aarch32_ADR_T2_A, {}),
         (re.compile(r'^ADR(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$', re.I), aarch32_ADR_T3_A, {}),
         (re.compile(r'^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$', re.I), aarch32_ADR_T3_A, {}),
+    ],
+    'ADD': [
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T1_A, {}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T3_A, {}),
+    ],
+    'SUB': [
+        (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T2_A, {}),
     ],
 }

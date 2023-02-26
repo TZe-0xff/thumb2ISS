@@ -9,7 +9,7 @@ log = logging.getLogger('Mnem.LDM')
 def aarch32_LDM_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
-    Rn = regex_groups.get('Rn', None)
+    Rn = regex_groups.get('Rn', 'SP')
     reg_list = [core.reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]
     registers = ['1' if reg in reg_list else '0' for reg in range(16)]
     log.debug(f'aarch32_LDM_T1_A Rn={Rn} cond={cond} reg_list={reg_list}')
@@ -43,10 +43,14 @@ def aarch32_LDM_T1_A(core, regex_match, bitdiffs):
 # regex ^LDM(?:IA)?(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$ : c Rn registers
 # pattern LDMFD{<c>}{<q>} <Rn>{!}, <registers> with bitdiffs=[]
 # regex ^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$ : c Rn registers
+# alias   POP{<c>}.W <registers>
+# regex ^POP(?P<c>[ACEGHLMNPV][CEILQST])?.W\s\{(?P<registers>[^}]+)\}$ : c registers
+# alias   POP{<c>}{<q>} <registers>
+# regex ^POP(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s\{(?P<registers>[^}]+)\}$ : c registers
 def aarch32_LDM_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
-    Rn = regex_groups.get('Rn', None)
+    Rn = regex_groups.get('Rn', 'SP')
     reg_list = [core.reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]
     registers = ['1' if reg in reg_list else '0' for reg in range(16)]
     W = bitdiffs.get('W', '0')
@@ -90,5 +94,9 @@ patterns = {
         (re.compile(r'^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T1_A, {}),
         (re.compile(r'^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
         (re.compile(r'^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
+    ],
+    'POP': [
+        (re.compile(r'^POP(?P<c>[ACEGHLMNPV][CEILQST])?.W\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
+        (re.compile(r'^POP(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
     ],
 }

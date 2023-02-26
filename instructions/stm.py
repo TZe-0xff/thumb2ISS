@@ -9,7 +9,7 @@ log = logging.getLogger('Mnem.STM')
 def aarch32_STM_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
-    Rn = regex_groups.get('Rn', None)
+    Rn = regex_groups.get('Rn', 'SP')
     reg_list = [core.reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]
     registers = ['1' if reg in reg_list else '0' for reg in range(16)]
     log.debug(f'aarch32_STM_T1_A Rn={Rn} cond={cond} reg_list={reg_list}')
@@ -49,7 +49,7 @@ def aarch32_STM_T1_A(core, regex_match, bitdiffs):
 def aarch32_STM_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
-    Rn = regex_groups.get('Rn', None)
+    Rn = regex_groups.get('Rn', 'SP')
     reg_list = [core.reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]
     registers = ['1' if reg in reg_list else '0' for reg in range(16)]
     W = bitdiffs.get('W', '0')

@@ -48,6 +48,7 @@ assembly_subst = [
     (False, 'ROR <',                                    r'(?P<shift_t>ROR)\s<'),
     (False, '<shift> <',                                r'(?P<shift_t>[LAR][SO][LR])\s<'),
     (False, 'RRX',                                      r'(?P<shift_t>RRX)'),
+    (True,  re.compile(r'^\^([LAR][SO][LR])'),          r'^(?P<shift_t>\1)'),
     (True,  re.compile(r'<([QDR]\w+)>'),                r'(?P<\1>\\w+)'),
     (True,  re.compile(r'\{(.*), ?\}\s?'),              r'|?:\1,\\s|?'),
     (True,  re.compile(r' ?\{, ?(.*)\}\s?'),            r'|?:,\\s\1|?'),
@@ -164,6 +165,9 @@ def applyReplacement(org_str, repl_table):
 def BuildPattern(inpat):
     working = applyReplacement('^'+inpat+'$', assembly_subst)
     secondary_pattern = None
+
+    if 'shift_t' in working and 'imm32' in working and 'shift_n' not in working:
+        working = working.replace('imm32', 'shift_n')
 
     fields = re.findall(r'\(\?P<(\w+)>', working)
     if len(set(fields)) != len(fields):
@@ -395,18 +399,61 @@ def emitExecute(exec, ofile, existing_vars=[], indent=0):
 
 
 default_flag_value = defaultdict(lambda : 0, {'U' : 1})
+
+class Alias:
+    def __init__(self, encs):
+        self.aliases = [(patterns, aliases) for name, insn_set, fields2, dec_asl, patterns, aliases in encs]
+        first_pattern = self.aliases[0][0][0]
+        first_alias = self.aliases[0][1][0]
+        self.name = f'{first_pattern[0]} alias of {first_alias[0]}'
+
+        self.mnem_alias = {}
+        for i in range(len(self.aliases)):
+            assert(len(self.aliases[i][1]) == 1)
+            base_mnem, base_handler = self.aliases[i][1][0]
+            if base_handler.endswith('_RRX'):
+                base_handler = base_handler[:-4]
+
+            full_handler_name = f'aarch32_{base_handler}_A'
+            
+            for name, pattern, _ in self.aliases[i][0]:
+                #equ_pattern_root = pattern.split(' ')[0].replace(name, base_mnem)
+                #if equ_pattern_root not in self.mnem_alias:
+                #    self.mnem_alias[equ_pattern_root] = []
+                #self.mnem_alias[equ_pattern_root] += [(name, pattern, full_handler_name)]
+                if full_handler_name not in self.mnem_alias:
+                    self.mnem_alias[full_handler_name] = []
+                self.mnem_alias[full_handler_name] += [(name, pattern, full_handler_name)]
+
+    def getAliasFor(self, handler_name):
+        if handler_name not in self.mnem_alias:
+            return []
+        return [(n,p) for n,p,fhn in self.mnem_alias[handler_name]]
+    
+    def getAliasFor_(self, equ_root, handler_name):
+        if equ_root not in self.mnem_alias:
+            return []
+        alias_list = [(n,p) for n,p,fhn in self.mnem_alias[equ_root] if fhn == handler_name]
+        return alias_list
+
+    def hasAliasFor(self, equ_root, handler_name):
+        if equ_root in self.mnem_alias and len(self.getAliasFor_(equ_root, handler_name)) > 0:
+            return True
+        return False
+        
+
 class Instruction:
     '''Representation of Instructions'''
 
     def __init__(self, name, encs, post, conditional, exec, mnems):
         self.name = name
-        self.encs = encs
+        self.encs = [(name, insn_set, fields2, dec_asl, patterns) for name, insn_set, fields2, dec_asl, patterns, aliases in encs]
         self.post = post
         self.conditional = conditional
         self.exec = exec
         self.mnems = mnems
         
-    def emit_python_syntax(self, ofile):
+    def emit_python_syntax(self, ofile, aliases=[]):
         print("# instruction "+ deslash(self.name), file=ofile)
         
         all_patterns = []
@@ -424,6 +471,29 @@ class Instruction:
                         all_fields += [f for f in fields if f not in all_fields]
                         all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
                         all_bitdiffs += [b[0] for b in bitdiffs if b[0] not in all_bitdiffs]
+                    # test if any alias for this decoder
+                    last_mnem = pat.split(' ')[0]
+                    if last_mnem.startswith('LDM'):
+                        last_mnem = last_mnem.replace('{IA}','')
+
+                    #local_alias = [a for a in aliases if a.hasAliasFor(last_mnem, deslash(inm))]
+                    #if len(local_alias) > 0:
+                    #    for a in local_alias:
+                    #        for alias_mnem, alias_pat in a.getAliasFor(last_mnem, deslash(inm)):
+                    #            print("# alias   "+ alias_pat, file=ofile)
+                    #            for reg_pat, fields, opt_fields in BuildPattern(alias_pat):
+                    #                print("# regex "+ reg_pat + " : " + " ".join(f+('*' if f in opt_fields else '') for f in fields), file=ofile)
+                    #                all_patterns.append((alias_mnem, len(fields), reg_pat, deslash(inm), []))
+                    #                all_fields += [f for f in fields if f not in all_fields]
+                    #                all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
+                for alias in aliases:
+                    for alias_mnem, alias_pat in alias.getAliasFor(deslash(inm)):
+                        print("# alias   "+ alias_pat, file=ofile)
+                        for reg_pat, fields, opt_fields in BuildPattern(alias_pat):
+                           print("# regex "+ reg_pat + " : " + " ".join(f+('*' if f in opt_fields else '') for f in fields), file=ofile)
+                           all_patterns.append((alias_mnem, len(fields), reg_pat, deslash(inm), []))
+                           all_fields += [f for f in fields if f not in all_fields]
+                           all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
                 print("def ", deslash(inm), '(core, regex_match, bitdiffs):', sep='', file=ofile)
                 print("    regex_groups = regex_match.groupdict()", file=ofile)
                 for f in all_fields:
@@ -432,6 +502,8 @@ class Instruction:
                     elif f == 'registers':
                         print("    reg_list = [core.reg_num[reg.strip()] for reg in regex_groups['registers'].split(',')]", file=ofile)
                         print("    registers = ['1' if reg in reg_list else '0' for reg in range(16)]", file=ofile)
+                    elif f == 'Rn' and 'registers' in all_fields:
+                        print(f"    {f} = regex_groups.get('{f}', 'SP')", file=ofile)
                     else:
                         print(f"    {f} = regex_groups.get('{f}', None)", file=ofile)
                         if f == 'abs_address':
@@ -950,28 +1022,32 @@ def readInstruction(xml,names,sailhack):
     posts = xml.findall(".//pstext[@section='Postdecode']/..")
     assert(len(posts) <= 1)
     assert(len(execs) <= 1)
-    if not execs: return (None, None) # discard aliases
-
-    exec = readASL(execs[0])
-    post = readASL(posts[0]) if posts else None
-
-    if demangle_instr:
-        # demangle execute code
-        code = exec.code.splitlines()
-        (top, conditional, decode, execute) = demangleExecuteASL(code)
-        exec.code = '\n'.join(execute)
+    if not execs: 
+        is_alias = True
+        exec = None
     else:
-        top = None
-        conditional = False
-        decode = None
+        is_alias = False
 
-    exec.patchDependencies(names)
-    if post: post.patchDependencies(names)
+        exec = readASL(execs[0])
+        post = readASL(posts[0]) if posts else None
 
-    include_matches = include_regex is None or include_regex.search(exec.name)
-    exclude_matches = exclude_regex is not None and exclude_regex.search(exec.name)
-    if not include_matches or exclude_matches:
-        return None
+        if demangle_instr:
+            # demangle execute code
+            code = exec.code.splitlines()
+            (top, conditional, decode, execute) = demangleExecuteASL(code)
+            exec.code = '\n'.join(execute)
+        else:
+            top = None
+            conditional = False
+            decode = None
+
+        exec.patchDependencies(names)
+        if post: post.patchDependencies(names)
+
+        include_matches = include_regex is None or include_regex.search(exec.name)
+        exclude_matches = exclude_regex is not None and exclude_regex.search(exec.name)
+        if not include_matches or exclude_matches:
+            return None
 
 
     # for each encoding, read instructions encoding, matching decode ASL and index
@@ -1023,17 +1099,23 @@ def readInstruction(xml,names,sailhack):
         for (hi, lo, nm, split, consts) in fields:
             if (nm in ["SP", "mask", "opcode"]
                and 'x' not in consts
-               and exec.name not in ["aarch64/float/convert/fix", "aarch64/float/convert/int"]):
+               and exec is not None and exec.name not in ["aarch64/float/convert/fix", "aarch64/float/convert/int"]):
                 # workaround: avoid use of overloaded field name
                 nm = '_'
             fields2.append((hi,lo,nm,split,consts))
 
-        dec_asl = readASL(iclass.find('ps_section/ps'))
-        if decode: dec_asl.code = decode +"\n"+ dec_asl.code
-        dec_asl.patchDependencies(names)
+        ps_section = iclass.find('ps_section/ps')
+        if ps_section:
+            dec_asl = readASL(ps_section)
+            if decode: dec_asl.code = decode +"\n"+ dec_asl.code
+            dec_asl.patchDependencies(names)
 
-        name = dec_asl.name if insn_set in ["T16","T32","A32"] else encoding.attrib['psname']
+            name = dec_asl.name if insn_set in ["T16","T32","A32"] else encoding.attrib['psname']
+        else:
+            dec_asl = ''
+            name = encoding.attrib['psname']
         patterns = []
+        aliases = []
         for encoding in iclass.findall('encoding'):
             bitdiffs = re.findall(r'(\w+) == (\d+)', encoding.attrib.get('bitdiffs', ''))
 
@@ -1050,8 +1132,19 @@ def readInstruction(xml,names,sailhack):
                 if categ not in mnems:
                     mnems.append(categ)
                 patterns.append((mnem, mnem+"".join(iterator), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
-        encs.append((name, insn_set, fields2, dec_asl, patterns))
 
+            if is_alias:
+                # find equivalent pattern
+                equivalent_to = encoding.find('equivalent_to')
+                asmtemplate = equivalent_to.find('asmtemplate')
+                aliases.append((asmtemplate[0].text, asmtemplate[0].attrib['href'].split('#')[1]))
+        if len(patterns) > 0:
+            encs.append((name, insn_set, fields2, dec_asl, patterns, aliases))
+    if is_alias:
+        if len(encs) > 0:
+            return Alias(encs), None
+        else:
+            return None, None
     return (Instruction(exec.name, encs, post, conditional, exec, mnems), top)
 
 ########################################################################
@@ -1163,6 +1256,7 @@ def main():
 
     sailhack = False
     instrs = []
+    aliases = []
     tops   = []
     for d in args.dir:
         for inf in glob.glob(os.path.join(d, '*.xml')):
@@ -1172,6 +1266,10 @@ def main():
             (instr, top) = readInstruction(xml,chunks,sailhack)
             if top: tops.append(top)
             if instr is None: continue
+
+            if type(instr) == Alias:
+                aliases.append(instr)
+                continue
 
             if encodings != []: # discard encodings from unwanted InsnSets
                 encs = [ e for e in instr.encs if e[1] in encodings ]
@@ -1184,6 +1282,7 @@ def main():
 
     # Having read everything in, decide which parts to write
     # back out again and in what order
+    # print([a.name for a in aliases])
 
     if args.verbose > 3:
         for f in shared.values():
@@ -1293,7 +1392,7 @@ def main():
             print(f"log = logging.getLogger('Mnem.{title_mnem}')", file=outf)
             all_patterns = []
             for i in i_list:
-                all_patterns += i.emit_python_syntax(outf)
+                all_patterns += i.emit_python_syntax(outf, aliases)
                 print(file=outf)
 
             #organize patterns per mnemonic
