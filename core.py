@@ -4,6 +4,10 @@ import binascii
 import importlib
 import logging
 import glob
+import semihosting
+
+class EndOfExecutionException(Exception):
+    pass
 
 class Register:
     def __init__(self, initial_value):
@@ -19,6 +23,7 @@ class Register:
         else:
             self.ival = int(initial_value)
             self.bval = struct.pack('<l', self.ival)
+        self._msb = 31
 
     @staticmethod
     def __get_ival(other):
@@ -187,12 +192,18 @@ class Core:
             self.log.warning(f'Unsupported {mnem} executed as NOP')
         return debug_exec
 
-
+    def Exit(self):
+        raise EndOfExecutionException(f'End of execution')
     
     def Field(self, value, msb=31, lsb=0):
         mask = (0xffffffff >> (31 - msb + lsb)) << lsb
+        if type(value) != int:
+            value = self.UInt(value)
         val = (value & mask) >> lsb
-        return Register(struct.pack('<L', val))
+
+        reg_res = Register(struct.pack('<L', val))
+        reg_res._msb = msb - lsb
+        return reg_res
 
     def UInt(self, value, highValue=None):
         if type(value) == Register:
@@ -251,9 +262,56 @@ class Core:
     def IsZeroBit(self, value):
         return self.IsZero(value)
 
+    def ZeroExtend(self, candidate, bitsize, msb=None, lsb=None):
+        assert(bitsize==32)
+        in_c = candidate
+        if type(candidate) is str and ('0' in candidate or '1' in candidate):
+            value = int(candidate, 2)
+        elif msb is not None:
+            candidate = self.Field(candidate, msb, lsb)
+            value = self.UInt(candidate)
+        else:
+            value = self.UInt(candidate)
+
+        self.log.debug(f'ZeroExtended {self.UInt(in_c)} to {hex(value)}')
+        return self.Field(value)
+
+    def ZeroExtendSubField(self, candidate, msb, lsb, bitsize):
+        return self.ZeroExtend(candidate, bitsize, msb, lsb)
+
+    def SignExtend(self, candidate, bitsize, msb=None, lsb=None):
+        assert(bitsize==32)
+        in_c = candidate
+        if type(candidate) is str and ('0' in candidate or '1' in candidate):
+            value = int(candidate, 2)
+            msb = len(candidate)
+            candidate = self.Field(value)
+            candidate._msb = msb
+        elif msb is not None:
+            candidate = self.Field(candidate, msb, lsb)
+        elif type(candidate) != Register:
+            candidate = self.Field(candidate)
+
+        # get unsigned representation of value
+        value = self.UInt(candidate)
+
+        # test sign bit
+        sign_bit = value & (1 << candidate._msb)
+        if sign_bit:
+            # sign extend
+            value = value | (0xFFFFFFFF << candidate._msb)
+
+        self.log.debug(f'SignExtended {self.UInt(in_c)} to {hex(value)}')
+        return self.Field(value)
+
+    def SignExtendSubField(self, candidate, msb, lsb, bitsize):
+        return self.SignExtend(candidate, bitsize, msb, lsb)
+
+
+
     def NOT(self, value):
         if type(value) == Register:
-            print(f'NOT({hex(value.ival)}) = {hex(~value.ival)}')
+            self.log.debug(f'NOT({hex(value.ival)}) = {hex(~value.ival)}')
             return (~value.ival)
         elif type(value) == bytes:
             return ~self.UInt(value)
@@ -310,7 +368,8 @@ class Core:
         try:
             i=0
             for b in value.to_bytes(size, byteorder='little'):
-                self.memory[address.ival+i] = b
+                self.memory[address.ival+i] = b.to_bytes(1, byteorder='little')
+                i+=1
         except KeyError:
             raise Exception(f'Illegal memory access between {hex(address.ival)} and {hex(address.ival + size - 1)}')
 
@@ -322,26 +381,35 @@ class Core:
 
     def BranchWritePC(self, targetAddress, branchType):
         if branchType == 'DIRCALL':
-            self.LR = self.R[15] + 4
+            self.LR = self.R[15] + 5
         elif branchType == 'INDCALL':
-            self.LR = self.R[15] + 2
+            self.LR = self.R[15] + 3
         self.log.info(f'Branching to {hex(self.UInt(targetAddress))}' + (f' with link back to {hex(self.UInt(self.LR))}' if branchType.endswith('CALL') else ''))
-        self.PC = Register(targetAddress)
+        self.PC = Register(targetAddress & (~1))
 
     def BXWritePC(self, targetAddress, branchType):
         self.BranchWritePC(targetAddress, branchType)
+
+    def CBWritePC(self, targetAddress):
+        self.BranchWritePC(targetAddress, 'DIR')
+
+    def LoadWritePC(self, address):
+        self.BXWritePC(address, 'INDIR');
 
     def SoftwareBreakpoint(self, value):
         value = self.UInt(value)
         if value == 0xab:
             #semihosting
-            pass
+            semihosting.ExecuteCmd(self)
         else:
             self.log.info(f'Breakpoint #{hex(value)} executed as NOP')
 
     def Align(self, reg_value, boundary):
         address = self.UInt(reg_value) & (-boundary)
         return Register(struct.pack('<L', address))
+
+    def IsAligned(self, address, size):
+        return False #(self.UInt(address) & (size-1)) == 0
 
     def Shift(self, value, srtype, amount, carry_in):
         (result, _) = self.Shift_C(value, srtype, amount, carry_in)

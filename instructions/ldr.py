@@ -158,10 +158,7 @@ def aarch32_LDR_l_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             base = core.Align(core.PC,4);
-            if abs_address is None:
-                address = (base + imm32) if add else (base - imm32);
-            else:
-                address = abs_address;
+            address = abs_address;
             data = core.ReadMemU(address,4);
             if t == 15:
                 if core.Field(address,1,0) == '00':

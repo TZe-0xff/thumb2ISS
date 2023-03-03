@@ -2,7 +2,7 @@ import re
 import logging
 import binascii
 import struct
-from core import Core
+from core import Core, EndOfExecutionException
 
 class Architecture:
     CortexM0 = 0
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     from intelhex import IntelHex
     import re,sys
 
-    dis_str = open('Hello.log', 'r').read()
+    dis_str = open('Hello.dis', 'r').read()
 
     # find RAM area
     sec_str = open('Hello.sec', 'r').read()
@@ -128,6 +128,7 @@ if __name__ == '__main__':
 
     ram_memory = b'\x00' * (ram_end+1-ram_start)
 
+    run_until = 0x2c8
 
     ih = IntelHex()
     ih.loadhex('Hello.hex')
@@ -135,8 +136,8 @@ if __name__ == '__main__':
     rom_memory = ih.gets(ih.minaddr(), len(ih))
 
     logging.basicConfig(filename='debug.log', filemode='w', level=logging.DEBUG)
-    logging.getLogger('Core').addHandler(logging.StreamHandler(sys.stdout))
-    logging.getLogger('Mnem').addHandler(logging.StreamHandler(sys.stdout))
+    #logging.getLogger('Core').addHandler(logging.StreamHandler(sys.stdout))
+    #logging.getLogger('Mnem').addHandler(logging.StreamHandler(sys.stdout))
     s = Simulator()
     if s.load(dis_str, rom_memory, ih.minaddr(), ram_memory, ram_start):
         address_ranges = [[v for _,v in g] for _,g in groupby(enumerate(sorted(s.memory.keys())), lambda x:x[0]-x[1])]
@@ -144,8 +145,13 @@ if __name__ == '__main__':
         for crange in address_ranges:
             print(f'Memory range : {hex(min(crange))} - {hex(max(crange))}')
 
-        s.core.showRegisters()
-        for _ in range(70):
-            s.step()
-            s.core.showRegisters()
+        try:
+            #s.core.showRegisters()
+            while True: #s.core.R[15] != run_until:
+                s.step()
+                #s.core.showRegisters()
+        except EndOfExecutionException:
+            print('\nSimulation ended by end of execution')
+        except KeyboardInterrupt:
+            print('\nSimulation ended by cancelation')
     #print(' '.join(  + list()))

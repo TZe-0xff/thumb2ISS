@@ -379,7 +379,7 @@ def emitExecute(exec, ofile, existing_vars=[], indent=0):
         working = re.sub(r'core.R\[(\w+)\]<(\w+):(\w+)> = core.Replicate\([^;]*', r'core.R[\1] = core.R[\1] & ~((0xffffffff >> (31 - \2 + \3)) << \3)', working)
 
     if 'Extend' in working:
-        working = re.sub(r'Extend\(core.R\[(\w+)\]<(\w+):(\w+)>', r'Extend(core.R[\1], \2, \3', working)
+        working = re.sub(r'Extend\(core.R\[(\w+)\]<(\w+):(\w+)>', r'ExtendSubField(core.R[\1], \2, \3', working)
 
     if 'write_spsr' in working:
         working = 'core.WriteSpecReg(spec_reg, core.R[n]);'
@@ -411,10 +411,15 @@ class Alias:
         for i in range(len(self.aliases)):
             assert(len(self.aliases[i][1]) == 1)
             base_mnem, base_handler = self.aliases[i][1][0]
-            if base_handler.endswith('_RRX'):
+            if base_handler.endswith('_RRX') or base_handler.endswith('_LSL') or base_handler.endswith('_LSR') or base_handler.endswith('_ASR') or base_handler.endswith('_ROR'):
                 base_handler = base_handler[:-4]
+            if 'MOVS' in base_handler:
+                base_handler = base_handler.replace('MOVS', 'MOV')
 
-            full_handler_name = f'aarch32_{base_handler}_A'
+            if base_handler.startswith('LDM') or base_handler.startswith('STM'):
+                full_handler_name = f'disabled_{base_handler}_A'
+            else:
+                full_handler_name = f'aarch32_{base_handler}_A'
             
             for name, pattern, _ in self.aliases[i][0]:
                 #equ_pattern_root = pattern.split(' ')[0].replace(name, base_mnem)
@@ -476,16 +481,6 @@ class Instruction:
                     if last_mnem.startswith('LDM'):
                         last_mnem = last_mnem.replace('{IA}','')
 
-                    #local_alias = [a for a in aliases if a.hasAliasFor(last_mnem, deslash(inm))]
-                    #if len(local_alias) > 0:
-                    #    for a in local_alias:
-                    #        for alias_mnem, alias_pat in a.getAliasFor(last_mnem, deslash(inm)):
-                    #            print("# alias   "+ alias_pat, file=ofile)
-                    #            for reg_pat, fields, opt_fields in BuildPattern(alias_pat):
-                    #                print("# regex "+ reg_pat + " : " + " ".join(f+('*' if f in opt_fields else '') for f in fields), file=ofile)
-                    #                all_patterns.append((alias_mnem, len(fields), reg_pat, deslash(inm), []))
-                    #                all_fields += [f for f in fields if f not in all_fields]
-                    #                all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
                 for alias in aliases:
                     for alias_mnem, alias_pat in alias.getAliasFor(deslash(inm)):
                         print("# alias   "+ alias_pat, file=ofile)
@@ -567,7 +562,7 @@ class Instruction:
                 print(f"    log.debug(f'{deslash(inm)} "+" ".join(debug_list)+"')", file=ofile)
                 print("    # decode", file=ofile)
                 dec.patchTypeVar()
-                emitDecoder(dec, ofile, all_fields, indent=4)
+                emitDecoder(dec, ofile, all_fields+all_bitdiffs, indent=4)
                 print(file=ofile)
 
                 exec_routine = deslash(inm)+'_exec'
@@ -894,23 +889,6 @@ def readShared(files):
             if r.name == 'shared/functions/system/PSTATE': r.defs.add("PSTATE")
             if "PSTATE" in r.code: r.deps.add("PSTATE")
 
-            # workaround: skip standard library functions
-            if r.name in [
-                'shared/functions/common/SInt',
-                'shared/functions/common/UInt',
-                'shared/functions/common/Ones',
-                'shared/functions/common/Zeros',
-                'shared/functions/common/IsOnes',
-                'shared/functions/common/IsZero',
-                'shared/functions/common/SignExtend',
-                'shared/functions/common/ZeroExtend',
-                'shared/functions/common/Replicate',
-                'shared/functions/common/RoundDown',
-                'shared/functions/common/RoundUp',
-                'shared/functions/common/RoundTowardsZero',
-                ]:
-                continue
-
             asl[r.name] = r
 
     return (asl, names)
@@ -1125,6 +1103,7 @@ def readInstruction(xml,names,sailhack):
                 iterator = asmtemplate.itertext()
                 mnem = next(iterator)
                 categ = mnem.split('.')[0]
+
                 if categ not in allowed_mnem:
                     with open('discarded.log', 'a') as f:
                         print(categ, file=f)

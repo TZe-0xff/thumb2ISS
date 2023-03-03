@@ -6,10 +6,6 @@ log = logging.getLogger('Mnem.STMDB')
 # regex ^STMDB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$ : c Rn registers
 # pattern STMFD{<c>}{<q>} <Rn>{!}, <registers> with bitdiffs=[]
 # regex ^STMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$ : c Rn registers
-# alias   PUSH{<c>}.W <registers>
-# regex ^PUSH(?P<c>[ACEGHLMNPV][CEILQST])?.W\s\{(?P<registers>[^}]+)\}$ : c registers
-# alias   PUSH{<c>}{<q>} <registers>
-# regex ^PUSH(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s\{(?P<registers>[^}]+)\}$ : c registers
 def aarch32_STMDB_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -56,9 +52,5 @@ patterns = {
     ],
     'STMFD': [
         (re.compile(r'^STMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_STMDB_T1_A, {}),
-    ],
-    'PUSH': [
-        (re.compile(r'^PUSH(?P<c>[ACEGHLMNPV][CEILQST])?.W\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_STMDB_T1_A, {}),
-        (re.compile(r'^PUSH(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_STMDB_T1_A, {}),
     ],
 }

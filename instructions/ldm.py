@@ -43,10 +43,6 @@ def aarch32_LDM_T1_A(core, regex_match, bitdiffs):
 # regex ^LDM(?:IA)?(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$ : c Rn registers
 # pattern LDMFD{<c>}{<q>} <Rn>{!}, <registers> with bitdiffs=[]
 # regex ^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$ : c Rn registers
-# alias   POP{<c>}.W <registers>
-# regex ^POP(?P<c>[ACEGHLMNPV][CEILQST])?.W\s\{(?P<registers>[^}]+)\}$ : c registers
-# alias   POP{<c>}{<q>} <registers>
-# regex ^POP(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s\{(?P<registers>[^}]+)\}$ : c registers
 def aarch32_LDM_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -94,9 +90,5 @@ patterns = {
         (re.compile(r'^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T1_A, {}),
         (re.compile(r'^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
         (re.compile(r'^LDMFD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rn>\w+)(?:!)?,\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
-    ],
-    'POP': [
-        (re.compile(r'^POP(?P<c>[ACEGHLMNPV][CEILQST])?.W\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
-        (re.compile(r'^POP(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s\{(?P<registers>[^}]+)\}$', re.I), aarch32_LDM_T2_A, {}),
     ],
 }

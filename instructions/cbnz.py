@@ -14,6 +14,7 @@ def aarch32_CBNZ_T1_A(core, regex_match, bitdiffs):
     op = bitdiffs.get('op', '0')
     log.debug(f'aarch32_CBNZ_T1_A Rn={Rn} abs_address={hex(abs_address)}')
     # decode
+    n = core.reg_num[Rn];  nonzero = (op == '1');
 
     def aarch32_CBNZ_T1_A_exec():
         # execute
