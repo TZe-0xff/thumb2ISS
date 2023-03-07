@@ -527,7 +527,7 @@ class Instruction:
                     print('    if Rm is None:', file=ofile)
                     print('        Rm = Rd', file=ofile)
 
-                if 'rbit' in mnem.lower():
+                if 'rbit' in mnem.lower() or 'clz' in mnem.lower():
                     print('    Rn = Rm', file=ofile)
 
                 zero_default_fields = ['imm32', 'shift_n', 'rotation']

@@ -5,7 +5,7 @@ import semihosting
 
 class Api():
 
-
+    # A 
     def Abs(self, x):
         return abs(x)
 
@@ -22,11 +22,82 @@ class Api():
         self.log.debug(f'Carry is {carry_out} because result {hex(self.UInt(result))} vs {hex(unsigned_sum)}')
         return (result, nzcv)
 
+    def Align(self, reg_value, boundary):
+        address = self.UInt(reg_value) & (-boundary)
+        return Register(struct.pack('<L', address))
+
     def ALUException(self, address):
         raise Exception(f'ALUException @ {hex(self.UInt(address))}')
 
     def ALUWritePC(self, address):
         self.BranchWritePC(address, 'INDIR')
+
+    # B
+
+    def BigEndian(self, dontcare):
+        return False
+
+    def Bit(self, value, bit_pos=31):
+        if type(value) == bytes or type(value) == Register:
+            return (self.UInt(value) & (1 << bit_pos)) != 0
+        elif type(value) == str:
+            value = int(value, 0)
+        return (value & (1 << bit_pos)) != 0
+
+    def BranchWritePC(self, targetAddress, branchType):
+        if branchType == 'DIRCALL':
+            self.LR = self.R[15] + 5
+        elif branchType == 'INDCALL':
+            self.LR = self.R[15] + 3
+        self.log.info(f'Branching to {hex(self.UInt(targetAddress))}' + (f' with link back to {hex(self.UInt(self.LR))}' if branchType.endswith('CALL') else ''))
+        self.PC = Register(targetAddress & (~1))
+
+    def BXWritePC(self, targetAddress, branchType):
+        self.BranchWritePC(targetAddress, branchType)
+
+    # C
+
+
+    def CBWritePC(self, targetAddress):
+        self.BranchWritePC(targetAddress, 'DIR')
+
+    def CheckITEnabled(self, dontcare):
+        pass
+
+    def ClearExclusiveLocal(self, dontcare):
+        pass
+
+    def ConditionPassed(self, cond):
+        if cond is None: return True
+        cond = cond.upper()
+        if cond == 'EQ': return (self.APSR.Z == True)
+        if cond == 'NE': return (self.APSR.Z == False)
+        if cond == 'CS': return (self.APSR.C == True)
+        if cond == 'CC': return (self.APSR.C == False)
+        if cond == 'MI': return (self.APSR.N == True)
+        if cond == 'PL': return (self.APSR.N == False)
+        if cond == 'VS': return (self.APSR.V == True)
+        if cond == 'VC': return (self.APSR.V == False)
+        if cond == 'HI': return (self.APSR.C == True and self.APSR.Z == False)
+        if cond == 'LS': return (self.APSR.C == False or self.APSR.Z == True)
+        if cond == 'GE': return (self.APSR.N == self.APSR.V)
+        if cond == 'LT': return (self.APSR.N != self.APSR.V)
+        if cond == 'GT': return (self.APSR.Z == False and self.APSR.N == self.APSR.V)
+        if cond == 'LE': return (self.APSR.Z == True or self.APSR.N != self.APSR.V)
+        if cond == 'AL' or cond == '': return True
+        raise Exception(f'Illegal condition : {cond}')
+
+    def CountLeadingZeroBits(self, x):
+        return 32 - (self.HighestSetBit(x) + 1)
+
+    # D
+
+    def HighestSetBit(self, x):
+        val = self.UInt(x)
+        for i in range(31, -1, -1):
+            if val & (1 << i):
+                return i
+        return -1
 
     def UInt(self, value, highValue=None):
         if type(value) == Register:
@@ -67,13 +138,6 @@ class Api():
             value = struct.unpack('<q', combo)[0]
 
         return value
-
-    def Bit(self, value, bit_pos=31):
-        if type(value) == bytes or type(value) == Register:
-            return (self.UInt(value) & (1 << bit_pos)) != 0
-        elif type(value) == str:
-            value = int(value, 0)
-        return (value & (1 << bit_pos)) != 0
 
     def IsZero(self, value):
         if type(value) == Register:
@@ -142,26 +206,6 @@ class Api():
             return not value
         return ~int(value)
 
-    def ConditionPassed(self, cond):
-        if cond is None: return True
-        cond = cond.upper()
-        if cond == 'EQ': return (self.APSR.Z == True)
-        if cond == 'NE': return (self.APSR.Z == False)
-        if cond == 'CS': return (self.APSR.C == True)
-        if cond == 'CC': return (self.APSR.C == False)
-        if cond == 'MI': return (self.APSR.N == True)
-        if cond == 'PL': return (self.APSR.N == False)
-        if cond == 'VS': return (self.APSR.V == True)
-        if cond == 'VC': return (self.APSR.V == False)
-        if cond == 'HI': return (self.APSR.C == True and self.APSR.Z == False)
-        if cond == 'LS': return (self.APSR.C == False or self.APSR.Z == True)
-        if cond == 'GE': return (self.APSR.N == self.APSR.V)
-        if cond == 'LT': return (self.APSR.N != self.APSR.V)
-        if cond == 'GT': return (self.APSR.Z == False and self.APSR.N == self.APSR.V)
-        if cond == 'LE': return (self.APSR.Z == True or self.APSR.N != self.APSR.V)
-        if cond == 'AL' or cond == '': return True
-        raise Exception(f'Illegal condition : {cond}')
-
     def ReadMemU(self, address, size):
         assert(size in [1,2,4])
         try:
@@ -198,20 +242,6 @@ class Api():
     def WriteMemS(self, address, size, value):
         self.WriteMemU(address, size, value)
 
-    def BranchWritePC(self, targetAddress, branchType):
-        if branchType == 'DIRCALL':
-            self.LR = self.R[15] + 5
-        elif branchType == 'INDCALL':
-            self.LR = self.R[15] + 3
-        self.log.info(f'Branching to {hex(self.UInt(targetAddress))}' + (f' with link back to {hex(self.UInt(self.LR))}' if branchType.endswith('CALL') else ''))
-        self.PC = Register(targetAddress & (~1))
-
-    def BXWritePC(self, targetAddress, branchType):
-        self.BranchWritePC(targetAddress, branchType)
-
-    def CBWritePC(self, targetAddress):
-        self.BranchWritePC(targetAddress, 'DIR')
-
     def LoadWritePC(self, address):
         self.BXWritePC(address, 'INDIR');
 
@@ -222,10 +252,6 @@ class Api():
             semihosting.ExecuteCmd(self)
         else:
             self.log.info(f'Breakpoint #{hex(value)} executed as NOP')
-
-    def Align(self, reg_value, boundary):
-        address = self.UInt(reg_value) & (-boundary)
-        return Register(struct.pack('<L', address))
 
     def IsAligned(self, address, size):
         return False #(self.UInt(address) & (size-1)) == 0
