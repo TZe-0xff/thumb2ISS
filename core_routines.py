@@ -32,6 +32,19 @@ class Api():
     def ALUWritePC(self, address):
         self.BranchWritePC(address, 'INDIR')
 
+    def ASR(self, x, i):
+        if shift == 0:
+            result = x;
+        else:
+            (result, _) = self.ASR_C(x, shift);
+        return result
+
+    def ASR_C(self, x, shift):
+        extended_x = self.SInt(x)
+        result = extended_x >> shift
+        carry_out = self.Bit(extended_x, shift-1)
+        return (result, carry_out)
+
     # B
 
     def BigEndian(self, dontcare):
@@ -92,12 +105,155 @@ class Api():
 
     # D
 
+    # E
+
+    def ExclusiveMonitorsPass(self, address, size):
+        return True
+
+    # F G
+
+    # H
+
     def HighestSetBit(self, x):
         val = self.UInt(x)
         for i in range(31, -1, -1):
             if val & (1 << i):
                 return i
         return -1
+
+    # I
+
+    def IsAligned(self, address, size):
+        return False #(self.UInt(address) & (size-1)) == 0
+
+    def IsZero(self, value):
+        if type(value) == Register:
+            return (value.ival == 0)
+        elif type(value) == bytes:
+            return (self.UInt(value) == 0)
+        return (int(value) == 0)
+
+    def IsZeroBit(self, value):
+        return self.IsZero(value)
+
+    # J K
+
+    # L
+
+    def LoadWritePC(self, address):
+        self.BXWritePC(address, 'INDIR');
+
+    def LowestSetBit(self, x):
+        val = self.UInt(x)
+        for i in range(32):
+            if val & (1 << i):
+                return i
+        return 32
+
+    def LSL(self, x, shift):
+        if shift == 0:
+            result = x;
+        else:
+            (result, _) = self.LSL_C(x, shift);
+        return result
+
+    def LSL_C(self, x, shift):
+        extended_x = self.UInt(x) << shift;
+        result = extended_x & 0xFFFFFFFF
+        carry_out = self.Bit(extended_x, 32)
+        return (result, carry_out)
+
+    def LSR(self, x, shift):
+        if shift == 0:
+            result = x;
+        else:
+            (result, _) = self.LSR_C(x, shift);
+        return result
+
+    def LSR_C(self, x, shift):
+        extended_x = self.UInt(x)
+        result = extended_x >> shift
+        carry_out = self.Bit(extended_x, shift-1)
+        return (result, carry_out)
+
+    # M
+
+    # N
+
+    def NOT(self, value):
+        if type(value) == Register:
+            return (~value.ival)
+        elif type(value) == bytes:
+            return ~self.UInt(value)
+        elif type(value) == bool:
+            return not value
+        return ~int(value)
+
+    # O
+
+    # P
+
+    def PCStoreValue(self):
+        return self.R[15]
+
+    def ProcessorID(self):
+        return 0
+
+    # Q
+
+    # R
+
+    def ReadMemA(self, address, size):
+        return self.ReadMemU(address, size)
+        
+    def ReadMemS(self, address, size):
+        return self.ReadMemU(address, size)
+
+    def ReadMemU(self, address, size):
+        assert(size in [1,2,4])
+        try:
+            byte_seq = b''.join(self.memory[i] for i in range(address.ival, address.ival + size))
+        except KeyError:
+            raise Exception(f'Illegal memory access between {hex(address.ival)} and {hex(address.ival + size - 1)}')
+
+        # load as unsigned
+        value = struct.unpack(self.bytes_to_Uint[size], byte_seq)[0]
+        self.log.info(f'Read {size} bytes as unsigned from {hex(address.ival)} : {hex(value)}')
+        return Register(struct.pack('<L', value))
+
+    def ReadSpecReg(self, spec_reg):
+        raise Exception('Special registers not implemented')
+
+    def Real(self, x):
+        return float(x)
+
+    def ROR(self, x, shift):
+        if shift == 0:
+            result = x;
+        else:
+            (result, _) = self.ROR_C(x, shift);
+        return result
+
+    def ROR_C(self, x, shift):
+        m = int(shift % 32)
+        if m != 0:
+            result = self.LSR(x,m) | self.LSL(x,32-m)
+        else:
+            result = x
+        carry_out = self.Bit(result, 31)
+        return (result, carry_out)
+
+    def RRX_C(self, x, carry_in):
+        val = self.UInt(x) | (int(carry_in) << 32) 
+        result = val >> 1
+        carry_out = core.Bit(val,0)
+        return (result, carry_out);
+
+    def RoundTowardsZero(self, x):
+        return int(x) # python float to integer already rounds towards zero
+
+    # S
+
 
     def UInt(self, value, highValue=None):
         if type(value) == Register:
@@ -121,7 +277,7 @@ class Api():
 
     def SInt(self, value, highValue=None):
         if type(value) == Register:
-            return value.ival
+            return self.SignExtend(value, 32).ival
         elif value == '0' or value == '1':
             value = int(value)
         elif type(value) == str:
@@ -138,16 +294,6 @@ class Api():
             value = struct.unpack('<q', combo)[0]
 
         return value
-
-    def IsZero(self, value):
-        if type(value) == Register:
-            return (value.ival == 0)
-        elif type(value) == bytes:
-            return (self.UInt(value) == 0)
-        return (int(value) == 0)
-
-    def IsZeroBit(self, value):
-        return self.IsZero(value)
 
     def ZeroExtend(self, candidate, bitsize, msb=None, lsb=None):
         assert(bitsize==32)
@@ -186,43 +332,13 @@ class Api():
         sign_bit = value & (1 << candidate._msb)
         if sign_bit:
             # sign extend
-            value = value | (0xFFFFFFFF << candidate._msb)
+            value = value | ((0xFFFFFFFF << candidate._msb) & 0xFFFFFFFF)
 
         self.log.debug(f'SignExtended {self.UInt(in_c)} to {hex(value)}')
         return self.Field(value)
 
     def SignExtendSubField(self, candidate, msb, lsb, bitsize):
         return self.SignExtend(candidate, bitsize, msb, lsb)
-
-
-
-    def NOT(self, value):
-        if type(value) == Register:
-            self.log.debug(f'NOT({hex(value.ival)}) = {hex(~value.ival)}')
-            return (~value.ival)
-        elif type(value) == bytes:
-            return ~self.UInt(value)
-        elif type(value) == bool:
-            return not value
-        return ~int(value)
-
-    def ReadMemU(self, address, size):
-        assert(size in [1,2,4])
-        try:
-            byte_seq = b''.join(self.memory[i] for i in range(address.ival, address.ival + size))
-        except KeyError:
-            raise Exception(f'Illegal memory access between {hex(address.ival)} and {hex(address.ival + size - 1)}')
-
-        # load as unsigned
-        value = struct.unpack(self.bytes_to_Uint[size], byte_seq)[0]
-        self.log.info(f'Read {size} bytes as unsigned from {hex(address.ival)} : {hex(value)}')
-        return Register(struct.pack('<L', value))
-
-    def ReadMemS(self, address, size):
-        return self.ReadMemU(address, size)
-
-    def ReadMemA(self, address, size):
-        return self.ReadMemU(address, size)
 
     def WriteMemU(self, address, size, value):
         assert(size in [1,2,4])
@@ -242,9 +358,6 @@ class Api():
     def WriteMemS(self, address, size, value):
         self.WriteMemU(address, size, value)
 
-    def LoadWritePC(self, address):
-        self.BXWritePC(address, 'INDIR');
-
     def SoftwareBreakpoint(self, value):
         value = self.UInt(value)
         if value == 0xab:
@@ -252,9 +365,6 @@ class Api():
             semihosting.ExecuteCmd(self)
         else:
             self.log.info(f'Breakpoint #{hex(value)} executed as NOP')
-
-    def IsAligned(self, address, size):
-        return False #(self.UInt(address) & (size-1)) == 0
 
     def Shift(self, value, srtype, amount, carry_in):
         (result, _) = self.Shift_C(value, srtype, amount, carry_in)
@@ -267,20 +377,14 @@ class Api():
             if srtype == 'LSL':
                 (result, carry_out) = self.LSL_C(value, amount)
             elif srtype == 'LSR':
-                pass #(result, carry_out) = self.LSR_C(value, amount)
+                (result, carry_out) = self.LSR_C(value, amount)
             elif srtype == 'ASR':
-                pass #(result, carry_out) = self.ASR_C(value, amount)
+                (result, carry_out) = self.ASR_C(value, amount)
             elif srtype == 'ROR':
-                pass #(result, carry_out) = self.ROR_C(value, amount)
+                (result, carry_out) = self.ROR_C(value, amount)
             elif srtype == 'RRX':
-                pass #(result, carry_out) = self.RRX_C(value, carry_in)
+                (result, carry_out) = self.RRX_C(value, carry_in)
 
-        return (result, carry_out)
-
-    def LSL_C(self, x, shift):
-        extended_x = self.UInt(x) << shift;
-        result = self.Field(extended_x, 32-1, 0)
-        carry_out = self.Bit(extended_x, 32)
         return (result, carry_out)
         
 
