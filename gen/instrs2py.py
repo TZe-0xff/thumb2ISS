@@ -117,6 +117,7 @@ exec_subst = [
     (True, re.compile(r'BranchType_(\w+)'),             r"'\1'"),
     (True, re.compile('!([^=])'),                       r'not \1'),
     (True, re.compile(r'PSTATE\.<[^>]*?> = (\w+);'),    r'core.APSR.update(\1);'),
+    (True, re.compile(r"PSTATE\.GE<(\d+)> == '1'"),     r'PSTATE.GE[\1]'),
     (False, 'PSTATE.IT<7:0> = firstcond:mask;',         'core.APSR.ITcond = firstcond; core.APSR.ITsteps = len(mask)'),
     (True, re.compile(r'(\S*[\w\[\]]+)<(\d+):(\d+)> += (.*);'), r'\1 = core.SetField(\1,\2,\3,\4);'),
     (True, re.compile(r'(\S*\w+)<(\d+)> += (.*);'),        r'\1 = core.SetBit(\1,\2,\3)'),
