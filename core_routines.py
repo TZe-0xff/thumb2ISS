@@ -253,64 +253,67 @@ class Api():
         return int(x) # python float to integer already rounds towards zero
 
     # S
+    # core.APSR.GE,0,'1' if sum1 >= 0 else '0'
+    def SetBit(self, bit_table, tgt_bit, tgt_value):
+        bit_table[int(tgt_bit)] = bool(int(tgt_value))
+        return bit_table
 
-
-    def UInt(self, value, highValue=None):
-        if type(value) == Register:
-            value = value.bval
-        elif value == '0' or value == '1':
-            value = int(value)
-        elif type(value) == str:
-            value = struct.pack('<l', int(value, 0))
-        elif type(value) == int:
-            value = struct.pack('<l', value)
-
-        if type(value) == bytes:
-            value = struct.unpack('<L', value)[0]
-
-        if highValue is not None:
-            highValue = self.UInt(highValue)
-            combo = struct.pack('<LL', value, highValue)
-            value = struct.unpack('<Q', combo)[0]
-        return value
         
+    def SetExclusiveMonitors(address, size):
+        pass
 
-    def SInt(self, value, highValue=None):
-        if type(value) == Register:
-            return self.SignExtend(value, 32).ival
-        elif value == '0' or value == '1':
-            value = int(value)
-        elif type(value) == str:
-            value = struct.pack('<l', int(value, 0))
-        elif type(value) == int:
-            value = struct.pack('<l', value)
-
-        if type(value) == bytes:
-            value = struct.unpack('<l', value)[0]
-
-        if highValue is not None:
-            highValue = self.UInt(highValue)
-            combo = struct.pack('<lL', value, highValue)
-            value = struct.unpack('<q', combo)[0]
-
-        return value
-
-    def ZeroExtend(self, candidate, bitsize, msb=None, lsb=None):
-        assert(bitsize==32)
-        in_c = candidate
-        if type(candidate) is str and ('0' in candidate or '1' in candidate):
-            value = int(candidate, 2)
-        elif msb is not None:
-            candidate = self.Field(candidate, msb, lsb)
-            value = self.UInt(candidate)
+    # core.SetField(core.APSR.GE,1,0,'11' if sum1 >= 0 else '00')
+    # core.SetField(result,7,0,core.Field(core.R[m],15,8))
+    def SetField(self, source, msb, lsb, value):
+        if type(source) == list:
+            bits = value[::-1]
+            for i in range(len(bits)):
+                source[lsb+i] = bool(int(bits[i]))
         else:
-            value = self.UInt(candidate)
+            # Register
+            mask = (0xffffffff >> (31 - msb + lsb)) << lsb
+            source = (source & ~mask) | ((self.UInt(value) << lsb) & mask)
+        return source
 
-        self.log.debug(f'ZeroExtended {self.UInt(in_c)} to {hex(value)}')
-        return self.Field(value)
 
-    def ZeroExtendSubField(self, candidate, msb, lsb, bitsize):
-        return self.ZeroExtend(candidate, bitsize, msb, lsb)
+    def Shift(self, value, srtype, amount, carry_in):
+        (result, _) = self.Shift_C(value, srtype, amount, carry_in)
+        return result
+
+    def Shift_C(self, value, srtype, amount, carry_in):
+        amount = int(amount)
+        if amount == 0:
+            (result, carry_out) = (value, carry_in)
+        else:
+            if srtype == 'LSL':
+                (result, carry_out) = self.LSL_C(value, amount)
+            elif srtype == 'LSR':
+                (result, carry_out) = self.LSR_C(value, amount)
+            elif srtype == 'ASR':
+                (result, carry_out) = self.ASR_C(value, amount)
+            elif srtype == 'ROR':
+                (result, carry_out) = self.ROR_C(value, amount)
+            elif srtype == 'RRX':
+                (result, carry_out) = self.RRX_C(value, carry_in)
+
+        return (result, carry_out)
+        
+    def SignedSat(self, i, N):
+        (result, _) = self.SignedSatQ(i, N)
+        return result
+
+    def SignedSatQ(self, i, N):
+        result = i
+        saturated = False
+        if i > 2**(N-1) - 1:
+            result = 2**(N-1) - 1
+            saturated = True
+        elif i < -(2**(N-1)):
+            result = -(2**(N-1))
+            saturated = True
+        else:
+            result = i
+        return (result, saturated);
 
     def SignExtend(self, candidate, bitsize, msb=None, lsb=None):
         assert(bitsize==32)
@@ -339,6 +342,84 @@ class Api():
 
     def SignExtendSubField(self, candidate, msb, lsb, bitsize):
         return self.SignExtend(candidate, bitsize, msb, lsb)
+    
+    def SInt(self, value, highValue=None):
+        if type(value) == Register:
+            return self.SignExtend(value, 32).ival
+        elif value == '0' or value == '1':
+            value = int(value)
+        elif type(value) == str:
+            value = struct.pack('<l', int(value, 0))
+        elif type(value) == int:
+            value = struct.pack('<l', value)
+
+        if type(value) == bytes:
+            value = struct.unpack('<l', value)[0]
+
+        if highValue is not None:
+            highValue = self.UInt(highValue)
+            combo = struct.pack('<lL', value, highValue)
+            value = struct.unpack('<q', combo)[0]
+
+        return value
+
+    def SoftwareBreakpoint(self, value):
+        value = self.UInt(value)
+        if value == 0xab:
+            #semihosting
+            semihosting.ExecuteCmd(self)
+        else:
+            self.log.info(f'Breakpoint #{hex(value)} executed as NOP')
+
+    # T
+
+    # U
+
+    def UInt(self, value, highValue=None):
+        if type(value) == Register:
+            value = value.bval
+        elif value == '0' or value == '1':
+            value = int(value)
+        elif type(value) == str:
+            value = struct.pack('<l', int(value, 0))
+        elif type(value) == int:
+            value = struct.pack('<l', value)
+
+        if type(value) == bytes:
+            value = struct.unpack('<L', value)[0]
+
+        if highValue is not None:
+            highValue = self.UInt(highValue)
+            combo = struct.pack('<LL', value, highValue)
+            value = struct.unpack('<Q', combo)[0]
+        return value
+        
+    def UnsignedSat(self, i, N):
+        (result, _) = self.UnsignedSatQ(i, N)
+        return result
+
+    def UnsignedSatQ(self, i, N):
+        result = i
+        saturated = False
+        if i > 2**N - 1:
+            result = 2**N - 1
+            saturated = True
+        elif i < 0:
+            result = 0
+            saturated = True
+        else:
+            result = i
+        return (result, saturated);
+
+    # V
+
+    # W
+
+    def WriteMemA(self, address, size, value):
+        self.WriteMemU(address, size, value)
+
+    def WriteMemS(self, address, size, value):
+        self.WriteMemU(address, size, value)
 
     def WriteMemU(self, address, size, value):
         assert(size in [1,2,4])
@@ -352,39 +433,35 @@ class Api():
         except KeyError:
             raise Exception(f'Illegal memory access between {hex(address.ival)} and {hex(address.ival + size - 1)}')
 
-    def WriteMemA(self, address, size, value):
-        self.WriteMemU(address, size, value)
 
-    def WriteMemS(self, address, size, value):
-        self.WriteMemU(address, size, value)
+    def WriteSpecReg(self, spec_reg, value):
+        raise Exception('Special registers not implemented')
 
-    def SoftwareBreakpoint(self, value):
-        value = self.UInt(value)
-        if value == 0xab:
-            #semihosting
-            semihosting.ExecuteCmd(self)
+    # X, Y
+
+    # Z
+
+    def ZeroExtend(self, candidate, bitsize, msb=None, lsb=None):
+        assert(bitsize==32)
+        in_c = candidate
+        if type(candidate) is str and ('0' in candidate or '1' in candidate):
+            value = int(candidate, 2)
+        elif msb is not None:
+            candidate = self.Field(candidate, msb, lsb)
+            value = self.UInt(candidate)
         else:
-            self.log.info(f'Breakpoint #{hex(value)} executed as NOP')
+            value = self.UInt(candidate)
 
-    def Shift(self, value, srtype, amount, carry_in):
-        (result, _) = self.Shift_C(value, srtype, amount, carry_in)
-        return result
+        self.log.debug(f'ZeroExtended {self.UInt(in_c)} to {hex(value)}')
+        return self.Field(value)
 
-    def Shift_C(self, value, srtype, amount, carry_in):
-        if amount == 0:
-            (result, carry_out) = (value, carry_in)
-        else:
-            if srtype == 'LSL':
-                (result, carry_out) = self.LSL_C(value, amount)
-            elif srtype == 'LSR':
-                (result, carry_out) = self.LSR_C(value, amount)
-            elif srtype == 'ASR':
-                (result, carry_out) = self.ASR_C(value, amount)
-            elif srtype == 'ROR':
-                (result, carry_out) = self.ROR_C(value, amount)
-            elif srtype == 'RRX':
-                (result, carry_out) = self.RRX_C(value, carry_in)
+    def ZeroExtendSubField(self, candidate, msb, lsb, bitsize):
+        return self.ZeroExtend(candidate, bitsize, msb, lsb)
 
-        return (result, carry_out)
-        
+    def Zeros(self, N):
+        return 0
+
+
+
+
 
