@@ -14,9 +14,12 @@ class Architecture:
 
 class Simulator(object):
 
-    def __init__(self, t_arch=Architecture.CortexM4):
+    def __init__(self, t_arch=Architecture.CortexM4, log_root=None):
         self.t_arch = t_arch
-        self.log = logging.getLogger('Simulator')
+        if log_root is not None:
+            self.log = log_root.getChild('Sim')
+        else:
+            self.log = logging.getLogger('Simulator')
         #self.timings_table = timings.load(t_arch)
         self.dis_patt = [
             # Labels
@@ -77,7 +80,7 @@ class Simulator(object):
         self.labels = {}
         self.memory = {}
         self.code   = {}
-        self.core = Core()
+        self.core = Core(self.log)
         for line in disassembly.splitlines():
             if len(line.strip()) > 0:
                 for pat, action in self.dis_patt:

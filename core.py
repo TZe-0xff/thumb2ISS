@@ -36,14 +36,17 @@ class ProgramStatus:
         return f'N: {int(self.N)} | Z: {int(self.Z)} | C: {int(self.C)} | V: {int(self.V)} | Q: {int(self.Q)} | GE: {ge_bits[::-1]}'
 
 class Core(core_routines.Api):
-    def __init__(self):
+    def __init__(self, log_root=None):
         self.R = {i:self.Field(0) for i in range(16)}
         self.R[14] = self.Field(0xffffffff) # initial LR
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
         self.reg_num.update({'SB':0, 'sb':9, 'SL':10, 'sl':10, 'FP':11, 'fp':11, 'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
         self.APSR = ProgramStatus()
         self.bytes_to_Uint = ['', '<B', '<H', '', '<L']
-        self.log = logging.getLogger('Core')
+        if log_root is None:
+            self.log = logging.getLogger('Core')
+        else:
+            self.log = log_root.getChild('Core')
         self.pc_updated = False
         
         self.instructions = {}

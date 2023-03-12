@@ -19,7 +19,7 @@ class Api():
                 'V' : self.SInt(result) != signed_sum
                 }
         carry_out = nzcv['C']
-        self.log.debug(f'Carry is {carry_out} because result {hex(self.UInt(result))} vs {hex(unsigned_sum)}')
+        self.log.info(f'Carry is {carry_out} because result {hex(self.UInt(result))} vs {hex(unsigned_sum)}')
         return (result, nzcv)
 
     def Align(self, reg_value, boundary):
@@ -337,7 +337,7 @@ class Api():
             # sign extend
             value = value | ((0xFFFFFFFF << candidate._msb) & 0xFFFFFFFF)
 
-        self.log.debug(f'SignExtended {self.UInt(in_c)} to {hex(value)}')
+        self.log.info(f'SignExtended {self.UInt(in_c)} to {hex(value)}')
         return self.Field(value)
 
     def SignExtendSubField(self, candidate, msb, lsb, bitsize):
@@ -452,7 +452,6 @@ class Api():
         else:
             value = self.UInt(candidate)
 
-        self.log.debug(f'ZeroExtended {self.UInt(in_c)} to {hex(value)}')
         return self.Field(value)
 
     def ZeroExtendSubField(self, candidate, msb, lsb, bitsize):
