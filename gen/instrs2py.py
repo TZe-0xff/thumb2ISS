@@ -64,7 +64,7 @@ assembly_subst = [
 
 dec_subst = [
     # re?       search                                  replace
-    (True, re.compile(r'([a-z]\d?) = UInt\(\w*\:?(Rd?\1[nm]?)\);'),       r'\1 = core.reg_num[\2];'), # register number extraction
+    (True, re.compile(r'([a-z]\d?(?:Lo|Hi)?) = UInt\(\w*\:?(Rd?\1[nm]?)\);'), r'\1 = core.reg_num[\2];'), # register number extraction
     (True, re.compile(r'(if .*then SEE.*)\n'),          r''),        # SEE references removal
     (True, re.compile(r"(.*?cond == '1111'.*\n)"),      r''),        # test of impossible condition removal
     (True, re.compile(r'(\s*)(.*;) *(if .*)'),          r'\1\2\n\1\3'),     # if on new lines only

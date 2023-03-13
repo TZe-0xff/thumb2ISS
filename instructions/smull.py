@@ -13,7 +13,7 @@ def aarch32_SMULL_T1_A(core, regex_match, bitdiffs):
     Rm = regex_groups.get('Rm', None)
     log.debug(f'aarch32_SMULL_T1_A RdLo={RdLo} RdHi={RdHi} Rn={Rn} Rm={Rm} cond={cond}')
     # decode
-    dLo = core.UInt(RdLo);  dHi = core.UInt(RdHi);  n = core.reg_num[Rn];  m = core.reg_num[Rm];  setflags = False;
+    dLo = core.reg_num[RdLo];  dHi = core.reg_num[RdHi];  n = core.reg_num[Rn];  m = core.reg_num[Rm];  setflags = False;
     if dLo == 15 or dHi == 15 or n == 15 or m == 15:
         raise Exception('UNPREDICTABLE');
     # Armv8-A removes raise Exception('UNPREDICTABLE') for R13

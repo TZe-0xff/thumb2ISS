@@ -21,7 +21,7 @@ def aarch32_SMLALBB_T1_A(core, regex_match, bitdiffs):
     M = bitdiffs.get('M', '0')
     log.debug(f'aarch32_SMLALBB_T1_A RdLo={RdLo} RdHi={RdHi} Rn={Rn} Rm={Rm} cond={cond}')
     # decode
-    dLo = core.UInt(RdLo);  dHi = core.UInt(RdHi);  n = core.reg_num[Rn];  m = core.reg_num[Rm];
+    dLo = core.reg_num[RdLo];  dHi = core.reg_num[RdHi];  n = core.reg_num[Rn];  m = core.reg_num[Rm];
     n_high = (N == '1');  m_high = (M == '1');
     if dLo == 15 or dHi == 15 or n == 15 or m == 15:
         raise Exception('UNPREDICTABLE');
