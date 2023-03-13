@@ -345,7 +345,7 @@ class Api():
     
     def SInt(self, value, highValue=None):
         if type(value) == Register:
-            return self.SignExtend(value, 32).ival
+            value = self.SignExtend(value, 32).ival
         elif value == '0' or value == '1':
             value = int(value)
         elif type(value) == str:
