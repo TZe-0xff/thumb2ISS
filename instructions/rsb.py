@@ -6,6 +6,10 @@ log = logging.getLogger('Mnem.RSB')
 # regex ^RSB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#0$ : c Rd* Rn
 # pattern RSBS{<q>} {<Rd>, }<Rn>, #0 with bitdiffs=[]
 # regex ^RSBS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#0$ : Rd* Rn
+# pattern NEG<c>{<q>} {<Rd>,} <Rn> with bitdiffs=[]
+# regex ^NEG(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+)$ : c Rd* Rn
+# pattern NEGS{<q>} {<Rd>,} <Rn> with bitdiffs=[]
+# regex ^NEGS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+)$ : Rd* Rn
 def aarch32_RSB_i_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -142,5 +146,11 @@ patterns = {
         (re.compile(r'^RSBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_RSB_i_T2_A, {'S': '1'}),
         (re.compile(r'^RSBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_RSB_r_T1_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^RSBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_RSB_r_T1_A, {'S': '1', 'stype': '11'}),
+    ],
+    'NEG': [
+        (re.compile(r'^NEG(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+)$', re.I), aarch32_RSB_i_T1_A, {}),
+    ],
+    'NEGS': [
+        (re.compile(r'^NEGS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+)$', re.I), aarch32_RSB_i_T1_A, {}),
     ],
 }

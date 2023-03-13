@@ -1112,6 +1112,14 @@ def readInstruction(xml,names,sailhack):
                 if categ not in mnems:
                     mnems.append(categ)
                 patterns.append((mnem, mnem+"".join(iterator), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
+            if name == 'aarch32/RSB_i/T1_A':
+                # add missing aliases
+                patterns.append(('NEG', 'NEG<c>{<q>} {<Rd>,} <Rn>', []))
+                aliases.append(('NEG', 'RSB_i_T1'))
+                patterns.append(('NEGS', 'NEGS{<q>} {<Rd>,} <Rn>', []))
+                aliases.append(('NEGS', 'RSB_i_T1'))
+                
+                
 
             if is_alias:
                 # find equivalent pattern
