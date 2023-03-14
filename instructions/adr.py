@@ -26,7 +26,7 @@ def aarch32_ADR_T1_A(core, regex_match, bitdiffs):
                           # Can only occur for A32 encodings
                 core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
         else:
             log.debug(f'aarch32_ADR_T1_A_exec skipped')
     return aarch32_ADR_T1_A_exec
@@ -57,7 +57,7 @@ def aarch32_ADR_T2_A(core, regex_match, bitdiffs):
                           # Can only occur for A32 encodings
                 core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
         else:
             log.debug(f'aarch32_ADR_T2_A_exec skipped')
     return aarch32_ADR_T2_A_exec
@@ -92,7 +92,7 @@ def aarch32_ADR_T3_A(core, regex_match, bitdiffs):
                           # Can only occur for A32 encodings
                 core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
         else:
             log.debug(f'aarch32_ADR_T3_A_exec skipped')
     return aarch32_ADR_T3_A_exec

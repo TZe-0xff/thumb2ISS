@@ -20,7 +20,7 @@ def aarch32_ADD_i_T1_A(core, regex_match, bitdiffs):
         # execute
         if True:
             (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
             if setflags:
                 core.APSR.update(nzcv);
     return aarch32_ADD_i_T1_A_exec
@@ -48,7 +48,7 @@ def aarch32_ADD_i_T2_A(core, regex_match, bitdiffs):
         # execute
         if True:
             (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
             if setflags:
                 core.APSR.update(nzcv);
     return aarch32_ADD_i_T2_A_exec
@@ -80,7 +80,7 @@ def aarch32_ADD_i_T3_A(core, regex_match, bitdiffs):
         # execute
         if True:
             (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
             if setflags:
                 core.APSR.update(nzcv);
     return aarch32_ADD_i_T3_A_exec
@@ -107,7 +107,7 @@ def aarch32_ADD_i_T4_A(core, regex_match, bitdiffs):
         # execute
         if True:
             (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
             if setflags:
                 core.APSR.update(nzcv);
     return aarch32_ADD_i_T4_A_exec
@@ -142,7 +142,7 @@ def aarch32_ADD_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -177,7 +177,7 @@ def aarch32_ADD_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -232,7 +232,7 @@ def aarch32_ADD_r_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -263,7 +263,7 @@ def aarch32_ADD_SP_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -291,7 +291,7 @@ def aarch32_ADD_SP_i_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -327,7 +327,7 @@ def aarch32_ADD_SP_i_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -360,7 +360,7 @@ def aarch32_ADD_SP_i_T4_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -392,7 +392,7 @@ def aarch32_ADD_SP_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -421,7 +421,7 @@ def aarch32_ADD_SP_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -468,7 +468,7 @@ def aarch32_ADD_SP_r_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:

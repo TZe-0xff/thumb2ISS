@@ -32,7 +32,7 @@ def aarch32_ADC_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -69,7 +69,7 @@ def aarch32_ADC_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -122,7 +122,7 @@ def aarch32_ADC_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = result; log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
                 if setflags:
                     core.APSR.update(nzcv);
         else:
