@@ -87,6 +87,8 @@ def aarch32_ADD_i_T3_A(core, regex_match, bitdiffs):
 
 # pattern ADD{<c>}{<q>} {<Rd>,} <Rn>, #<imm12> with bitdiffs=[]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$ : c Rd* Rn imm32
+# pattern ADDW{<c>}{<q>} {<Rd>,} <Rn>, #<imm12> with bitdiffs=[]
+# regex ^ADDW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$ : c Rd* Rn imm32
 def aarch32_ADD_i_T4_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -334,6 +336,8 @@ def aarch32_ADD_SP_i_T3_A(core, regex_match, bitdiffs):
 
 # pattern ADD{<c>}{<q>} {<Rd>,} SP, #<imm12> with bitdiffs=[]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$ : c Rd* imm32
+# pattern ADDW{<c>}{<q>} {<Rd>,} SP, #<imm12> with bitdiffs=[]
+# regex ^ADDW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$ : c Rd* imm32
 def aarch32_ADD_SP_i_T4_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -515,5 +519,9 @@ patterns = {
         (re.compile(r'^ADDS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_ADD_r_T3_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^ADDS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_ADD_SP_r_T3_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^ADDS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_ADD_r_T3_A, {'S': '1', 'stype': '11'}),
+    ],
+    'ADDW': [
+        (re.compile(r'^ADDW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_SP_i_T4_A, {}),
+        (re.compile(r'^ADDW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T4_A, {}),
     ],
 }

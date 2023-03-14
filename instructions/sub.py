@@ -111,6 +111,8 @@ def aarch32_SUB_i_T3_A(core, regex_match, bitdiffs):
 
 # pattern SUB{<c>}{<q>} {<Rd>,} <Rn>, #<imm12> with bitdiffs=[]
 # regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$ : c Rd* Rn imm32
+# pattern SUBW{<c>}{<q>} {<Rd>,} <Rn>, #<imm12> with bitdiffs=[]
+# regex ^SUBW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$ : c Rd* Rn imm32
 def aarch32_SUB_i_T4_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -331,6 +333,8 @@ def aarch32_SUB_SP_i_T2_A(core, regex_match, bitdiffs):
 
 # pattern SUB{<c>}{<q>} {<Rd>,} SP, #<imm12> with bitdiffs=[]
 # regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$ : c Rd* imm32
+# pattern SUBW{<c>}{<q>} {<Rd>,} SP, #<imm12> with bitdiffs=[]
+# regex ^SUBW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$ : c Rd* imm32
 def aarch32_SUB_SP_i_T3_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -447,5 +451,9 @@ patterns = {
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_SUB_r_T2_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_SUB_SP_r_T1_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^SUBS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_SUB_r_T2_A, {'S': '1', 'stype': '11'}),
+    ],
+    'SUBW': [
+        (re.compile(r'^SUBW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_SP_i_T3_A, {}),
+        (re.compile(r'^SUBW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_SUB_i_T4_A, {}),
     ],
 }

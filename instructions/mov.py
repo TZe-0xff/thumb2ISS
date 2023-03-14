@@ -79,6 +79,8 @@ def aarch32_MOV_i_T2_A(core, regex_match, bitdiffs):
 
 # pattern MOV{<c>}{<q>} <Rd>, #<imm16> with bitdiffs=[]
 # regex ^MOV(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$ : c Rd imm32
+# pattern MOVW{<c>}{<q>} <Rd>, #<imm16> with bitdiffs=[]
+# regex ^MOVW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$ : c Rd imm32
 def aarch32_MOV_i_T3_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -457,6 +459,9 @@ patterns = {
         (re.compile(r'^MOVS.W\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>[LAR][SO][LR])\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {'S': '1'}),
         (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_MOV_r_T3_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^MOVS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>[LAR][SO][LR])\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T2_A, {'S': '1'}),
+    ],
+    'MOVW': [
+        (re.compile(r'^MOVW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_MOV_i_T3_A, {}),
     ],
     'ASRS': [
         (re.compile(r'^(?P<shift_t>ASR)S(?:\.[NW])?\s(?P<Rdm>\w+),\s(?P=Rdm),\s(?P<Rs>\w+)$', re.I), aarch32_MOV_rr_T1_A, {}),
