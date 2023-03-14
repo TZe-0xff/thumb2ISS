@@ -285,6 +285,7 @@ class Api():
         if amount == 0:
             (result, carry_out) = (value, carry_in)
         else:
+            srtype = srtype.upper()
             if srtype == 'LSL':
                 (result, carry_out) = self.LSL_C(value, amount)
             elif srtype == 'LSR':
@@ -295,6 +296,8 @@ class Api():
                 (result, carry_out) = self.ROR_C(value, amount)
             elif srtype == 'RRX':
                 (result, carry_out) = self.RRX_C(value, carry_in)
+            else:
+                raise Exception(f'Unsupported srtype {srtype}')
 
         return (result, carry_out)
         
@@ -349,9 +352,13 @@ class Api():
         elif value == '0' or value == '1':
             value = int(value)
         elif type(value) == str:
-            value = struct.pack('<l', int(value, 0))
-        elif type(value) == int:
-            value = struct.pack('<l', value)
+            value = int(value, 0)
+
+        if type(value) == int:
+            if value < 0:
+                value = struct.pack('<l', value)
+            else:
+                value = struct.pack('<L', value)
 
         if type(value) == bytes:
             value = struct.unpack('<l', value)[0]
@@ -381,9 +388,13 @@ class Api():
         elif value == '0' or value == '1':
             value = int(value)
         elif type(value) == str:
-            value = struct.pack('<l', int(value, 0))
-        elif type(value) == int:
-            value = struct.pack('<l', value)
+            value = int(value, 0)
+
+        if type(value) == int:
+            if value < 0:
+                value = struct.pack('<l', value)
+            else:
+                value = struct.pack('<L', value)
 
         if type(value) == bytes:
             value = struct.unpack('<L', value)[0]
