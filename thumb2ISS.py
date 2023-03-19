@@ -15,14 +15,15 @@ from sim import Simulator, EndOfExecutionException
 def run(elf_file, cpu, debug, log, verbose, timeout):
     ''' Runs ELF_FILE on thumb2 Instruction Set Simulator'''
 
+
     if log is not None:
-        print(f'log {log}')
+        logging.basicConfig(level=logging.DEBUG, stream=log)
+    else:
+        logging.basicConfig(level=logging.INFO, stream=sys.stderr)
+        logging.getLogger('Mnem').setLevel(logging.WARNING)
+        logging.getLogger('thumb2ISS.Sim').setLevel(logging.WARNING)
 
     log = logging.getLogger('thumb2ISS')
-    logging.basicConfig(level=logging.INFO, stream=sys.stderr)
-    logging.getLogger('Mnem').setLevel(logging.WARNING)
-    logging.getLogger('thumb2ISS.Sim').setLevel(logging.WARNING)
-
     log.info(f'Loading elf {elf_file} ...')
 
     hex_file = os.path.splitext(elf_file)[0] + '.hex'
@@ -56,10 +57,8 @@ def run(elf_file, cpu, debug, log, verbose, timeout):
 
     s = Simulator(log_root=log)
     if s.load(dis_str, rom_memory, ih.minaddr(), ram_memory, ram_start):
-        address_ranges = [[v for _,v in g] for _,g in groupby(enumerate(sorted(s.memory.keys())), lambda x:x[0]-x[1])]
-
-        for crange in address_ranges:
-            log.info(f'Memory range : {hex(min(crange))} - {hex(max(crange))}')
+        for minaddr,maxaddr in s.address_limits:
+            print(f'Memory range : {hex(minaddr)} - {hex(maxaddr)}')
 
     if not debug:
         step_cnt = 0
@@ -67,7 +66,7 @@ def run(elf_file, cpu, debug, log, verbose, timeout):
         time_limit = timeout + start_time if timeout else False
         try:
             while True:
-                s.step()
+                s.step_in()
                 step_cnt+=1
                 if step_cnt%100 == 0:
                     if time_limit and time.time() > time_limit:
@@ -78,7 +77,21 @@ def run(elf_file, cpu, debug, log, verbose, timeout):
             log.info(f'Simulation ended by end of execution ({step_cnt} steps simulated in {elapsed_time:.3f} s)')
         except KeyboardInterrupt:
             log.info('Simulation ended by cancelation')
+    else:
+        # starting debugger
+        from debugger import Debugger
+        end_of_exec = False
+        d = Debugger()
+        try:
+            d.loop()    
+        except EndOfExecutionException:
+            end_of_exec = True
+            log.info(f'Simulation ended by end of execution')
+        except KeyboardInterrupt:
+            log.info('Simulation ended by cancelation')
 
+        if not end_of_exec:
+            log.info(f'Simulation ended by Debugger exit')
 
 if __name__ == '__main__':
     run()

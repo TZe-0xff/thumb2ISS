@@ -7,7 +7,12 @@ import glob
 import core_routines
 from register import Register
 
-
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 class EndOfExecutionException(Exception):
     pass
@@ -35,20 +40,16 @@ class ProgramStatus:
         ge_bits = ''.join(str(int(v)) for v in self.GE)
         return f'N: {int(self.N)} | Z: {int(self.Z)} | C: {int(self.C)} | V: {int(self.V)} | Q: {int(self.Q)} | GE: {ge_bits[::-1]}'
 
-class Core(core_routines.Api):
+class Core(core_routines.Api, metaclass=Singleton):
     def __init__(self, log_root=None):
-        self.R = {i:self.Field(0) for i in range(16)}
-        self.R[14] = self.Field(0xffffffff) # initial LR
+        self.initializeRegisters()
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
         self.reg_num.update({'SB':0, 'sb':9, 'SL':10, 'sl':10, 'FP':11, 'fp':11, 'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
-        self.APSR = ProgramStatus()
         self.bytes_to_Uint = ['', '<B', '<H', '', '<L']
         if log_root is None:
             self.log = logging.getLogger('Core')
         else:
             self.log = log_root.getChild('Core')
-        self.pc_updated = False
-        
         self.instructions = {}
         for instr in glob.glob('instructions/[a-z]*.py'):
             instr_module = instr.replace('\\','.').replace('.py','')
@@ -57,6 +58,14 @@ class Core(core_routines.Api):
                 if mnem not in self.instructions:
                     self.instructions[mnem] = []
                 self.instructions[mnem] += pat_list
+
+    def initializeRegisters(self):
+        self.R = {i:self.Field(0) for i in range(16)}
+        self.R[14] = self.Field(0xffffffff) # initial LR
+        self.APSR = ProgramStatus()
+        self.pc_updated = False
+        self.break_reached = False
+
 
     @property
     def PC(self):
@@ -84,6 +93,7 @@ class Core(core_routines.Api):
         self.R[14] = value
 
     def configure(self, pc, sp, mem):
+        self.initializeRegisters()
         self.memory = mem
         self.R[15] = self.Field(pc & 0xfffffffe)
         self.R[13] = self.Field(sp)
@@ -91,8 +101,12 @@ class Core(core_routines.Api):
     def getPC(self):
         return self.UInt(self.R[15])
 
+    def getLR(self):
+        return self.UInt(self.R[14])
+
     def incPC(self, step):
         if not self.pc_updated:
+            #raise(Exception('#### PC increment'))
             self.R[15] = self.R[15] + step
             if self.APSR.ITsteps > 0:
                 self.APSR.ITsteps -= 1
@@ -102,6 +116,7 @@ class Core(core_routines.Api):
             self.pc_updated = False
             self.APSR.ITsteps = 0
             self.APSR.ITcond = None
+        return self.break_reached
 
 
     def showRegisters(self, indent=0):
@@ -136,7 +151,10 @@ class Core(core_routines.Api):
         if m is not None:
             instr_exec = action(self, m, bitdiffs)
             def mnem_exec():
-                assert(expected_pc == self.UInt(self.R[15]))
+                try:
+                    assert(expected_pc == self.UInt(self.R[15]))
+                except:
+                    raise Exception(f'{full_assembly} Expected PC to be {hex(expected_pc)} but was {hex(self.UInt(self.R[15]))}')
                 instr_exec()
             return mnem_exec
 
