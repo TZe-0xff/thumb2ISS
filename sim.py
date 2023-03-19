@@ -27,7 +27,7 @@ class Simulator(object, metaclass=Singleton):
             (re.compile(r'^(?P<address>[\da-f]{8}) <(?P<label>[^>]+)>: *'), 
                 lambda m: self.genLbl(m.group('label'), int(m.group('address'), 16))),
             # code
-            (re.compile(r'^ +(?P<address>[\da-f]+):\s+(?P<lowWord>[\da-f ]{4})(?: +(?P<higWord>[\da-f]{4}))?\s+(?P<mnem>\w[\w.]+)\s*(?P<args>[^;\n\t]+)?.*'),
+            (re.compile(r'^ +(?P<address>[\da-f]+):\s+(?P<lowWord>[\da-f ]{4})(?: +(?P<higWord>[\da-f]{4}))?\s+(?P<mnem>[a-z][\w.]+)\s*(?P<args>[^;\n\t]+)?.*'),
                 lambda m : self.genIsn(int(m.group('address'), 16), m.group('mnem'), m.group('args'), (m.group('lowWord'),m.group('higWord')))),
             # const data
             (re.compile(r'^ +(?P<address>[\da-f]+):\t(?P<value>[\da-f]+)\s+(?P<mnem>\.[\w.]+).*'),
@@ -81,7 +81,7 @@ class Simulator(object, metaclass=Singleton):
         for i in range(len(data)):
             self.memory[address+i] = data[i:i+1]
 
-    def load(self, disassembly, rom_memory, rom_start, ram_memory, ram_start):
+    def load(self, disassembly, rom_memory, rom_start, ram_memorys):
         self.labels = {}
         self.label_by_address = {}
         self.memory = {}
@@ -98,8 +98,10 @@ class Simulator(object, metaclass=Singleton):
                         action(m)
                         break
         self.core = None
+        self.rom_start = rom_start
         self.memory.update({rom_start+i : rom_memory[i:i+1] for i in range(len(rom_memory))})
-        self.memory.update({ram_start+i : ram_memory[i:i+1] for i in range(len(ram_memory))})
+        for ram_start, ram_memory in ram_memorys:
+            self.memory.update({ram_start+i : ram_memory[i:i+1] for i in range(len(ram_memory))})
 
         self.address_ranges = [[v for _,v in g] for _,g in groupby(enumerate(sorted(self.memory.keys())), lambda x:x[0]-x[1])]
         self.address_limits = []
@@ -116,7 +118,8 @@ class Simulator(object, metaclass=Singleton):
         elif '__vector_table' in self.labels:
             vector_table = self.labels['__vector_table']
         else:
-            raise Exception('__vectors symbol missing')
+            #raise Exception('__vectors symbol missing')
+            vector_table = self.rom_start
             
         # get initial sp & inital pc from vector table
         byte_seq = b''.join(self.memory[i] for i in range(vector_table, vector_table + 8))
@@ -250,7 +253,7 @@ if __name__ == '__main__':
     #logging.getLogger('Core').addHandler(logging.StreamHandler(sys.stdout))
     #logging.getLogger('Mnem').addHandler(logging.StreamHandler(sys.stdout))
     s = Simulator()
-    if s.load(dis_str, rom_memory, ih.minaddr(), ram_memory, ram_start):
+    if s.load(dis_str, rom_memory, ih.minaddr(), [(ram_start, ram_memory)]):
         for minaddr,maxaddr in s.address_limits:
             print(f'Memory range : {hex(minaddr)} - {hex(maxaddr)}')
 

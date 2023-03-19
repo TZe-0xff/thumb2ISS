@@ -2,7 +2,7 @@ import click
 import logging
 from itertools import groupby
 from intelhex import IntelHex
-import re,sys,time,os
+import re,sys,time,os,subprocess,tempfile
 from sim import Simulator, EndOfExecutionException
 
 @click.command()
@@ -26,39 +26,34 @@ def run(elf_file, cpu, debug, log, verbose, timeout):
     log = logging.getLogger('thumb2ISS')
     log.info(f'Loading elf {elf_file} ...')
 
-    hex_file = os.path.splitext(elf_file)[0] + '.hex'
-    dis_file = os.path.splitext(elf_file)[0] + '.dis'
-    sec_file = os.path.splitext(elf_file)[0] + '.sec'
+    # extract hex from elf
+    base_name = os.path.splitext(os.path.basename(elf_file))[0]
+    hex_file = base_name + '.hex'
+    with tempfile.TemporaryDirectory() as tmp:
+        hex_path = os.path.join(tmp, hex_file)
+        subprocess.run(f'arm-none-eabi-objcopy --gap-fill 0xFF -O ihex "{elf_file}" "{hex_path}"', shell=True)
 
-    # load disassembly
-    with open(dis_file, 'r') as f:
-        dis_str = f.read()
+        ih = IntelHex()
+        ih.loadhex(hex_path)
+    
+        # load disassembly
+        dis_str = subprocess.check_output(f'arm-none-eabi-objdump.exe -d -z "{elf_file}"')
 
-    # find RAM area
-    with open(sec_file, 'r') as f:
-        sec_str = f.read()
+        # find RAM area
+        sec_str = subprocess.check_output(f'arm-none-eabi-readelf.exe -S "{elf_file}"')
 
-    ram_start = 0xFFFFFFFF
-    ram_end = 0
-    for strt,sz in re.findall(r' ([\da-f]+) +[\da-f]+ +([\da-f]+) +[\da-f]+ +W', sec_str):
-        sec_strt = int(strt, 16)
-        sec_size = int(sz, 16)
-        if sec_strt < ram_start:
-            ram_start = sec_strt
-        if sec_strt+sec_size > ram_end:
-            ram_end = sec_strt + sec_size
+        ram_memories = []
+        for strt,sz in re.findall(rb' ([\da-f]+) +[\da-f]+ +([\da-f]+) +[\da-f]+ +W', sec_str):
+            sec_strt = int(strt, 16)
+            sec_size = int(sz, 16)
+            ram_memories.append((sec_strt, b'\x00' * sec_size))
 
-    ram_memory = b'\x00' * (ram_end+1-ram_start)
+        rom_memory = ih.gets(ih.minaddr(), len(ih))
 
-    ih = IntelHex()
-    ih.loadhex(hex_file)
-
-    rom_memory = ih.gets(ih.minaddr(), len(ih))
-
-    s = Simulator(log_root=log)
-    if s.load(dis_str, rom_memory, ih.minaddr(), ram_memory, ram_start):
-        for minaddr,maxaddr in s.address_limits:
-            print(f'Memory range : {hex(minaddr)} - {hex(maxaddr)}')
+        s = Simulator(log_root=log)
+        if s.load(dis_str.decode('ascii'), rom_memory, ih.minaddr(), ram_memories):
+            for minaddr,maxaddr in s.address_limits:
+                print(f'Memory range : {hex(minaddr)} - {hex(maxaddr)}')
 
     if not debug:
         step_cnt = 0
