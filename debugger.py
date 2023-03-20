@@ -25,6 +25,7 @@ class Debugger():
         ExpandChoice(key='b', name='Break at ...', value=self.break_at),
         ExpandChoice(key='e', name='Edit breakpoints ...', value=self.break_edit),
         ExpandChoice(key='w', name='Write register ...', value=self.write_reg),
+        ExpandChoice(key='m', name='Edit memory ...', value=self.mem_edit),
     ]
 
     def step_over(self):
@@ -66,11 +67,11 @@ class Debugger():
 
     def querySymbol(self):
         return inquirer.text(
-            message="Address or symbol to stop at:",
+            message="Address or symbol:",
             completer=self.symb_completer,
             validate=lambda result:self.get_symbol(result) is not None,
             filter=self.get_symbol,
-            amark='|_',
+            amark='| ',
             qmark='|_',
             mandatory=False,
         ).execute()
@@ -87,6 +88,49 @@ class Debugger():
                 removed_bkpt_list = [bkpt for bkpt in original_bkpt_list if bkpt not in remaining_bkpt_list]
                 for bkpt in removed_bkpt_list:
                     sim.removeBreakpoint(bkpt)
+
+    def get_value(self, candidate):
+        try:
+            candidate = int(candidate,0)
+        except:
+            candidate = None
+        return candidate
+
+
+    def mem_edit(self):
+        sim = Simulator()
+        address = self.querySymbol()
+        if address is not None:
+            data_size = inquirer.select(
+                message="Select data size:",
+                choices=[
+                    Choice(value=1, name="Byte"),
+                    Choice(value=2, name="Half"),
+                    Choice(value=4, name="Word"),
+                    Choice(value=8, name="DblWord"),
+                ],
+                amark='| ',
+                qmark='|_',
+                default=4,
+                mandatory=False
+            ).execute()
+            if data_size is not None:
+                raw_data = b''.join(sim.memory[i] for i in range(address, address+data_size))
+
+                udata = int.from_bytes(raw_data, byteorder='little')
+                ndata = inquirer.text(
+                    message=f"Current val ({hex(udata)}), new val : (Ctrl-Z to cancel)",
+                    validate=lambda result:self.get_value(result) is not None,
+                    filter=self.get_value,
+                    amark='| ',
+                    qmark='|_',
+                    mandatory=False,
+                ).execute()
+                if ndata is not None:            
+                    i = 0
+                    for b in ndata.to_bytes(data_size, byteorder='little'):
+                        sim.memory[address+i] = b.to_bytes(1, byteorder='little')
+                        i+=1
 
     def get_regwrite(self, result):
         if result is not None:
@@ -134,7 +178,7 @@ class Debugger():
         cmd = True
         sim = Simulator()
         while cmd:
-            #os.system('cls')
+            os.system('cls')
             # display disassembly
             total_lines = os.get_terminal_size().lines
             if total_lines > 12+13:
