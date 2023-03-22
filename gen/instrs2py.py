@@ -197,16 +197,28 @@ def BuildPattern(inpat):
 
     if len(set(fields)) != len(fields):
         print('Multiple instance of same field', inpat, fields)
+
+    if secondary_pattern is None and r'|?:!|?' in working:
+        # generate second pattern with wback option
+        secondary_pattern = working.replace(r'|?:!|?', r'(?P<wback>!)', 1)
+
+        # generate main pattern without wback option
+        working = working.replace(r'|?:!|?', r'', 1)
+
+
     opt_seq = re.findall(r'\|\?:([^|]*)\|\?', working)
     opt_fields = []
     for seq in opt_seq:
         opt_fields += re.findall(r'\(\?P<(\w+)>', seq)
     working = working.replace('|?:', '(?:')
     working = working.replace('|?', ')?')
+
+
     out_patterns = [(working, fields, opt_fields)]
     if secondary_pattern is not None:
         secondary_pattern = secondary_pattern.replace('|?:', '(?:')
         secondary_pattern = secondary_pattern.replace('|?', ')?')
+        fields = re.findall(r'\(\?P<(\w+)>', secondary_pattern)
         out_patterns += [(secondary_pattern, fields, opt_fields)]
     return out_patterns
 
@@ -502,6 +514,8 @@ class Instruction:
                         print("    registers = ['1' if reg in reg_list else '0' for reg in range(16)]", file=ofile)
                     elif f == 'Rn' and 'registers' in all_fields:
                         print(f"    {f} = regex_groups.get('{f}', 'SP')", file=ofile)
+                    elif f == 'wback':
+                        print(f"    {f} = regex_groups.get('{f}', None) is not None", file=ofile)
                     else:
                         print(f"    {f} = regex_groups.get('{f}', None)", file=ofile)
                         if f == 'abs_address':
