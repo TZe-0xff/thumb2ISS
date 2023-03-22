@@ -25,7 +25,7 @@ def aarch32_LDRSB_i_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
         else:
             log.debug(f'aarch32_LDRSB_i_T1_A_exec skipped')
     return aarch32_LDRSB_i_T1_A_exec
@@ -64,7 +64,7 @@ def aarch32_LDRSB_i_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
         else:
             log.debug(f'aarch32_LDRSB_i_T2_A_exec skipped')
     return aarch32_LDRSB_i_T2_A_exec
@@ -126,7 +126,7 @@ def aarch32_LDRSB_r_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
         else:
             log.debug(f'aarch32_LDRSB_r_T1_A_exec skipped')
     return aarch32_LDRSB_r_T1_A_exec
@@ -162,7 +162,7 @@ def aarch32_LDRSB_r_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
         else:
             log.debug(f'aarch32_LDRSB_r_T2_A_exec skipped')
     return aarch32_LDRSB_r_T2_A_exec

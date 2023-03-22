@@ -140,7 +140,7 @@ exec_subst = [
     (False, 'FALSE',                                    'False'),
     (False, 'core.bits(32) UNKNOWN',                    'core.Field(0xdeadbeef)'),
     (False, 'AArch32.core',                             'core'),
-    (True, re.compile(r'( *)(core\.R\[([^]]+)\] = (\w+);)'), r"\1\2 log.info(f'Setting R{\3}={hex(core.UInt(\4))}')"),
+    (True, re.compile(r'( *)(core\.R\[([^]]+)\] = (\w+);)'), r"\1\2 log.info(f'Setting R{\3}={hex(core.UInt(core.Field(\4)))}')"),
     (False, '= result;',                                '= core.Field(result);'),
 ]
 

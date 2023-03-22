@@ -30,7 +30,7 @@ def aarch32_MVN_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -68,7 +68,7 @@ def aarch32_MVN_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -121,7 +121,7 @@ def aarch32_MVN_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(result))}')
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);

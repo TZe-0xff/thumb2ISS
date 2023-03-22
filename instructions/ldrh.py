@@ -24,7 +24,7 @@ def aarch32_LDRH_i_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
             core.R[t] = core.ZeroExtend(data, 32);
     return aarch32_LDRH_i_T1_A_exec
 
@@ -53,7 +53,7 @@ def aarch32_LDRH_i_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
             core.R[t] = core.ZeroExtend(data, 32);
     return aarch32_LDRH_i_T2_A_exec
 
@@ -91,7 +91,7 @@ def aarch32_LDRH_i_T3_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
             core.R[t] = core.ZeroExtend(data, 32);
     return aarch32_LDRH_i_T3_A_exec
 
@@ -153,7 +153,7 @@ def aarch32_LDRH_r_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
             core.R[t] = core.ZeroExtend(data, 32);
         else:
             log.debug(f'aarch32_LDRH_r_T1_A_exec skipped')
@@ -190,7 +190,7 @@ def aarch32_LDRH_r_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.R[n];
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
             core.R[t] = core.ZeroExtend(data, 32);
         else:
             log.debug(f'aarch32_LDRH_r_T2_A_exec skipped')

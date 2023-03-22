@@ -29,8 +29,8 @@ def aarch32_LDRT_T1_A(core, regex_match, bitdiffs):
             address = core.R[n] if postindex else offset_addr;
             data = MemU_unpriv[address,4];
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(offset_addr))}')
-            core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(data))}')
+                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+            core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
         else:
             log.debug(f'aarch32_LDRT_T1_A_exec skipped')
     return aarch32_LDRT_T1_A_exec
