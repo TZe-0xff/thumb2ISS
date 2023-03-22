@@ -1,7 +1,7 @@
 import logging
 from _testing import Core, test
 logging.basicConfig(level=logging.DEBUG)
-c = Core()
+c = Core(profile=True)
 
 steps = []
 steps += [c.getExec('adc', 'adc r0, #10', 0)]

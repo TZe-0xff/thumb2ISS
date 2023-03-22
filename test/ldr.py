@@ -1,7 +1,7 @@
 from _testing import Core, test
 import logging, struct
 logging.basicConfig(level=logging.DEBUG)
-c = Core()
+c = Core(profile=True)
 
 steps = []
 steps += [c.getExec('ldr', 'ldr r5, [pc, #28]', 0)]

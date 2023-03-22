@@ -41,7 +41,7 @@ class ProgramStatus:
         return f'N: {int(self.N)} | Z: {int(self.Z)} | C: {int(self.C)} | V: {int(self.V)} | Q: {int(self.Q)} | GE: {ge_bits[::-1]}'
 
 class Core(core_routines.Api, metaclass=Singleton):
-    def __init__(self, log_root=None):
+    def __init__(self, log_root=None, profile=False):
         self.initializeRegisters()
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
         self.reg_num.update({'SB':0, 'sb':9, 'SL':10, 'sl':10, 'FP':11, 'fp':11, 'IP': 12, 'ip':12, 'SP':13, 'sp':13, 'LR':14, 'lr':14, 'PC':15, 'pc':15})
@@ -51,6 +51,11 @@ class Core(core_routines.Api, metaclass=Singleton):
         else:
             self.log = log_root.getChild('Core')
         self.instructions = {}
+        self.profile = profile
+        if self.profile:
+            self.matched_patterns = {}
+            self.exec_called = {}
+            self.exec_by_mnem = {}
         for instr in glob.glob('instructions/[a-z]*.py'):
             instr_module = instr.replace('\\','.').replace('.py','')
             self.log.info(f'Loading {instr_module}')
@@ -60,7 +65,14 @@ class Core(core_routines.Api, metaclass=Singleton):
                     self.instructions[mnem] += pat_list
                 else:
                     self.instructions[mnem] = sorted(self.instructions[mnem]+pat_list, key=lambda pat:pat[0].pattern.count('(?P<')*1000+len(pat[0].pattern))
-                
+
+                if self.profile:
+                    self.matched_patterns[mnem] = {pat[0].pattern:0 for pat in self.instructions[mnem]}
+                    self.exec_by_mnem[mnem] = []
+                    for _, action, _ in self.instructions[mnem]:
+                        if action.__name__+'_exec' not in self.exec_by_mnem[mnem]:
+                            self.exec_by_mnem[mnem].append(action.__name__+'_exec')
+                        self.exec_called[action.__name__+'_exec'] = 0
 
     def initializeRegisters(self):
         self.R = {i:self.Field(0) for i in range(16)}
@@ -152,12 +164,16 @@ class Core(core_routines.Api, metaclass=Singleton):
             if m is not None:
                 break
         if m is not None:
+            if self.profile:
+                self.matched_patterns[mnem.upper()][pat.pattern] += 1
             instr_exec = action(self, m, bitdiffs)
             def mnem_exec():
                 try:
                     assert(expected_pc == self.UInt(self.R[15]))
                 except:
                     raise Exception(f'{full_assembly} Expected PC to be {hex(expected_pc)} but was {hex(self.UInt(self.R[15]))}')
+                if self.profile:
+                    self.exec_called[instr_exec.__name__] += 1
                 instr_exec()
             return mnem_exec
 

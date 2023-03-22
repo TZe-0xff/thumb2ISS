@@ -81,14 +81,14 @@ class Simulator(object, metaclass=Singleton):
         for i in range(len(data)):
             self.memory[address+i] = data[i:i+1]
 
-    def load(self, disassembly, rom_memory, rom_start, ram_memorys):
+    def load(self, disassembly, rom_memory, rom_start, ram_memorys, profile=False):
         self.labels = {}
         self.label_by_address = {}
         self.memory = {}
         self.code   = {}
         self.dis    = {}
         self.breakpoints = {}
-        self.core = Core(self.log)
+        self.core = Core(self.log, profile=profile)
         
         for line in disassembly.splitlines():
             if len(line.strip()) > 0:

@@ -21,3 +21,28 @@ def test(c, steps, initial_mem={}, intial_regs={13:0x20001000, 15:0}):
         s()
         c.showRegisters(4)
         print('-'*20)
+
+    if c.profile:
+        print('#'*5, 'Profile', '#'*5)
+        used_mnems = []
+        print('Unused patterns')
+        for mnem in c.matched_patterns:
+            used_patterns = [(pat,cnt) for pat,cnt in c.matched_patterns[mnem].items() if cnt > 0]
+            if len(used_patterns) > 0:
+                used_mnems.append(mnem)
+                unused_patterns = [pat for pat,cnt in c.matched_patterns[mnem].items() if cnt == 0]
+                print('\n-->', mnem, f'({len(unused_patterns)}/{len(c.matched_patterns[mnem])})')
+                if len(unused_patterns) > 0:
+                    print('\n'.join(f'   {pat}' for pat in unused_patterns))
+        print('-'*20)
+        print('Unused executions')
+        for mnem in used_mnems:
+            possible_execs = c.exec_by_mnem[mnem]
+            used_execs = [(ex,c.exec_called[ex]) for ex in possible_execs if c.exec_called[ex] > 0]
+            if len(used_execs) > 0:
+                unused_execs = [ex for ex in possible_execs if c.exec_called[ex] == 0]
+                print('\n-->', mnem, f'({len(unused_execs)}/{len(possible_execs)})')
+                if len(unused_execs) > 0:
+                    print('\n'.join(f'   {ex}' for ex in unused_execs))
+        
+        

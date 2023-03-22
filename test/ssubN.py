@@ -1,7 +1,7 @@
 import logging
 from _testing import Core, test
 logging.basicConfig(level=logging.DEBUG)
-c = Core()
+c = Core(profile=True)
 
 steps = []
 steps += [c.getExec('ssub8', 'ssub8 r2, r1, r0', 0)] # r2= r1 - r0 on each byte
