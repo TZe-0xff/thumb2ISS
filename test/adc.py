@@ -11,3 +11,7 @@ steps += [c.getExec('adcs', 'adcs r1, r0', 0)]
 steps += [c.getExec('adc', 'adc r2, r1, r0', 0)]
 
 test(c, steps)
+
+assert(c.UInt(c.R[0]) == 10)
+assert(c.UInt(c.R[1]) == 31)
+assert(c.UInt(c.R[2]) == 41)

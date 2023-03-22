@@ -60,8 +60,6 @@ class Core(core_routines.Api, metaclass=Singleton):
                     self.instructions[mnem] += pat_list
                 else:
                     self.instructions[mnem] = sorted(self.instructions[mnem]+pat_list, key=lambda pat:pat[0].pattern.count('(?P<')*1000+len(pat[0].pattern))
-                    print(f'{mnem} :')
-                    print('\n'.join([pat[0].pattern for pat in self.instructions[mnem]]))
                 
 
     def initializeRegisters(self):
