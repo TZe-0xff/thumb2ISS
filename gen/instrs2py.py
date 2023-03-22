@@ -334,7 +334,7 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
     if 'shift_n' in existing_vars and 'shift_t' in existing_vars:
         working = re.sub(rf'\(shift_t, shift_n\) = [^;]+; ?', '', working)
 
-    subst_var = existing_vars
+    subst_var = existing_vars + ['widthminus1']
     if 'imm32' in existing_vars:
         subst_var += ['imm8', 'imm16']
     if 'abs_address' in existing_vars and 'imm32' not in existing_vars:
@@ -348,6 +348,8 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
 
     if 'imm32' in existing_vars:
         working = re.sub(r'\(imm32, carry\) = T32ExpandImm_C\([^,]+, ([^)]+)\)', r'carry = \1', working)
+        if 'sat_imm' in working:
+            working = working.replace('sat_imm', 'imm32')
 
     if 'lsb' in existing_vars and 'lsbit' in working:
         working = re.sub(r'lsbit = [^;]+', r'lsbit = UInt(lsb)', working)
@@ -390,6 +392,9 @@ def emitExecute(exec, ofile, existing_vars=[], indent=0):
             working = working.replace('imm16', 'imm32')
         if 'imm8' in working:
             working = working.replace('imm8', 'imm32')
+        if 'sat_imm' in working:
+            working = working.replace('sat_imm', 'imm32')
+
     if 'Replicate' in working:
         working = re.sub(r'core.R\[(\w+)\]<(\w+):(\w+)> = core.Replicate\([^;]*', r'core.R[\1] = core.R[\1] & ~((0xffffffff >> (31 - \2 + \3)) << \3)', working)
 

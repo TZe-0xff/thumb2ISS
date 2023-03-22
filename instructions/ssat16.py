@@ -12,7 +12,7 @@ def aarch32_SSAT16_T1_A(core, regex_match, bitdiffs):
     Rn = regex_groups.get('Rn', None)
     log.debug(f'aarch32_SSAT16_T1_A Rd={Rd} imm32={imm32} Rn={Rn} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  saturate_to = core.UInt(sat_imm)+1;
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  saturate_to = core.UInt(imm32)+1;
     if d == 15 or n == 15:
         raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
 

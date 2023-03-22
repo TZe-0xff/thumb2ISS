@@ -14,7 +14,7 @@ def aarch32_UBFX_T1_A(core, regex_match, bitdiffs):
     log.debug(f'aarch32_UBFX_T1_A Rd={Rd} Rn={Rn} lsb={lsb} width={width} cond={cond}')
     # decode
     d = core.reg_num[Rd];  n = core.reg_num[Rn];
-    lsbit = core.UInt(lsb);  widthminus1 = core.UInt(widthm1);
+    lsbit = core.UInt(lsb);  
     msbit = core.UInt(width) + core.UInt(lsb);
     if d == 15 or n == 15:
         raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
