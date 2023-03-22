@@ -181,13 +181,12 @@ class Api():
     # N
 
     def NOT(self, value):
-        if type(value) == Register:
-            return (~value.ival)
-        elif type(value) == bytes:
-            return ~self.UInt(value)
-        elif type(value) == bool:
+        if type(value) == bool:
             return not value
-        return ~int(value)
+
+        full_scale_val = ~self.UInt(value)
+
+        return self.Field(full_scale_val)
 
     # O
 
@@ -319,7 +318,7 @@ class Api():
         return (result, saturated);
 
     def SignExtend(self, candidate, bitsize, msb=None, lsb=None):
-        assert(bitsize==32)
+
         in_c = candidate
         if type(candidate) is str and ('0' in candidate or '1' in candidate):
             value = int(candidate, 2)
@@ -341,7 +340,7 @@ class Api():
             value = value | ((0xFFFFFFFF << candidate._msb) & 0xFFFFFFFF)
 
         self.log.info(f'SignExtended {self.UInt(in_c)} to {hex(value)}')
-        return self.Field(value)
+        return self.Field(value, msb=bitsize-1)
 
     def SignExtendSubField(self, candidate, msb, lsb, bitsize):
         return self.SignExtend(candidate, bitsize, msb, lsb)
@@ -392,6 +391,8 @@ class Api():
 
         if type(value) == int:
             if value < 0:
+                if value < -2**31:
+                    print(hex(value))
                 value = struct.pack('<l', value)
             else:
                 value = struct.pack('<L', value)
