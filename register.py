@@ -12,12 +12,9 @@ class Register:
             self.ival = int(initial_value, 0)
             self.bval = struct.pack('<l', self.ival)
         else:
-            self.ival = int(initial_value)
-            if self.ival < 0 or self.ival < 2**31:
-                self.bval = struct.pack('<l', self.ival)
-            else:
-                self.bval = struct.pack('<L', self.ival)
-                self.ival = struct.unpack('<l', self.bval)[0]
+            uval = int(initial_value) & 0xffffffff
+            self.bval = struct.pack('<L', uval)
+            self.ival = struct.unpack('<l', self.bval)[0]
         self._msb = 31
 
     @staticmethod

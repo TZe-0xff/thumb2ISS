@@ -227,6 +227,7 @@ class Api():
         return float(x)
 
     def ROR(self, x, shift):
+        shift = int(shift)
         if shift == 0:
             result = x;
         else:
@@ -454,7 +455,6 @@ class Api():
     # Z
 
     def ZeroExtend(self, candidate, bitsize, msb=None, lsb=None):
-        assert(bitsize==32)
         in_c = candidate
         if type(candidate) is str and ('0' in candidate or '1' in candidate):
             value = int(candidate, 2)
@@ -464,7 +464,7 @@ class Api():
         else:
             value = self.UInt(candidate)
 
-        return self.Field(value)
+        return self.Field(value, msb=bitsize-1)
 
     def ZeroExtendSubField(self, candidate, msb, lsb, bitsize):
         return self.ZeroExtend(candidate, bitsize, msb, lsb)
