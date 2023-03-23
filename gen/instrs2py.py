@@ -366,6 +366,10 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
 
     working = applyReplacement(working, dec_subst)
 
+    if 'if msbit > 31:' in working:
+        print('msbit found')
+        working = re.sub(r"if msbit > 31:\n(\s*)raise Exception\('UNPREDICTABLE'\);", r'if msbit > 31:\n\1msbit = 31;', working)
+
     for line in working.splitlines():
         if len(line.strip()) > 0:
             print(' '*indent, line, sep='', file=ofile)
