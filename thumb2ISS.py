@@ -117,28 +117,48 @@ def run(elf_file, cpu, debug, log, verbose, timeout, profile):
             log.info(f'Simulation ended by Debugger exit')
 
     if profile:
-        print('#'*5, 'Profile', '#'*5)
+        from collections import defaultdict
+        sum_patt = {}
+        if os.path.exists('prof_patt_summary.csv'):
+            with open('prof_patt_summary.csv') as f:
+                next(f)
+                for line in f:
+                    _,pat,cnt = line.split(';')
+                    sum_patt[pat] = int(cnt.strip())
+        else:
+            sum_patt = defaultdict(lambda:0)
+
+        sum_exec = {}
+        if os.path.exists('prof_exec_summary.csv'):
+            with open('prof_exec_summary.csv') as f:
+                next(f)
+                for line in f:
+                    _,exc,cnt = line.split(';')
+                    sum_exec[exc] = int(cnt.strip())
+        else:
+            sum_exec = defaultdict(lambda:0)
+            
         used_mnems = []
         c = Core()
-        print('Unused patterns')
-        for mnem in c.matched_patterns:
-            used_patterns = [(pat,cnt) for pat,cnt in c.matched_patterns[mnem].items() if cnt > 0]
-            if len(used_patterns) > 0:
-                used_mnems.append(mnem)
-                unused_patterns = [pat for pat,cnt in c.matched_patterns[mnem].items() if cnt == 0]
-                print('\n-->', mnem, f'({len(unused_patterns)}/{len(c.matched_patterns[mnem])})')
-                if len(unused_patterns) > 0:
-                    print('\n'.join(f'   {pat}' for pat in unused_patterns))
-        print('-'*20)
-        print('Unused executions')
-        for mnem in used_mnems:
-            possible_execs = c.exec_by_mnem[mnem]
-            used_execs = [(ex,c.exec_called[ex]) for ex in possible_execs if c.exec_called[ex] > 0]
-            if len(used_execs) > 0:
-                unused_execs = [ex for ex in possible_execs if c.exec_called[ex] == 0]
-                print('\n-->', mnem, f'({len(unused_execs)}/{len(possible_execs)})')
-                if len(unused_execs) > 0:
-                    print('\n'.join(f'   {ex}' for ex in unused_execs))
+        with open(f'prof_patt_{base_name}.csv', 'w') as f:
+            with open(f'prof_patt_summary.csv', 'w') as s:
+                print('Mnemonic;Pattern;Occurences', file=f)
+                print('Mnemonic;Pattern;Occurences', file=s)
+        
+                for mnem in sorted(c.matched_patterns):
+                    for pat,cnt in sorted(c.matched_patterns[mnem].items(), key=lambda x:x[0]):
+                        print(';'.join([mnem, pat, str(cnt)]), file=f)
+                        print(';'.join([mnem, pat, str(cnt+sum_patt[pat])]), file=s)
+
+        
+        with open(f'prof_exec_{base_name}.csv', 'w') as f:           
+            with open(f'prof_exec_summary.csv', 'w') as s:
+                print('Mnemonic;Function;Executed', file=f)
+                print('Mnemonic;Function;Executed', file=s)
+                for mnem in sorted(c.exec_by_mnem):
+                    for exc in sorted(c.exec_by_mnem[mnem]):
+                        print(';'.join([mnem, exc, str(c.exec_called[exc])]), file=f)     
+                        print(';'.join([mnem, exc, str(c.exec_called[exc]+sum_exec[exc])]), file=s)            
 
 if __name__ == '__main__':
     run()
