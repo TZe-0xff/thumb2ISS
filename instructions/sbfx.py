@@ -15,7 +15,7 @@ def aarch32_SBFX_T1_A(core, regex_match, bitdiffs):
     # decode
     d = core.reg_num[Rd];  n = core.reg_num[Rn];
     lsbit = core.UInt(lsb);  
-    msbit = core.UInt(width) + core.UInt(lsb);
+    msbit = core.UInt(width) - 1 + core.UInt(lsb);
     if d == 15 or n == 15:
         raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
     if msbit > 31:

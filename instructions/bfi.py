@@ -13,7 +13,7 @@ def aarch32_BFI_T1_A(core, regex_match, bitdiffs):
     width = regex_groups.get('width', None)
     log.debug(f'aarch32_BFI_T1_A Rd={Rd} Rn={Rn} lsb={lsb} width={width} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  msbit = core.UInt(width) + core.UInt(lsb);  lsbit = core.UInt(lsb);
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  msbit = core.UInt(width) - 1 + core.UInt(lsb);  lsbit = core.UInt(lsb);
     if d == 15:
         raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
     if msbit < lsbit:

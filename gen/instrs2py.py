@@ -355,7 +355,7 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
         working = re.sub(r'lsbit = [^;]+', r'lsbit = UInt(lsb)', working)
 
     if 'width' in existing_vars and 'msbit' in working:
-        working = re.sub(r'msbit = [^;]+', r'msbit = UInt(width) + UInt(lsb)', working)
+        working = re.sub(r'msbit = [^;]+', r'msbit = UInt(width) - 1 + UInt(lsb)', working)
 
     if 'op' not in existing_vars:
         working = re.sub(r'.*op == .*\n', '', working)
