@@ -12,15 +12,15 @@ def aarch32_SSAT16_T1_A(core, regex_match, bitdiffs):
     Rn = regex_groups.get('Rn', None)
     log.debug(f'aarch32_SSAT16_T1_A Rd={Rd} imm32={imm32} Rn={Rn} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  saturate_to = core.UInt(imm32)+1;
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  
     if d == 15 or n == 15:
         raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
 
     def aarch32_SSAT16_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (result1, sat1) = core.SignedSatQ(core.SInt(core.Field(core.R[n],15,0)), saturate_to);
-            (result2, sat2) = core.SignedSatQ(core.SInt(core.Field(core.R[n],31,16)), saturate_to);
+            (result1, sat1) = core.SignedSatQ(core.SInt(core.Field(core.R[n],15,0)), imm32);
+            (result2, sat2) = core.SignedSatQ(core.SInt(core.Field(core.R[n],31,16)), imm32);
             core.R[d] = core.SetField(core.R[d],15,0,core.SignExtend(result1, 16));
             core.R[d] = core.SetField(core.R[d],31,16,core.SignExtend(result2, 16));
             if sat1 or sat2:

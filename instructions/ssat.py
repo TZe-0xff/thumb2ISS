@@ -21,7 +21,7 @@ def aarch32_SSAT_T1_A(core, regex_match, bitdiffs):
         shift_t = 'LSL'
     log.debug(f'aarch32_SSAT_T1_A Rd={Rd} imm32={imm32} Rn={Rn} shift_t={shift_t} shift_n={shift_n} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  saturate_to = core.UInt(imm32)+1;
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  
     if d == 15 or n == 15:
         raise Exception('UNPREDICTABLE'); # Armv8-A removes raise Exception('UNPREDICTABLE') for R13
 
@@ -29,7 +29,7 @@ def aarch32_SSAT_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             operand = core.Shift(core.R[n], shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
-            (result, sat) = core.SignedSatQ(core.SInt(operand), saturate_to);
+            (result, sat) = core.SignedSatQ(core.SInt(operand), imm32);
             core.R[d] = core.SignExtend(result, 32);
             if sat:
                 core.APSR.Q = bool(1);

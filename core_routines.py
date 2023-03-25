@@ -306,6 +306,7 @@ class Api():
         return result
 
     def SignedSatQ(self, i, N):
+        N = self.UInt(N)
         result = i
         saturated = False
         if i > 2**(N-1) - 1:
@@ -413,6 +414,7 @@ class Api():
 
     def UnsignedSatQ(self, i, N):
         result = i
+        N = self.UInt(N)
         saturated = False
         if i > 2**N - 1:
             result = 2**N - 1
