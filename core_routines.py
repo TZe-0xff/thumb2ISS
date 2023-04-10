@@ -69,10 +69,14 @@ class Api():
         self.BranchWritePC(targetAddress, branchType)
 
     # C
-
+    def CallSupervisor(self, dontcare):
+        pass
 
     def CBWritePC(self, targetAddress):
         self.BranchWritePC(targetAddress, 'DIR')
+
+    def CheckForSVCTrap(self, dontcare):
+        pass
 
     def CheckITEnabled(self, dontcare):
         pass
@@ -221,7 +225,10 @@ class Api():
         return Register(struct.pack('<L', value))
 
     def ReadSpecReg(self, spec_reg):
-        raise Exception('Special registers not implemented')
+        if spec_reg.upper() in ['MSP', 'PSP']:
+            return self.SP
+        else: # ['APSR', 'IAPSR', 'EAPSR', 'XPSR', 'IPSR', 'EPSR', 'IEPSR', 'PRIMASK', 'BASEPRI', 'BASEPRI_MAX', 'FAULTMASK', 'CONTROL']
+            raise Exception('Special registers not implemented')
 
     def Real(self, x):
         return float(x)
@@ -447,7 +454,10 @@ class Api():
 
 
     def WriteSpecReg(self, spec_reg, value):
-        raise Exception('Special registers not implemented')
+        if spec_reg.upper() in ['MSP', 'PSP']:
+            self.SP = value
+        else: # ['APSR', 'IAPSR', 'EAPSR', 'XPSR', 'IPSR', 'EPSR', 'IEPSR', 'PRIMASK', 'BASEPRI', 'BASEPRI_MAX', 'FAULTMASK', 'CONTROL']
+            raise Exception('Special registers not implemented')
 
     # X, Y
 
