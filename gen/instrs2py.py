@@ -129,6 +129,7 @@ exec_subst = [
     (False, 'UNPREDICTABLE',                            "raise Exception('UNPREDICTABLE')"),
     (False, 'UNDEFINED',                                "raise Exception('UNDEFINED')"),
     (False, 'PC + imm32',                               'abs_address'),
+    (False, 'PC(PC',                                    'PC(core.PC'),
     (False, '# Do nothing',                             'pass # Do nothing'),
     (False, '||',                                       'or'),
     (False, '&&',                                       'and'),
