@@ -56,23 +56,18 @@ class Core(core_routines.Api, metaclass=Singleton):
             self.matched_patterns = {}
             self.exec_called = {}
             self.exec_by_mnem = {}
-        for instr in glob.glob('instructions/[a-z]*.py'):
-            instr_module = instr.replace('\\','.').replace('.py','')
-            self.log.info(f'Loading {instr_module}')
-            for mnem, pat_list in importlib.import_module(instr_module).patterns.items():
-                if mnem not in self.instructions:
-                    self.instructions[mnem] = []
-                    self.instructions[mnem] += pat_list
-                else:
-                    self.instructions[mnem] = sorted(self.instructions[mnem]+pat_list, key=lambda pat:pat[0].pattern.count('(?P<')*1000+(-100 if ('PC' in pat[0].pattern or 'SP' in pat[0].pattern) else 0)+len(pat[0].pattern))
+        from instructions._all import patterns
+        self.instructions = patterns
 
-                if self.profile:
-                    self.matched_patterns[mnem] = {pat[0].pattern:0 for pat in self.instructions[mnem]}
-                    self.exec_by_mnem[mnem] = []
-                    for _, action, _ in self.instructions[mnem]:
-                        if action.__name__+'_exec' not in self.exec_by_mnem[mnem]:
-                            self.exec_by_mnem[mnem].append(action.__name__+'_exec')
-                        self.exec_called[action.__name__+'_exec'] = 0
+
+        if self.profile:
+            for mnem in self.instructions:
+                self.matched_patterns[mnem] = {pat[0].pattern:0 for pat in self.instructions[mnem]}
+                self.exec_by_mnem[mnem] = []
+                for _, action, _ in self.instructions[mnem]:
+                    if action.__name__+'_exec' not in self.exec_by_mnem[mnem]:
+                        self.exec_by_mnem[mnem].append(action.__name__+'_exec')
+                    self.exec_called[action.__name__+'_exec'] = 0
 
     def initializeRegisters(self):
         self.R = {i:self.Field(0) for i in range(16)}

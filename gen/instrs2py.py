@@ -1421,40 +1421,59 @@ def main():
     comm_file  = args.output + "_common.py"
 
     if args.verbose > 0: print("Writing instructions to", args.output)
-    for title_mnem, i_list in instr_by_mnem.items():
-        with open(args.output + title_mnem.lower() + '.py', "w") as outf:
-            # header
-            print(f'import re, logging\n', file=outf)
-            print(f"log = logging.getLogger('Mnem.{title_mnem}')", file=outf)
-            all_patterns = []
-            for i in i_list:
-                all_patterns += i.emit_python_syntax(outf, aliases)
-                print(file=outf)
+    with open(args.output + '_all.py', 'w') as outall:
+        print(f'import re, logging\n', file=outall)
+        print(f"log = logging.getLogger('Mnem.All')", file=outall)
+        global_patterns = {}
+        for title_mnem, i_list in instr_by_mnem.items():
+            with open(args.output + title_mnem.lower() + '.py', "w") as outf:
+                # header
+                print(f'import re, logging\n', file=outf)
+                print(f"log = logging.getLogger('Mnem.{title_mnem}')", file=outf)
+                all_patterns = []
+                for i in i_list:
+                    all_patterns += i.emit_python_syntax(outf, aliases)
+                    print(file=outf)
+                    i.emit_python_syntax(outall, aliases)
+                    print(file=outall)
 
-            #organize patterns per mnemonic
-            org_patterns = {}
-            for decode_pat in all_patterns:
-                mnem = decode_pat[0].split('.')[0]
-                if mnem not in org_patterns:
-                    org_patterns[mnem] = []
-                org_patterns[mnem].append(decode_pat)
+                #organize patterns per mnemonic
+                org_patterns = {}
+                for decode_pat in all_patterns:
+                    mnem = decode_pat[0].split('.')[0]
+                    if mnem not in org_patterns:
+                        org_patterns[mnem] = []
+                    if mnem not in global_patterns:
+                        global_patterns[mnem] = []
+                    org_patterns[mnem].append(decode_pat)
+                    global_patterns[mnem].append(decode_pat)
 
-            print('patterns = {', file=outf)
-            # sort them by ascending complexity
-            for mnem in org_patterns:
-                print(f"    '{mnem}': [", file=outf)
-                for _,_,pat,method,bitdiff in sorted(org_patterns[mnem], key=lambda decode_pat : decode_pat[1]):
-                    print(" "*8, "(re.compile(r'", pat, "', re.I), ", method, ', ', dict(bitdiff), '),', sep='', file=outf)
-                print("    ],", file=outf)
-            print("}", file=outf)
+                print('patterns = {', file=outf)
+                # sort them by ascending complexity
+                for mnem in org_patterns:
+                    print(f"    '{mnem}': [", file=outf)
+                    for _,_,pat,method,bitdiff in sorted(org_patterns[mnem], key=lambda decode_pat : decode_pat[1]):
+                        print(" "*8, "(re.compile(r'", pat, "', re.I), ", method, ', ', dict(bitdiff), '),', sep='', file=outf)
+                    print("    ],", file=outf)
+                print("}", file=outf)
+
+        print('patterns = {', file=outall)
+        mnem_list = sorted(global_patterns.keys())
+        for mnem in mnem_list:
+            # sort them using magic order
+            print(f"    '{mnem}': [", file=outall)
+            for _,_,pat,method,bitdiff in sorted(global_patterns[mnem], key=lambda decode_pat:decode_pat[2].count('(?P<')*1000+(-100 if ('PC' in decode_pat[2] or 'SP' in decode_pat[2]) else 0)+len(decode_pat[2])):
+                print(" "*8, "(re.compile(r'", pat, "', re.I), ", method, ', ', dict(bitdiff), '),', sep='', file=outall)
+            print("    ],", file=outall)
+        print("}", file=outall)
 
 
 
-    if args.verbose > 0: print("Writing common definitions to", comm_file)
-    with open(comm_file, "w") as outf:
-        print(file=outf)
-        for x in live_chunks:
-            emitExecute(x,outf)
+    #if args.verbose > 0: print("Writing common definitions to", comm_file)
+    #with open(comm_file, "w") as outf:
+    #    print(file=outf)
+    #    for x in live_chunks:
+    #        emitExecute(x,outf)
         
     return
 
