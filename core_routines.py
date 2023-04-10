@@ -246,14 +246,13 @@ class Api():
     def RRX_C(self, x, carry_in):
         val = self.UInt(x) | (int(carry_in) << 32) 
         result = val >> 1
-        carry_out = core.Bit(val,0)
+        carry_out = self.Bit(val,0)
         return (result, carry_out);
 
     def RoundTowardsZero(self, x):
         return int(x) # python float to integer already rounds towards zero
 
     # S
-    # core.APSR.GE,0,'1' if sum1 >= 0 else '0'
     def SetBit(self, bit_table, tgt_bit, tgt_value):
         bit_table[int(tgt_bit)] = bool(int(tgt_value))
         return bit_table
@@ -262,8 +261,6 @@ class Api():
     def SetExclusiveMonitors(address, size):
         pass
 
-    # core.SetField(core.APSR.GE,1,0,'11' if sum1 >= 0 else '00')
-    # core.SetField(result,7,0,core.Field(core.R[m],15,8))
     def SetField(self, source, msb, lsb, value):
         if type(source) == list:
             bits = value[::-1]
@@ -282,10 +279,10 @@ class Api():
 
     def Shift_C(self, value, srtype, amount, carry_in):
         amount = int(amount)
-        if amount == 0:
+        srtype = srtype.upper()
+        if amount == 0 and srtype != 'RRX':
             (result, carry_out) = (value, carry_in)
         else:
-            srtype = srtype.upper()
             if srtype == 'LSL':
                 (result, carry_out) = self.LSL_C(value, amount)
             elif srtype == 'LSR':
