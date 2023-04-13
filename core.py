@@ -177,7 +177,7 @@ class Core(core_routines.Api, metaclass=Singleton):
                 instr_exec()
             return mnem_exec
 
-        if mnem.upper() not in ['CPSIE', 'CPSID', 'DMB', 'DSB', 'ISB', 'WFE', 'WFI', 'SEV', 'SVC']:
+        if mnem.upper() not in ['CPSIE', 'CPSID', 'DMB', 'DSB', 'ISB', 'WFE', 'WFI', 'SEV', 'SVC', 'PLD', 'PLI']:
             print(self.instructions.get(mnem.upper(), []))
             raise Exception(f'Unmanaged {mnem} : {full_assembly}')
         def debug_exec():
