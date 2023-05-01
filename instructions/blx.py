@@ -17,7 +17,7 @@ def aarch32_BLX_r_T1_A(core, regex_match, bitdiffs):
     def aarch32_BLX_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            target = core.R[m];
+            target = core.readR(m);
             core.BXWritePC(target, 'INDCALL');
         else:
             log.debug(f'aarch32_BLX_r_T1_A_exec skipped')

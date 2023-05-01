@@ -27,8 +27,8 @@ def aarch32_UXTAH_T1_A(core, regex_match, bitdiffs):
     def aarch32_UXTAH_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            rotated = core.ROR(core.R[m], rotation);
-            core.R[d] = core.R[n] + core.ZeroExtend(core.Field(rotated,15,0), 32);
+            rotated = core.ROR(core.readR(m), rotation);
+            core.R[d] = core.readR(n) + core.ZeroExtend(core.Field(rotated,15,0), 32);
         else:
             log.debug(f'aarch32_UXTAH_T1_A_exec skipped')
     return aarch32_UXTAH_T1_A_exec

@@ -31,14 +31,14 @@ def aarch32_LDMDB_T1_A(core, regex_match, bitdiffs):
     def aarch32_LDMDB_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            address = core.R[n] - 4*registers.count('1');
+            address = core.readR(n) - 4*registers.count('1');
             for i in range(0,14+1):
                 if registers[i] == '1':
                     core.R[i] = core.ReadMemS(address,4);  address = address + 4;
             if registers[15] == '1':
                 core.LoadWritePC(core.ReadMemS(address,4));
             if wback and registers[n] == '0':
-                 core.R[n] = core.R[n] - 4*registers.count('1');
+                 core.R[n] = core.readR(n) - 4*registers.count('1');
             if wback and registers[n] == '1':
                  core.R[n] = UNKNOWN = 0;
         else:

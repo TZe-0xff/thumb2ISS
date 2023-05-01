@@ -18,7 +18,7 @@ def aarch32_LDREXH_T1_A(core, regex_match, bitdiffs):
     def aarch32_LDREXH_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            address = core.R[n];
+            address = core.readR(n);
             core.SetExclusiveMonitors(address,2);
             core.R[t] = core.ZeroExtend(core.ReadMemA(address,2), 32);
         else:

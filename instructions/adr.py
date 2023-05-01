@@ -4,7 +4,7 @@ log = logging.getLogger('Mnem.ADR')
 # instruction aarch32_ADR_A
 # pattern ADR{<c>}{<q>} <Rd>, <label> with bitdiffs=[]
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
-# alias   ADD{<c>}{<q>} <Rd>, PC, #<imm8>
+# alias   ADD{<c>}{<q>} <Rd>, PC, #<imm8> with bitdiffs=[('S', '0')]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$ : c Rd imm32
 def aarch32_ADR_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
@@ -33,7 +33,7 @@ def aarch32_ADR_T1_A(core, regex_match, bitdiffs):
 
 # pattern ADR{<c>}{<q>} <Rd>, <label> with bitdiffs=[]
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
-# alias   SUB{<c>}{<q>} <Rd>, PC, #<imm12>
+# alias   SUB{<c>}{<q>} <Rd>, PC, #<imm12> with bitdiffs=[('S', '0')]
 # regex ^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$ : c Rd imm32
 def aarch32_ADR_T2_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
@@ -66,9 +66,9 @@ def aarch32_ADR_T2_A(core, regex_match, bitdiffs):
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
 # pattern ADR{<c>}{<q>} <Rd>, <label> with bitdiffs=[]
 # regex ^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$ : c Rd abs_address
-# alias   ADDW{<c>}{<q>} <Rd>, PC, #<imm12>
+# alias   ADDW{<c>}{<q>} <Rd>, PC, #<imm12> with bitdiffs=[('S', '0')]
 # regex ^ADDW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$ : c Rd imm32
-# alias   ADD{<c>}{<q>} <Rd>, PC, #<imm12>
+# alias   ADD{<c>}{<q>} <Rd>, PC, #<imm12> with bitdiffs=[('S', '0')]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$ : c Rd imm32
 def aarch32_ADR_T3_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
@@ -106,13 +106,13 @@ patterns = {
         (re.compile(r'^ADR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<abs_address>[a-f\d]+)\s*.*$', re.I), aarch32_ADR_T3_A, {}),
     ],
     'ADD': [
-        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T1_A, {}),
-        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T3_A, {}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T1_A, {'S': '0'}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T3_A, {'S': '0'}),
     ],
     'SUB': [
-        (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T2_A, {}),
+        (re.compile(r'^SUB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T2_A, {'S': '0'}),
     ],
     'ADDW': [
-        (re.compile(r'^ADDW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T3_A, {}),
+        (re.compile(r'^ADDW(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\sPC,\s#(?P<imm32>\d+)$', re.I), aarch32_ADR_T3_A, {'S': '0'}),
     ],
 }

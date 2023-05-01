@@ -24,7 +24,7 @@ def aarch32_SBFX_T1_A(core, regex_match, bitdiffs):
     def aarch32_SBFX_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.SignExtendSubField(core.R[n], msbit, lsbit, 32);
+            core.R[d] = core.SignExtendSubField(core.readR(n), msbit, lsbit, 32);
         else:
             log.debug(f'aarch32_SBFX_T1_A_exec skipped')
     return aarch32_SBFX_T1_A_exec

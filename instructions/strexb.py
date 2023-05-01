@@ -21,9 +21,9 @@ def aarch32_STREXB_T1_A(core, regex_match, bitdiffs):
     def aarch32_STREXB_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            address = core.R[n];
+            address = core.readR(n);
             if core.ExclusiveMonitorsPass(address,1):
-                core.WriteMemA(address,1, core.Field(core.R[t],7,0));
+                core.WriteMemA(address,1, core.Field(core.readR(t),7,0));
                 core.R[d] = core.ZeroExtend('0', 32);
             else:
                 core.R[d] = core.ZeroExtend('1', 32);

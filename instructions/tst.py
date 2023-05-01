@@ -19,7 +19,7 @@ def aarch32_TST_i_T1_A(core, regex_match, bitdiffs):
     def aarch32_TST_i_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            result = core.R[n] & imm32;
+            result = core.readR(n) & imm32;
             core.APSR.N = core.Bit(result,31);
             core.APSR.Z = core.IsZeroBit(result);
             core.APSR.C = carry;
@@ -45,8 +45,8 @@ def aarch32_TST_r_T1_A(core, regex_match, bitdiffs):
     def aarch32_TST_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (shifted, carry) = core.Shift_C(core.R[m], shift_t, shift_n, core.APSR.C);
-            result = core.R[n] & shifted;
+            (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
+            result = core.readR(n) & shifted;
             core.APSR.N = core.Bit(result,31);
             core.APSR.Z = core.IsZeroBit(result);
             core.APSR.C = carry;
@@ -82,8 +82,8 @@ def aarch32_TST_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_TST_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (shifted, carry) = core.Shift_C(core.R[m], shift_t, shift_n, core.APSR.C);
-            result = core.R[n] & shifted;
+            (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
+            result = core.readR(n) & shifted;
             core.APSR.N = core.Bit(result,31);
             core.APSR.Z = core.IsZeroBit(result);
             core.APSR.C = carry;

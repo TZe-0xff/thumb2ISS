@@ -21,14 +21,14 @@ def aarch32_QSUB8_T1_A(core, regex_match, bitdiffs):
     def aarch32_QSUB8_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            diff1 = core.SInt(core.Field(core.R[n],7,0)) - core.SInt(core.Field(core.R[m],7,0));
-            diff2 = core.SInt(core.Field(core.R[n],15,8)) - core.SInt(core.Field(core.R[m],15,8));
-            diff3 = core.SInt(core.Field(core.R[n],23,16)) - core.SInt(core.Field(core.R[m],23,16));
-            diff4 = core.SInt(core.Field(core.R[n],31,24)) - core.SInt(core.Field(core.R[m],31,24));
-            core.R[d] = core.SetField(core.R[d],7,0,core.SignedSat(diff1, 8));
-            core.R[d] = core.SetField(core.R[d],15,8,core.SignedSat(diff2, 8));
-            core.R[d] = core.SetField(core.R[d],23,16,core.SignedSat(diff3, 8));
-            core.R[d] = core.SetField(core.R[d],31,24,core.SignedSat(diff4, 8));
+            diff1 = core.SInt(core.Field(core.readR(n),7,0)) - core.SInt(core.Field(core.readR(m),7,0));
+            diff2 = core.SInt(core.Field(core.readR(n),15,8)) - core.SInt(core.Field(core.readR(m),15,8));
+            diff3 = core.SInt(core.Field(core.readR(n),23,16)) - core.SInt(core.Field(core.readR(m),23,16));
+            diff4 = core.SInt(core.Field(core.readR(n),31,24)) - core.SInt(core.Field(core.readR(m),31,24));
+            core.R[d] = core.SetField(core.readR(d),7,0,core.SignedSat(diff1, 8));
+            core.R[d] = core.SetField(core.readR(d),15,8,core.SignedSat(diff2, 8));
+            core.R[d] = core.SetField(core.readR(d),23,16,core.SignedSat(diff3, 8));
+            core.R[d] = core.SetField(core.readR(d),31,24,core.SignedSat(diff4, 8));
         else:
             log.debug(f'aarch32_QSUB8_T1_A_exec skipped')
     return aarch32_QSUB8_T1_A_exec

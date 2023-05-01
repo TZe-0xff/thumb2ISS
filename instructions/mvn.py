@@ -42,24 +42,25 @@ def aarch32_MVN_i_T1_A(core, regex_match, bitdiffs):
 
 
 # instruction aarch32_MVN_r_A
-# pattern MVN<c>{<q>} <Rd>, <Rm> with bitdiffs=[]
+# pattern MVN<c>{<q>} <Rd>, <Rm> with bitdiffs=[('S', '0')]
 # regex ^MVN(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$ : c Rd Rm
-# pattern MVNS{<q>} <Rd>, <Rm> with bitdiffs=[]
+# pattern MVNS{<q>} <Rd>, <Rm> with bitdiffs=[('S', '1')]
 # regex ^MVNS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$ : Rd Rm
 def aarch32_MVN_r_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
     Rd = regex_groups.get('Rd', None)
     Rm = regex_groups.get('Rm', None)
+    S = bitdiffs.get('S', '0')
     log.debug(f'aarch32_MVN_r_T1_A Rd={Rd} Rm={Rm} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  m = core.reg_num[Rm];  setflags = not (cond is not None);
+    d = core.reg_num[Rd];  m = core.reg_num[Rm];  setflags = (S == '1');
     (shift_t, shift_n) = ('LSL', 0);
 
     def aarch32_MVN_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (shifted, carry) = core.Shift_C(core.R[m], shift_t, shift_n, core.APSR.C);
+            (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
             result = core.NOT(shifted);
             if d == 15:
                           # Can only occur for A32 encoding
@@ -112,7 +113,7 @@ def aarch32_MVN_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_MVN_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (shifted, carry) = core.Shift_C(core.R[m], shift_t, shift_n, core.APSR.C);
+            (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
             result = core.NOT(shifted);
             if d == 15:
                           # Can only occur for A32 encoding
@@ -135,13 +136,13 @@ def aarch32_MVN_r_T2_A(core, regex_match, bitdiffs):
 patterns = {
     'MVN': [
         (re.compile(r'^MVN(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_MVN_i_T1_A, {'S': '0'}),
-        (re.compile(r'^MVN(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_MVN_r_T1_A, {}),
+        (re.compile(r'^MVN(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_MVN_r_T1_A, {'S': '0'}),
         (re.compile(r'^MVN(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?P<Rd>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_MVN_r_T2_A, {'S': '0', 'stype': '11'}),
         (re.compile(r'^MVN(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_MVN_r_T2_A, {'S': '0', 'stype': '11'}),
         (re.compile(r'^MVN(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_MVN_r_T2_A, {'S': '0', 'stype': '11'}),
     ],
     'MVNS': [
-        (re.compile(r'^MVNS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_MVN_r_T1_A, {}),
+        (re.compile(r'^MVNS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_MVN_r_T1_A, {'S': '1'}),
         (re.compile(r'^MVNS.W\s(?P<Rd>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_MVN_r_T2_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^MVNS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_MVN_i_T1_A, {'S': '1'}),
         (re.compile(r'^MVNS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_MVN_r_T2_A, {'S': '1', 'stype': '11'}),

@@ -21,10 +21,10 @@ def aarch32_USAD8_T1_A(core, regex_match, bitdiffs):
     def aarch32_USAD8_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            absdiff1 = core.Abs(core.UInt(core.Field(core.R[n],7,0))   - core.UInt(core.Field(core.R[m],7,0)));
-            absdiff2 = core.Abs(core.UInt(core.Field(core.R[n],15,8))  - core.UInt(core.Field(core.R[m],15,8)));
-            absdiff3 = core.Abs(core.UInt(core.Field(core.R[n],23,16)) - core.UInt(core.Field(core.R[m],23,16)));
-            absdiff4 = core.Abs(core.UInt(core.Field(core.R[n],31,24)) - core.UInt(core.Field(core.R[m],31,24)));
+            absdiff1 = core.Abs(core.UInt(core.Field(core.readR(n),7,0))   - core.UInt(core.Field(core.readR(m),7,0)));
+            absdiff2 = core.Abs(core.UInt(core.Field(core.readR(n),15,8))  - core.UInt(core.Field(core.readR(m),15,8)));
+            absdiff3 = core.Abs(core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16)));
+            absdiff4 = core.Abs(core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24)));
             result = absdiff1 + absdiff2 + absdiff3 + absdiff4;
             core.R[d] = core.Field(result,31,0);
         else:

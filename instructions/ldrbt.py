@@ -24,9 +24,9 @@ def aarch32_LDRBT_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             if core.APSR.EL == EL2:
                  raise Exception('UNPREDICTABLE');               # Hyp mode
-            offset = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C) if register_form else imm32;
-            offset_addr = (core.R[n] + offset) if add else (core.R[n] - offset);
-            address = core.R[n] if postindex else offset_addr;
+            offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C) if register_form else imm32;
+            offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
+            address = core.readR(n) if postindex else offset_addr;
             core.R[t] = core.ZeroExtend(MemU_unpriv[address,1],32);
             if postindex:
                  core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')

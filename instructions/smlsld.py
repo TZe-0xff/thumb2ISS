@@ -26,10 +26,10 @@ def aarch32_SMLSLD_T1_A(core, regex_match, bitdiffs):
     def aarch32_SMLSLD_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            operand2 = core.ROR(core.R[m],16) if m_swap else core.R[m];
-            product1 = core.SInt(core.Field(core.R[n],15,0)) * core.SInt(core.Field(operand2,15,0));
-            product2 = core.SInt(core.Field(core.R[n],31,16)) * core.SInt(core.Field(operand2,31,16));
-            result = (product1 - product2) + core.SInt(core.R[dLo], core.R[dHi]);
+            operand2 = core.ROR(core.readR(m),16) if m_swap else core.readR(m);
+            product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
+            product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
+            result = (product1 - product2) + core.SInt(core.readR(dLo), core.readR(dHi));
             core.R[dHi] = core.Field(result,63,32);
             core.R[dLo] = core.Field(result,31,0);
         else:

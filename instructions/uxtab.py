@@ -27,8 +27,8 @@ def aarch32_UXTAB_T1_A(core, regex_match, bitdiffs):
     def aarch32_UXTAB_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            rotated = core.ROR(core.R[m], rotation);
-            core.R[d] = core.R[n] + core.ZeroExtend(core.Field(rotated,7,0), 32);
+            rotated = core.ROR(core.readR(m), rotation);
+            core.R[d] = core.readR(n) + core.ZeroExtend(core.Field(rotated,7,0), 32);
         else:
             log.debug(f'aarch32_UXTAB_T1_A_exec skipped')
     return aarch32_UXTAB_T1_A_exec

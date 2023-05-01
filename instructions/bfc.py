@@ -21,8 +21,8 @@ def aarch32_BFC_T1_A(core, regex_match, bitdiffs):
     def aarch32_BFC_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.R[d] & ~((0xffffffff >> (31 - msbit + lsbit)) << lsbit);
-            # Other bits of core.R[d] are unchanged
+            core.R[d] = core.readR(d) & ~((0xffffffff >> (31 - msbit + lsbit)) << lsbit);
+            # Other bits of core.readR(d) are unchanged
         else:
             log.debug(f'aarch32_BFC_T1_A_exec skipped')
     return aarch32_BFC_T1_A_exec

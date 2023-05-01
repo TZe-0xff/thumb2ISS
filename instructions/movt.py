@@ -18,8 +18,8 @@ def aarch32_MOVT_T1_A(core, regex_match, bitdiffs):
     def aarch32_MOVT_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.SetField(core.R[d],31,16,imm32);
-            # core.Field(core.R[d],15,0) unchanged
+            core.R[d] = core.SetField(core.readR(d),31,16,imm32);
+            # core.Field(core.readR(d),15,0) unchanged
         else:
             log.debug(f'aarch32_MOVT_T1_A_exec skipped')
     return aarch32_MOVT_T1_A_exec

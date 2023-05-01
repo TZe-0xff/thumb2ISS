@@ -21,14 +21,14 @@ def aarch32_UQADD8_T1_A(core, regex_match, bitdiffs):
     def aarch32_UQADD8_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            sum1 = core.UInt(core.Field(core.R[n],7,0)) + core.UInt(core.Field(core.R[m],7,0));
-            sum2 = core.UInt(core.Field(core.R[n],15,8)) + core.UInt(core.Field(core.R[m],15,8));
-            sum3 = core.UInt(core.Field(core.R[n],23,16)) + core.UInt(core.Field(core.R[m],23,16));
-            sum4 = core.UInt(core.Field(core.R[n],31,24)) + core.UInt(core.Field(core.R[m],31,24));
-            core.R[d] = core.SetField(core.R[d],7,0,core.UnsignedSat(sum1, 8));
-            core.R[d] = core.SetField(core.R[d],15,8,core.UnsignedSat(sum2, 8));
-            core.R[d] = core.SetField(core.R[d],23,16,core.UnsignedSat(sum3, 8));
-            core.R[d] = core.SetField(core.R[d],31,24,core.UnsignedSat(sum4, 8));
+            sum1 = core.UInt(core.Field(core.readR(n),7,0)) + core.UInt(core.Field(core.readR(m),7,0));
+            sum2 = core.UInt(core.Field(core.readR(n),15,8)) + core.UInt(core.Field(core.readR(m),15,8));
+            sum3 = core.UInt(core.Field(core.readR(n),23,16)) + core.UInt(core.Field(core.readR(m),23,16));
+            sum4 = core.UInt(core.Field(core.readR(n),31,24)) + core.UInt(core.Field(core.readR(m),31,24));
+            core.R[d] = core.SetField(core.readR(d),7,0,core.UnsignedSat(sum1, 8));
+            core.R[d] = core.SetField(core.readR(d),15,8,core.UnsignedSat(sum2, 8));
+            core.R[d] = core.SetField(core.readR(d),23,16,core.UnsignedSat(sum3, 8));
+            core.R[d] = core.SetField(core.readR(d),31,24,core.UnsignedSat(sum4, 8));
         else:
             log.debug(f'aarch32_UQADD8_T1_A_exec skipped')
     return aarch32_UQADD8_T1_A_exec

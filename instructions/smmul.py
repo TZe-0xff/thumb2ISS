@@ -24,7 +24,7 @@ def aarch32_SMMUL_T1_A(core, regex_match, bitdiffs):
     def aarch32_SMMUL_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            result = core.SInt(core.R[n]) * core.SInt(core.R[m]);
+            result = core.SInt(core.readR(n)) * core.SInt(core.readR(m));
             if round:
                  result = result + 0x80000000;
             core.R[d] = core.Field(result,63,32);

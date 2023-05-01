@@ -21,7 +21,7 @@ def aarch32_MSR_r_T1_AS(core, regex_match, bitdiffs):
     def aarch32_MSR_r_T1_AS_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.WriteSpecReg(spec_reg, core.R[n]);
+            core.WriteSpecReg(spec_reg, core.readR(n));
         else:
             log.debug(f'aarch32_MSR_r_T1_AS_exec skipped')
     return aarch32_MSR_r_T1_AS_exec

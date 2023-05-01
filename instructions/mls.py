@@ -21,9 +21,9 @@ def aarch32_MLS_T1_A(core, regex_match, bitdiffs):
     def aarch32_MLS_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            operand1 = core.SInt(core.R[n]);  # operand1 = core.UInt(core.R[n]) produces the same final results
-            operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.R[m]) produces the same final results
-            addend   = core.SInt(core.R[a]);  # addend   = core.UInt(core.R[a]) produces the same final results
+            operand1 = core.SInt(core.R[n]);  # operand1 = core.UInt(core.readR(n)) produces the same final results
+            operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
+            addend   = core.SInt(core.R[a]);  # addend   = core.UInt(core.readR(a)) produces the same final results
             result = addend - operand1 * operand2;
             core.R[d] = core.Field(result,31,0);
         else:

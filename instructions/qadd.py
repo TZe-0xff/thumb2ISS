@@ -22,7 +22,7 @@ def aarch32_QADD_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             sat = False;
-            (core.R[d], sat) = core.SignedSatQ(core.SInt(core.R[m]) + core.SInt(core.R[n]), 32);
+            (core.R[d], sat) = core.SignedSatQ(core.SInt(core.readR(m)) + core.SInt(core.readR(n)), 32);
             if sat:
                 core.APSR.Q = bool(1);
         else:

@@ -23,9 +23,9 @@ def aarch32_TBB_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             halfwords = 0;
             if is_tbh:
-                halfwords = core.UInt(core.ReadMemU(core.R[n]+core.LSL(core.R[m],1), 2));
+                halfwords = core.UInt(core.ReadMemU(core.readR(n)+core.LSL(core.readR(m),1), 2));
             else:
-                halfwords = core.UInt(core.ReadMemU(core.R[n]+core.R[m], 1));
+                halfwords = core.UInt(core.ReadMemU(core.readR(n)+core.readR(m), 1));
             core.BranchWritePC(PC + 2*halfwords, 'INDIR');
         else:
             log.debug(f'aarch32_TBB_T1_A_exec skipped')

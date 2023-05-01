@@ -18,7 +18,7 @@ def aarch32_CBNZ_T1_A(core, regex_match, bitdiffs):
 
     def aarch32_CBNZ_T1_A_exec():
         # execute
-        if nonzero != core.IsZero(core.R[n]):
+        if nonzero != core.IsZero(core.readR(n)):
             core.CBWritePC(abs_address);
     return aarch32_CBNZ_T1_A_exec
 

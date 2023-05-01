@@ -24,9 +24,9 @@ def aarch32_STREX_T1_A(core, regex_match, bitdiffs):
     def aarch32_STREX_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            address = core.R[n] + imm32;
+            address = core.readR(n) + imm32;
             if core.ExclusiveMonitorsPass(address,4):
-                core.WriteMemA(address,4, core.R[t]);
+                core.WriteMemA(address,4, core.readR(t));
                 core.R[d] = core.ZeroExtend('0', 32);
             else:
                 core.R[d] = core.ZeroExtend('1', 32);

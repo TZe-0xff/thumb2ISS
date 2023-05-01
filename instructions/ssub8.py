@@ -21,14 +21,14 @@ def aarch32_SSUB8_T1_A(core, regex_match, bitdiffs):
     def aarch32_SSUB8_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            diff1 = core.SInt(core.Field(core.R[n],7,0)) - core.SInt(core.Field(core.R[m],7,0));
-            diff2 = core.SInt(core.Field(core.R[n],15,8)) - core.SInt(core.Field(core.R[m],15,8));
-            diff3 = core.SInt(core.Field(core.R[n],23,16)) - core.SInt(core.Field(core.R[m],23,16));
-            diff4 = core.SInt(core.Field(core.R[n],31,24)) - core.SInt(core.Field(core.R[m],31,24));
-            core.R[d] = core.SetField(core.R[d],7,0,core.Field(diff1,7,0));
-            core.R[d] = core.SetField(core.R[d],15,8,core.Field(diff2,7,0));
-            core.R[d] = core.SetField(core.R[d],23,16,core.Field(diff3,7,0));
-            core.R[d] = core.SetField(core.R[d],31,24,core.Field(diff4,7,0));
+            diff1 = core.SInt(core.Field(core.readR(n),7,0)) - core.SInt(core.Field(core.readR(m),7,0));
+            diff2 = core.SInt(core.Field(core.readR(n),15,8)) - core.SInt(core.Field(core.readR(m),15,8));
+            diff3 = core.SInt(core.Field(core.readR(n),23,16)) - core.SInt(core.Field(core.readR(m),23,16));
+            diff4 = core.SInt(core.Field(core.readR(n),31,24)) - core.SInt(core.Field(core.readR(m),31,24));
+            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(diff1,7,0));
+            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(diff2,7,0));
+            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(diff3,7,0));
+            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(diff4,7,0));
             core.APSR.GE = core.SetBit(core.APSR.GE,0,'1' if diff1 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,1,'1' if diff2 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,2,'1' if diff3 >= 0 else '0')

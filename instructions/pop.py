@@ -20,7 +20,7 @@ def aarch32_POP_T1_A(core, regex_match, bitdiffs):
     def aarch32_POP_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            address = core.R[13];
+            address = core.readR(13);
             for i in range(0,14+1):
                 if registers[i] == '1':
                     core.R[i] = core.ReadMemU(address,4) if UnalignedAllowed else core.ReadMemA(address,4);
@@ -34,7 +34,7 @@ def aarch32_POP_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.LoadWritePC(core.ReadMemA(address,4));
             if registers[13] == '0':
-                 core.R[13] = core.R[13] + 4*registers.count('1');
+                 core.R[13] = core.readR(13) + 4*registers.count('1');
             if registers[13] == '1':
                  core.R[13] = UNKNOWN = 0;
         else:

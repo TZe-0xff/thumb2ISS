@@ -31,19 +31,19 @@ def aarch32_STMDB_T1_A(core, regex_match, bitdiffs):
     def aarch32_STMDB_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            address = core.R[n] - 4*registers.count('1');
+            address = core.readR(n) - 4*registers.count('1');
             for i in range(0,14+1):
                 if registers[i] == '1':
                     if i == n and wback and i != core.LowestSetBit(registers):
                         core.WriteMemS(address,4, UNKNOWN = 0);  # Only possible for encoding A1
                     else:
-                        core.WriteMemS(address,4, core.R[i]);
+                        core.WriteMemS(address,4, core.readR(i));
                     address = address + 4;
             if registers[15] == '1':
                   # Only possible for encoding A1
                 core.WriteMemS(address,4, core.PCStoreValue());
             if wback:
-                 core.R[n] = core.R[n] - 4*registers.count('1');
+                 core.R[n] = core.readR(n) - 4*registers.count('1');
         else:
             log.debug(f'aarch32_STMDB_T1_A_exec skipped')
     return aarch32_STMDB_T1_A_exec

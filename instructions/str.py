@@ -19,12 +19,15 @@ def aarch32_STR_i_T1_A(core, regex_match, bitdiffs):
 
     def aarch32_STR_i_T1_A_exec():
         # execute
-        if True:
-            offset_addr = (core.R[n] + imm32) if add else (core.R[n] - imm32);
-            address = offset_addr if index else core.R[n];
-            core.WriteMemU(address,4, core.R[t]);
-            if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        if core.ConditionPassed(cond):
+            if True:
+                offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
+                address = offset_addr if index else core.readR(n);
+                core.WriteMemU(address,4, core.readR(t));
+                if wback:
+                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        else:
+            log.debug(f'aarch32_STR_i_T1_A_exec skipped')
     return aarch32_STR_i_T1_A_exec
 
 # pattern STR{<c>}{<q>} <Rt>, [SP{, #{+}<imm>}] with bitdiffs=[]
@@ -43,12 +46,15 @@ def aarch32_STR_i_T2_A(core, regex_match, bitdiffs):
 
     def aarch32_STR_i_T2_A_exec():
         # execute
-        if True:
-            offset_addr = (core.R[n] + imm32) if add else (core.R[n] - imm32);
-            address = offset_addr if index else core.R[n];
-            core.WriteMemU(address,4, core.R[t]);
-            if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        if core.ConditionPassed(cond):
+            if True:
+                offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
+                address = offset_addr if index else core.readR(n);
+                core.WriteMemU(address,4, core.readR(t));
+                if wback:
+                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        else:
+            log.debug(f'aarch32_STR_i_T2_A_exec skipped')
     return aarch32_STR_i_T2_A_exec
 
 # pattern STR{<c>}.W <Rt>, [<Rn> {, #{+}<imm>}] with bitdiffs=[]
@@ -74,12 +80,15 @@ def aarch32_STR_i_T3_A(core, regex_match, bitdiffs):
 
     def aarch32_STR_i_T3_A_exec():
         # execute
-        if True:
-            offset_addr = (core.R[n] + imm32) if add else (core.R[n] - imm32);
-            address = offset_addr if index else core.R[n];
-            core.WriteMemU(address,4, core.R[t]);
-            if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        if core.ConditionPassed(cond):
+            if True:
+                offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
+                address = offset_addr if index else core.readR(n);
+                core.WriteMemU(address,4, core.readR(t));
+                if wback:
+                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        else:
+            log.debug(f'aarch32_STR_i_T3_A_exec skipped')
     return aarch32_STR_i_T3_A_exec
 
 # pattern STR{<c>}{<q>} <Rt>, [<Rn> {, #-<imm>}] with bitdiffs=[('P', '1'), ('U', '0'), ('W', '0')]
@@ -110,12 +119,15 @@ def aarch32_STR_i_T4_A(core, regex_match, bitdiffs):
 
     def aarch32_STR_i_T4_A_exec():
         # execute
-        if True:
-            offset_addr = (core.R[n] + imm32) if add else (core.R[n] - imm32);
-            address = offset_addr if index else core.R[n];
-            core.WriteMemU(address,4, core.R[t]);
-            if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        if core.ConditionPassed(cond):
+            if True:
+                offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
+                address = offset_addr if index else core.readR(n);
+                core.WriteMemU(address,4, core.readR(t));
+                if wback:
+                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+        else:
+            log.debug(f'aarch32_STR_i_T4_A_exec skipped')
     return aarch32_STR_i_T4_A_exec
 
 
@@ -137,15 +149,15 @@ def aarch32_STR_r_T1_A(core, regex_match, bitdiffs):
     def aarch32_STR_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            offset = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            offset_addr = (core.R[n] + offset) if add else (core.R[n] - offset);
-            address = offset_addr if index else core.R[n];
+            offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
+            address = offset_addr if index else core.readR(n);
             data = 0;
             if t == 15:
                   # Only possible for encoding A1
                 data = core.PCStoreValue();
             else:
-                data = core.R[t];
+                data = core.readR(t);
             core.WriteMemU(address,4, data);
             if wback:
                  core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
@@ -181,15 +193,15 @@ def aarch32_STR_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_STR_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            offset = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            offset_addr = (core.R[n] + offset) if add else (core.R[n] - offset);
-            address = offset_addr if index else core.R[n];
+            offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
+            address = offset_addr if index else core.readR(n);
             data = 0;
             if t == 15:
                   # Only possible for encoding A1
                 data = core.PCStoreValue();
             else:
-                data = core.R[t];
+                data = core.readR(t);
             core.WriteMemU(address,4, data);
             if wback:
                  core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')

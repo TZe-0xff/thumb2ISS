@@ -21,10 +21,10 @@ def aarch32_SSUB16_T1_A(core, regex_match, bitdiffs):
     def aarch32_SSUB16_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            diff1 = core.SInt(core.Field(core.R[n],15,0)) - core.SInt(core.Field(core.R[m],15,0));
-            diff2 = core.SInt(core.Field(core.R[n],31,16)) - core.SInt(core.Field(core.R[m],31,16));
-            core.R[d] = core.SetField(core.R[d],15,0,core.Field(diff1,15,0));
-            core.R[d] = core.SetField(core.R[d],31,16,core.Field(diff2,15,0));
+            diff1 = core.SInt(core.Field(core.readR(n),15,0)) - core.SInt(core.Field(core.readR(m),15,0));
+            diff2 = core.SInt(core.Field(core.readR(n),31,16)) - core.SInt(core.Field(core.readR(m),31,16));
+            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff1,15,0));
+            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff2,15,0));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if diff1 >= 0 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if diff2 >= 0 else '00');
         else:

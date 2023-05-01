@@ -21,10 +21,10 @@ def aarch32_SHADD16_T1_A(core, regex_match, bitdiffs):
     def aarch32_SHADD16_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            sum1 = core.SInt(core.Field(core.R[n],15,0)) + core.SInt(core.Field(core.R[m],15,0));
-            sum2 = core.SInt(core.Field(core.R[n],31,16)) + core.SInt(core.Field(core.R[m],31,16));
-            core.R[d] = core.SetField(core.R[d],15,0,core.Field(sum1,16,1));
-            core.R[d] = core.SetField(core.R[d],31,16,core.Field(sum2,16,1));
+            sum1 = core.SInt(core.Field(core.readR(n),15,0)) + core.SInt(core.Field(core.readR(m),15,0));
+            sum2 = core.SInt(core.Field(core.readR(n),31,16)) + core.SInt(core.Field(core.readR(m),31,16));
+            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum1,16,1));
+            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum2,16,1));
         else:
             log.debug(f'aarch32_SHADD16_T1_A_exec skipped')
     return aarch32_SHADD16_T1_A_exec

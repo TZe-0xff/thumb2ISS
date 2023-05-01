@@ -38,6 +38,7 @@ assembly_subst = [
     (False,     '.<dt>',                                r'\.F(?P<esize>\d+)'),
     (False, '<shift> #<amount>',                        r'(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+)'),
     (False, 'LSL #<imm>',                               r'(?P<shift_t>LSL)\s#(?P<shift_n>\d+)'),
+    (False, 'ASR #<imm>',                               r'(?P<shift_t>ASR)\s#(?P<shift_n>\d+)'),
     (False, 'LSL #<amount>',                            r'(?P<shift_t>LSL)\s#(?P<shift_n>\d+)'),
     (False, 'LSR #<amount>',                            r'(?P<shift_t>LSR)\s#(?P<shift_n>\d+)'),
     (False, 'ASR #<amount>',                            r'(?P<shift_t>ASR)\s#(?P<shift_n>\d+)'),
@@ -369,8 +370,11 @@ def emitDecoder(dec, ofile, existing_vars, indent=0):
     working = applyReplacement(working, dec_subst)
 
     if 'if msbit > 31:' in working:
-        print('msbit found')
         working = re.sub(r"if msbit > 31:\n(\s*)raise Exception\('UNPREDICTABLE'\);", r'if msbit > 31:\n\1msbit = 31;', working)
+
+
+    if 'setflags =' in working:
+        working = re.sub(r"setflags = (?:not )?\(cond is not None\)", r"setflags = (S == '1')", working)
 
     for line in working.splitlines():
         if len(line.strip()) > 0:
@@ -419,8 +423,9 @@ def emitExecute(exec, ofile, existing_vars=[], indent=0):
         working = "core.R[d] = core.Field(int(f'{core.UInt(core.R[m]):032b}'[::-1],2))"
 
     working = re.sub(r'(\s*)core.R\[(?P<dst>\w+)\]<(?P<msbit>\w+):(?P<lsbit>\w+)> = core.R\[(?P<src>\w+)\]<\((?P=msbit)-(?P=lsbit)\):0>;', 
-                     r'\1tmp_R\g<dst> = core.R[\g<dst>] & ~((0xffffffff >> (31 - \g<msbit> + \g<lsbit>)) << \g<lsbit>);\n\1core.R[\g<dst>] = tmp_R\g<dst> | (core.UInt(core.R[\g<src>]) << \g<lsbit>);',
+                     r'\1mask = 0xffffffff >> (31 - \g<msbit> + \g<lsbit>);\n\1tmp_R\g<dst> = core.R[\g<dst>] & ~((mask) << \g<lsbit>);\n\1core.R[\g<dst>] = tmp_R\g<dst> | ((core.UInt(core.R[\g<src>]) & mask) << \g<lsbit>);',
                      working)
+    working = re.sub(r'core\.R\[(\w+)\](?!.*=)', r'core.readR(\1)', working)
     for line in working.splitlines():
         if len(line.strip()) > 0:
             print(' '*indent, line, sep='', file=ofile)
@@ -449,24 +454,24 @@ class Alias:
             else:
                 full_handler_name = f'aarch32_{base_handler}_A'
             
-            for name, pattern, _ in self.aliases[i][0]:
+            for name, pattern, bdiffs in self.aliases[i][0]:
                 #equ_pattern_root = pattern.split(' ')[0].replace(name, base_mnem)
                 #if equ_pattern_root not in self.mnem_alias:
                 #    self.mnem_alias[equ_pattern_root] = []
                 #self.mnem_alias[equ_pattern_root] += [(name, pattern, full_handler_name)]
                 if full_handler_name not in self.mnem_alias:
                     self.mnem_alias[full_handler_name] = []
-                self.mnem_alias[full_handler_name] += [(name, pattern, full_handler_name)]
+                self.mnem_alias[full_handler_name] += [(name, pattern, bdiffs, full_handler_name)]
 
     def getAliasFor(self, handler_name):
         if handler_name not in self.mnem_alias:
             return []
-        return [(n,p) for n,p,fhn in self.mnem_alias[handler_name]]
+        return [(n,p,b) for n,p,b,fhn in self.mnem_alias[handler_name]]
     
     def getAliasFor_(self, equ_root, handler_name):
         if equ_root not in self.mnem_alias:
             return []
-        alias_list = [(n,p) for n,p,fhn in self.mnem_alias[equ_root] if fhn == handler_name]
+        alias_list = [(n,p,b) for n,p,b,fhn in self.mnem_alias[equ_root] if fhn == handler_name]
         return alias_list
 
     def hasAliasFor(self, equ_root, handler_name):
@@ -510,11 +515,11 @@ class Instruction:
                         last_mnem = last_mnem.replace('{IA}','')
 
                 for alias in aliases:
-                    for alias_mnem, alias_pat in alias.getAliasFor(deslash(inm)):
-                        print("# alias   "+ alias_pat, file=ofile)
+                    for alias_mnem, alias_pat, bitdiffs in alias.getAliasFor(deslash(inm)):
+                        print("# alias   "+ alias_pat + " with bitdiffs=%s"%(bitdiffs), file=ofile)
                         for reg_pat, fields, opt_fields in BuildPattern(alias_pat):
                            print("# regex "+ reg_pat + " : " + " ".join(f+('*' if f in opt_fields else '') for f in fields), file=ofile)
-                           all_patterns.append((alias_mnem, len(fields), reg_pat, deslash(inm), []))
+                           all_patterns.append((alias_mnem, len(fields), reg_pat, deslash(inm), bitdiffs))
                            all_fields += [f for f in fields if f not in all_fields]
                            all_opt_fields += [f for f in opt_fields if f not in all_opt_fields]
                 print("def ", deslash(inm), '(core, regex_match, bitdiffs):', sep='', file=ofile)
@@ -599,13 +604,13 @@ class Instruction:
                 print("    def ", exec_routine, '():', sep='', file=ofile)
                 indent = 8
                 print(" "*indent, '# execute', sep='', file=ofile)
-                if self.conditional:
+                if self.conditional or 'cond' in all_fields:
                     print(" "*indent, 'if core.ConditionPassed(cond):', sep='', file=ofile)
                     indent += 4
                 self.exec.patchTypeVar()
                 emitExecute(self.exec, ofile, all_fields, indent)
 
-                if self.conditional:
+                if self.conditional or 'cond' in all_fields:
                     indent-=4
                     print(" "*indent, 'else:', sep='', file=ofile)
                     print(" "*(indent+4), f"log.debug(f'{exec_routine} skipped')", sep='', file=ofile)
@@ -1134,26 +1139,39 @@ def readInstruction(xml,names,sailhack):
                 mnem = next(iterator)
                 categ = mnem.split('.')[0]
 
+                need_sflag = is_alias or ('setflags' in dec_asl.code and 'setflags = FALSE' not in dec_asl.code and 'setflags = TRUE' not in dec_asl.code)
+                if need_sflag:
+                    sflag = False
+                    for k,v in bitdiffs:
+                        if k == 'S':
+                            sflag = True
+                            break
+                    if sflag:
+                        bd_add = []
+                    else:
+                        bd_add = [('S', '1' if categ.endswith('S') else '0')]
+                else:
+                    bd_add = []
+
                 if categ not in allowed_mnem:
                     with open('discarded.log', 'a') as f:
                         print(categ, file=f)
                     continue
                 if categ not in mnems:
                     mnems.append(categ)
-                patterns.append((mnem, mnem+"".join(iterator), [(k,v) for k,v in bitdiffs if 'imm' not in k]))
+                patterns.append((mnem, mnem+"".join(iterator), [(k,v) for k,v in bitdiffs+bd_add if 'imm' not in k]))
             if name == 'aarch32/RSB_i/T1_A':
                 # add missing aliases
-                patterns.append(('NEG', 'NEG<c>{<q>} {<Rd>,} <Rn>', []))
+                patterns.append(('NEG', 'NEG<c>{<q>} {<Rd>,} <Rn>', [('S','0')]))
                 aliases.append(('NEG', 'RSB_i_T1'))
-                patterns.append(('NEGS', 'NEGS{<q>} {<Rd>,} <Rn>', []))
+                patterns.append(('NEGS', 'NEGS{<q>} {<Rd>,} <Rn>', [('S','1')]))
                 aliases.append(('NEGS', 'RSB_i_T1'))
-                
-                
 
             if is_alias:
                 # find equivalent pattern
                 equivalent_to = encoding.find('equivalent_to')
                 asmtemplate = equivalent_to.find('asmtemplate')
+
                 aliases.append((asmtemplate[0].text, asmtemplate[0].attrib['href'].split('#')[1]))
         if len(patterns) > 0:
             encs.append((name, insn_set, fields2, dec_asl, patterns, aliases))

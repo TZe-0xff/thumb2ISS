@@ -21,10 +21,10 @@ def aarch32_SEL_T1_A(core, regex_match, bitdiffs):
     def aarch32_SEL_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.SetField(core.R[d],7,0,core.Field(core.R[n],7,0)   if core.APSR.GE[0] else core.Field(core.R[m],7,0));
-            core.R[d] = core.SetField(core.R[d],15,8,core.Field(core.R[n],15,8)  if core.APSR.GE[1] else core.Field(core.R[m],15,8));
-            core.R[d] = core.SetField(core.R[d],23,16,core.Field(core.R[n],23,16) if core.APSR.GE[2] else core.Field(core.R[m],23,16));
-            core.R[d] = core.SetField(core.R[d],31,24,core.Field(core.R[n],31,24) if core.APSR.GE[3] else core.Field(core.R[m],31,24));
+            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(core.readR(n),7,0)   if core.APSR.GE[0] else core.Field(core.readR(m),7,0));
+            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(core.readR(n),15,8)  if core.APSR.GE[1] else core.Field(core.readR(m),15,8));
+            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(core.readR(n),23,16) if core.APSR.GE[2] else core.Field(core.readR(m),23,16));
+            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(core.readR(n),31,24) if core.APSR.GE[3] else core.Field(core.readR(m),31,24));
         else:
             log.debug(f'aarch32_SEL_T1_A_exec skipped')
     return aarch32_SEL_T1_A_exec

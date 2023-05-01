@@ -5,7 +5,7 @@ log = logging.getLogger('Mnem.PKHBT')
 # pattern PKHBT{<c>}{<q>} {<Rd>,} <Rn>, <Rm> {, LSL #<imm>} with bitdiffs=[('tb', '0')]
 # regex ^PKHBT(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>LSL)\s#(?P<shift_n>\d+))?$ : c Rd* Rn Rm shift_t* shift_n*
 # pattern PKHTB{<c>}{<q>} {<Rd>,} <Rn>, <Rm> {, ASR #<imm>} with bitdiffs=[('tb', '1')]
-# regex ^PKHTB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\sASR\s#(?P<imm32>\d+))?$ : c Rd* Rn Rm imm32*
+# regex ^PKHTB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>ASR)\s#(?P<shift_n>\d+))?$ : c Rd* Rn Rm shift_t* shift_n*
 def aarch32_PKH_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
     cond = regex_groups.get('c', None)
@@ -14,19 +14,16 @@ def aarch32_PKH_T1_A(core, regex_match, bitdiffs):
     Rm = regex_groups.get('Rm', None)
     shift_t = regex_groups.get('shift_t', None)
     shift_n = regex_groups.get('shift_n', None)
-    imm32 = regex_groups.get('imm32', None)
     tb = bitdiffs.get('tb', '0')
     S = bitdiffs.get('S', '0')
     T = bitdiffs.get('T', '0')
     if Rd is None:
         Rd = Rn
-    if imm32 is None:
-        imm32 = '0'
     if shift_n is None:
         shift_n = '0'
     if shift_t is None:
         shift_t = 'LSL'
-    log.debug(f'aarch32_PKH_T1_A Rd={Rd} Rn={Rn} Rm={Rm} shift_t={shift_t} shift_n={shift_n} imm32={imm32} cond={cond}')
+    log.debug(f'aarch32_PKH_T1_A Rd={Rd} Rn={Rn} Rm={Rm} shift_t={shift_t} shift_n={shift_n} cond={cond}')
     # decode
     if S == '1' or T == '1':
         raise Exception('UNDEFINED');
@@ -37,9 +34,9 @@ def aarch32_PKH_T1_A(core, regex_match, bitdiffs):
     def aarch32_PKH_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            operand2 = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
-            core.R[d] = core.SetField(core.R[d],15,0,core.Field(operand2,15,0) if tbform else core.Field(core.R[n],15,0));
-            core.R[d] = core.SetField(core.R[d],31,16,core.Field(core.R[n],31,16)    if tbform else core.Field(operand2,31,16));
+            operand2 = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
+            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(operand2,15,0) if tbform else core.Field(core.readR(n),15,0));
+            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16)    if tbform else core.Field(operand2,31,16));
         else:
             log.debug(f'aarch32_PKH_T1_A_exec skipped')
     return aarch32_PKH_T1_A_exec
@@ -50,6 +47,6 @@ patterns = {
         (re.compile(r'^PKHBT(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>LSL)\s#(?P<shift_n>\d+))?$', re.I), aarch32_PKH_T1_A, {'tb': '0'}),
     ],
     'PKHTB': [
-        (re.compile(r'^PKHTB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\sASR\s#(?P<imm32>\d+))?$', re.I), aarch32_PKH_T1_A, {'tb': '1'}),
+        (re.compile(r'^PKHTB(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>ASR)\s#(?P<shift_n>\d+))?$', re.I), aarch32_PKH_T1_A, {'tb': '1'}),
     ],
 }

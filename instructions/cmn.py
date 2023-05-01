@@ -18,7 +18,7 @@ def aarch32_CMN_i_T1_A(core, regex_match, bitdiffs):
     def aarch32_CMN_i_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
+            (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
             core.APSR.update(nzcv);
         else:
             log.debug(f'aarch32_CMN_i_T1_A_exec skipped')
@@ -41,8 +41,8 @@ def aarch32_CMN_r_T1_A(core, regex_match, bitdiffs):
     def aarch32_CMN_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[n], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(n), shifted, '0');
             core.APSR.update(nzcv);
         else:
             log.debug(f'aarch32_CMN_r_T1_A_exec skipped')
@@ -75,8 +75,8 @@ def aarch32_CMN_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_CMN_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[n], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(n), shifted, '0');
             core.APSR.update(nzcv);
         else:
             log.debug(f'aarch32_CMN_r_T2_A_exec skipped')

@@ -64,7 +64,7 @@ class Core(core_routines.Api, metaclass=Singleton):
                     self.instructions[mnem] = []
                     self.instructions[mnem] += pat_list
                 else:
-                    self.instructions[mnem] = sorted(self.instructions[mnem]+pat_list, key=lambda pat:pat[0].pattern.count('(?P<')*1000+len(pat[0].pattern))
+                    self.instructions[mnem] = sorted(self.instructions[mnem]+pat_list, key=lambda pat:pat[0].pattern.count('(?P<')*1000+(-100 if ('PC' in pat[0].pattern or 'SP' in pat[0].pattern) else 0)+len(pat[0].pattern))
 
                 if self.profile:
                     self.matched_patterns[mnem] = {pat[0].pattern:0 for pat in self.instructions[mnem]}
@@ -81,6 +81,11 @@ class Core(core_routines.Api, metaclass=Singleton):
         self.pc_updated = False
         self.break_reached = False
 
+    def readR(self, reg_id):
+        if reg_id < 15:
+            return self.R[reg_id]
+        else:
+            return self.PC
 
     @property
     def PC(self):

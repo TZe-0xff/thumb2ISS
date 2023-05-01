@@ -32,8 +32,8 @@ def aarch32_LDRD_i_T1_A(core, regex_match, bitdiffs):
     def aarch32_LDRD_i_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            offset_addr = (core.R[n] + imm32) if add else (core.R[n] - imm32);
-            address = offset_addr if index else core.R[n];
+            offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
+            address = offset_addr if index else core.readR(n);
             if core.IsAligned(address, 8):
                 data = core.ReadMemA(address,8);
                 if core.BigEndian(AccessType_GPR) :

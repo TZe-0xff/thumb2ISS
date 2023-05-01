@@ -26,7 +26,7 @@ def aarch32_UDIV_T1_A(core, regex_match, bitdiffs):
             if core.UInt(core.R[m]) == 0:
                 result = 0;
             else:
-                result = core.RoundTowardsZero(core.Real(core.UInt(core.R[n])) / core.Real(core.UInt(core.R[m])));
+                result = core.RoundTowardsZero(core.Real(core.UInt(core.readR(n))) / core.Real(core.UInt(core.readR(m))));
             core.R[d] = core.Field(result,31,0);
         else:
             log.debug(f'aarch32_UDIV_T1_A_exec skipped')

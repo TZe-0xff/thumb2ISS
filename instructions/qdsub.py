@@ -21,9 +21,9 @@ def aarch32_QDSUB_T1_A(core, regex_match, bitdiffs):
     def aarch32_QDSUB_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (doubled, sat1) = core.SignedSatQ(2 * core.SInt(core.R[n]), 32);
+            (doubled, sat1) = core.SignedSatQ(2 * core.SInt(core.readR(n)), 32);
             sat2 = False;
-            (core.R[d], sat2)  = core.SignedSatQ(core.SInt(core.R[m]) - core.SInt(doubled), 32);
+            (core.R[d], sat2)  = core.SignedSatQ(core.SInt(core.readR(m)) - core.SInt(doubled), 32);
             if sat1 or sat2:
                 core.APSR.Q = bool(1);
         else:

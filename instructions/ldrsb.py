@@ -21,8 +21,8 @@ def aarch32_LDRSB_i_T1_A(core, regex_match, bitdiffs):
     def aarch32_LDRSB_i_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            offset_addr = (core.R[n] + imm32) if add else (core.R[n] - imm32);
-            address = offset_addr if index else core.R[n];
+            offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
+            address = offset_addr if index else core.readR(n);
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
                  core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
@@ -60,8 +60,8 @@ def aarch32_LDRSB_i_T2_A(core, regex_match, bitdiffs):
     def aarch32_LDRSB_i_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            offset_addr = (core.R[n] + imm32) if add else (core.R[n] - imm32);
-            address = offset_addr if index else core.R[n];
+            offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
+            address = offset_addr if index else core.readR(n);
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
                  core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
@@ -121,9 +121,9 @@ def aarch32_LDRSB_r_T1_A(core, regex_match, bitdiffs):
     def aarch32_LDRSB_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            offset = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            offset_addr = (core.R[n] + offset) if add else (core.R[n] - offset);
-            address = offset_addr if index else core.R[n];
+            offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
+            address = offset_addr if index else core.readR(n);
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
                  core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
@@ -157,9 +157,9 @@ def aarch32_LDRSB_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_LDRSB_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            offset = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            offset_addr = (core.R[n] + offset) if add else (core.R[n] - offset);
-            address = offset_addr if index else core.R[n];
+            offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
+            address = offset_addr if index else core.readR(n);
             core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
             if wback:
                  core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')

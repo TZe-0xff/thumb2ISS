@@ -25,7 +25,7 @@ def aarch32_ORR_i_T1_A(core, regex_match, bitdiffs):
     def aarch32_ORR_i_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            result = core.R[n] | imm32;
+            result = core.readR(n) | imm32;
             if d == 15:
                           # Can only occur for A32 encoding
                 if setflags:
@@ -45,10 +45,10 @@ def aarch32_ORR_i_T1_A(core, regex_match, bitdiffs):
 
 
 # instruction aarch32_ORR_r_A
-# pattern ORR<c>{<q>} {<Rdn>,} <Rdn>, <Rm> with bitdiffs=[]
+# pattern ORR<c>{<q>} {<Rdn>,} <Rdn>, <Rm> with bitdiffs=[('S', '0')]
 # regex ^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s(?P<Rm>\w+)$ : c Rdn Rm
 # regex ^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$ : c Rdn Rm
-# pattern ORRS{<q>} {<Rdn>,} <Rdn>, <Rm> with bitdiffs=[]
+# pattern ORRS{<q>} {<Rdn>,} <Rdn>, <Rm> with bitdiffs=[('S', '1')]
 # regex ^ORRS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s(?P<Rm>\w+)$ : Rdn Rm
 # regex ^ORRS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$ : Rdn Rm
 def aarch32_ORR_r_T1_A(core, regex_match, bitdiffs):
@@ -56,16 +56,17 @@ def aarch32_ORR_r_T1_A(core, regex_match, bitdiffs):
     cond = regex_groups.get('c', None)
     Rdn = regex_groups.get('Rdn', None)
     Rm = regex_groups.get('Rm', None)
+    S = bitdiffs.get('S', '0')
     log.debug(f'aarch32_ORR_r_T1_A Rdn={Rdn} Rm={Rm} cond={cond}')
     # decode
-    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  m = core.reg_num[Rm];  setflags = not (cond is not None);
+    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  m = core.reg_num[Rm];  setflags = (S == '1');
     (shift_t, shift_n) = ('LSL', 0);
 
     def aarch32_ORR_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (shifted, carry) = core.Shift_C(core.R[m], shift_t, shift_n, core.APSR.C);
-            result = core.R[n] | shifted;
+            (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
+            result = core.readR(n) | shifted;
             if d == 15:
                           # Can only occur for A32 encoding
                 if setflags:
@@ -120,8 +121,8 @@ def aarch32_ORR_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_ORR_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (shifted, carry) = core.Shift_C(core.R[m], shift_t, shift_n, core.APSR.C);
-            result = core.R[n] | shifted;
+            (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
+            result = core.readR(n) | shifted;
             if d == 15:
                           # Can only occur for A32 encoding
                 if setflags:
@@ -142,16 +143,16 @@ def aarch32_ORR_r_T2_A(core, regex_match, bitdiffs):
 
 patterns = {
     'ORR': [
-        (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {}),
-        (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {}),
+        (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {'S': '0'}),
+        (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {'S': '0'}),
         (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ORR_i_T1_A, {'S': '0'}),
         (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T2_A, {'S': '0', 'stype': '11'}),
         (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_ORR_r_T2_A, {'S': '0', 'stype': '11'}),
         (re.compile(r'^ORR(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_ORR_r_T2_A, {'S': '0', 'stype': '11'}),
     ],
     'ORRS': [
-        (re.compile(r'^ORRS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {}),
-        (re.compile(r'^ORRS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {}),
+        (re.compile(r'^ORRS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {'S': '1'}),
+        (re.compile(r'^ORRS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T1_A, {'S': '1'}),
         (re.compile(r'^ORRS.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ORR_r_T2_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^ORRS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ORR_i_T1_A, {'S': '1'}),
         (re.compile(r'^ORRS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_ORR_r_T2_A, {'S': '1', 'stype': '11'}),

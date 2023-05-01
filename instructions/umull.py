@@ -23,7 +23,7 @@ def aarch32_UMULL_T1_A(core, regex_match, bitdiffs):
     def aarch32_UMULL_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            result = core.UInt(core.R[n]) * core.UInt(core.R[m]);
+            result = core.UInt(core.readR(n)) * core.UInt(core.readR(m));
             core.R[dHi] = core.Field(result,63,32);
             core.R[dLo] = core.Field(result,31,0);
             if setflags:

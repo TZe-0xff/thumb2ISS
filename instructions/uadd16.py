@@ -21,10 +21,10 @@ def aarch32_UADD16_T1_A(core, regex_match, bitdiffs):
     def aarch32_UADD16_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            sum1 = core.UInt(core.Field(core.R[n],15,0)) + core.UInt(core.Field(core.R[m],15,0));
-            sum2 = core.UInt(core.Field(core.R[n],31,16)) + core.UInt(core.Field(core.R[m],31,16));
-            core.R[d] = core.SetField(core.R[d],15,0,core.Field(sum1,15,0));
-            core.R[d] = core.SetField(core.R[d],31,16,core.Field(sum2,15,0));
+            sum1 = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),15,0));
+            sum2 = core.UInt(core.Field(core.readR(n),31,16)) + core.UInt(core.Field(core.readR(m),31,16));
+            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum1,15,0));
+            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum2,15,0));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if sum1 >= 0x10000 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if sum2 >= 0x10000 else '00');
         else:

@@ -23,7 +23,7 @@ def aarch32_SMULL_T1_A(core, regex_match, bitdiffs):
     def aarch32_SMULL_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            result = core.SInt(core.R[n]) * core.SInt(core.R[m]);
+            result = core.SInt(core.readR(n)) * core.SInt(core.readR(m));
             core.R[dHi] = core.Field(result,63,32);
             core.R[dLo] = core.Field(result,31,0);
             if setflags:

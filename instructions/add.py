@@ -2,9 +2,9 @@ import re, logging
 
 log = logging.getLogger('Mnem.ADD')
 # instruction aarch32_ADD_i_A
-# pattern ADD<c>{<q>} <Rd>, <Rn>, #<imm3> with bitdiffs=[]
+# pattern ADD<c>{<q>} <Rd>, <Rn>, #<imm3> with bitdiffs=[('S', '0')]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$ : c Rd Rn imm32
-# pattern ADDS{<q>} <Rd>, <Rn>, #<imm3> with bitdiffs=[]
+# pattern ADDS{<q>} <Rd>, <Rn>, #<imm3> with bitdiffs=[('S', '1')]
 # regex ^ADDS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$ : Rd Rn imm32
 def aarch32_ADD_i_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
@@ -12,27 +12,31 @@ def aarch32_ADD_i_T1_A(core, regex_match, bitdiffs):
     Rd = regex_groups.get('Rd', None)
     Rn = regex_groups.get('Rn', None)
     imm32 = regex_groups.get('imm32', None)
+    S = bitdiffs.get('S', '0')
     log.debug(f'aarch32_ADD_i_T1_A Rd={Rd} Rn={Rn} imm32={imm32} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  setflags = not (cond is not None);  
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  setflags = (S == '1');  
 
     def aarch32_ADD_i_T1_A_exec():
         # execute
-        if True:
-            (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
-            if setflags:
-                core.APSR.update(nzcv);
+        if core.ConditionPassed(cond):
+            if True:
+                (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                if setflags:
+                    core.APSR.update(nzcv);
+        else:
+            log.debug(f'aarch32_ADD_i_T1_A_exec skipped')
     return aarch32_ADD_i_T1_A_exec
 
-# pattern ADD<c>{<q>} <Rdn>, #<imm8> with bitdiffs=[]
+# pattern ADD<c>{<q>} <Rdn>, #<imm8> with bitdiffs=[('S', '0')]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : c Rdn imm32
-# pattern ADD<c>{<q>} {<Rdn>,} <Rdn>, #<imm8> with bitdiffs=[]
+# pattern ADD<c>{<q>} {<Rdn>,} <Rdn>, #<imm8> with bitdiffs=[('S', '0')]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$ : c Rdn imm32
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : c Rdn imm32
-# pattern ADDS{<q>} <Rdn>, #<imm8> with bitdiffs=[]
+# pattern ADDS{<q>} <Rdn>, #<imm8> with bitdiffs=[('S', '1')]
 # regex ^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : Rdn imm32
-# pattern ADDS{<q>} {<Rdn>,} <Rdn>, #<imm8> with bitdiffs=[]
+# pattern ADDS{<q>} {<Rdn>,} <Rdn>, #<imm8> with bitdiffs=[('S', '1')]
 # regex ^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$ : Rdn imm32
 # regex ^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$ : Rdn imm32
 def aarch32_ADD_i_T2_A(core, regex_match, bitdiffs):
@@ -40,17 +44,21 @@ def aarch32_ADD_i_T2_A(core, regex_match, bitdiffs):
     cond = regex_groups.get('c', None)
     Rdn = regex_groups.get('Rdn', None)
     imm32 = regex_groups.get('imm32', None)
+    S = bitdiffs.get('S', '0')
     log.debug(f'aarch32_ADD_i_T2_A Rdn={Rdn} imm32={imm32} cond={cond}')
     # decode
-    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  setflags = not (cond is not None);  
+    d = core.reg_num[Rdn];  n = core.reg_num[Rdn];  setflags = (S == '1');  
 
     def aarch32_ADD_i_T2_A_exec():
         # execute
-        if True:
-            (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
-            if setflags:
-                core.APSR.update(nzcv);
+        if core.ConditionPassed(cond):
+            if True:
+                (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                if setflags:
+                    core.APSR.update(nzcv);
+        else:
+            log.debug(f'aarch32_ADD_i_T2_A_exec skipped')
     return aarch32_ADD_i_T2_A_exec
 
 # pattern ADD<c>.W {<Rd>,} <Rn>, #<const> with bitdiffs=[('S', '0')]
@@ -78,11 +86,14 @@ def aarch32_ADD_i_T3_A(core, regex_match, bitdiffs):
 
     def aarch32_ADD_i_T3_A_exec():
         # execute
-        if True:
-            (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
-            if setflags:
-                core.APSR.update(nzcv);
+        if core.ConditionPassed(cond):
+            if True:
+                (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                if setflags:
+                    core.APSR.update(nzcv);
+        else:
+            log.debug(f'aarch32_ADD_i_T3_A_exec skipped')
     return aarch32_ADD_i_T3_A_exec
 
 # pattern ADD{<c>}{<q>} {<Rd>,} <Rn>, #<imm12> with bitdiffs=[]
@@ -105,18 +116,21 @@ def aarch32_ADD_i_T4_A(core, regex_match, bitdiffs):
 
     def aarch32_ADD_i_T4_A_exec():
         # execute
-        if True:
-            (result, nzcv) = core.AddWithCarry(core.R[n], imm32, '0');
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
-            if setflags:
-                core.APSR.update(nzcv);
+        if core.ConditionPassed(cond):
+            if True:
+                (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
+                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                if setflags:
+                    core.APSR.update(nzcv);
+        else:
+            log.debug(f'aarch32_ADD_i_T4_A_exec skipped')
     return aarch32_ADD_i_T4_A_exec
 
 
 # instruction aarch32_ADD_r_A
-# pattern ADD<c>{<q>} <Rd>, <Rn>, <Rm> with bitdiffs=[]
+# pattern ADD<c>{<q>} <Rd>, <Rn>, <Rm> with bitdiffs=[('S', '0')]
 # regex ^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s(?P<Rm>\w+)$ : c Rd Rn Rm
-# pattern ADDS{<q>} {<Rd>,} <Rn>, <Rm> with bitdiffs=[]
+# pattern ADDS{<q>} {<Rd>,} <Rn>, <Rm> with bitdiffs=[('S', '1')]
 # regex ^ADDS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$ : Rd* Rn Rm
 def aarch32_ADD_r_T1_A(core, regex_match, bitdiffs):
     regex_groups = regex_match.groupdict()
@@ -124,18 +138,19 @@ def aarch32_ADD_r_T1_A(core, regex_match, bitdiffs):
     Rd = regex_groups.get('Rd', None)
     Rn = regex_groups.get('Rn', None)
     Rm = regex_groups.get('Rm', None)
+    S = bitdiffs.get('S', '0')
     if Rd is None:
         Rd = Rn
     log.debug(f'aarch32_ADD_r_T1_A Rd={Rd} Rn={Rn} Rm={Rm} cond={cond}')
     # decode
-    d = core.reg_num[Rd];  n = core.reg_num[Rn];  m = core.reg_num[Rm];  setflags = not (cond is not None);
+    d = core.reg_num[Rd];  n = core.reg_num[Rn];  m = core.reg_num[Rm];  setflags = (S == '1');
     (shift_t, shift_n) = ('LSL', 0);
 
     def aarch32_ADD_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[n], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(n), shifted, '0');
             if d == 15:
                 if setflags:
                     core.ALUExceptionReturn(result);
@@ -169,8 +184,8 @@ def aarch32_ADD_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_ADD_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[n], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(n), shifted, '0');
             if d == 15:
                 if setflags:
                     core.ALUExceptionReturn(result);
@@ -224,8 +239,8 @@ def aarch32_ADD_r_T3_A(core, regex_match, bitdiffs):
     def aarch32_ADD_r_T3_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[n], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(n), shifted, '0');
             if d == 15:
                 if setflags:
                     core.ALUExceptionReturn(result);
@@ -255,7 +270,7 @@ def aarch32_ADD_SP_i_T1_A(core, regex_match, bitdiffs):
     def aarch32_ADD_SP_i_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (result, nzcv) = core.AddWithCarry(core.R[13], imm32, '0');
+            (result, nzcv) = core.AddWithCarry(core.readR(13), imm32, '0');
             if d == 15:
                           # Can only occur for A32 encoding
                 if setflags:
@@ -283,7 +298,7 @@ def aarch32_ADD_SP_i_T2_A(core, regex_match, bitdiffs):
     def aarch32_ADD_SP_i_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (result, nzcv) = core.AddWithCarry(core.R[13], imm32, '0');
+            (result, nzcv) = core.AddWithCarry(core.readR(13), imm32, '0');
             if d == 15:
                           # Can only occur for A32 encoding
                 if setflags:
@@ -319,7 +334,7 @@ def aarch32_ADD_SP_i_T3_A(core, regex_match, bitdiffs):
     def aarch32_ADD_SP_i_T3_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (result, nzcv) = core.AddWithCarry(core.R[13], imm32, '0');
+            (result, nzcv) = core.AddWithCarry(core.readR(13), imm32, '0');
             if d == 15:
                           # Can only occur for A32 encoding
                 if setflags:
@@ -352,7 +367,7 @@ def aarch32_ADD_SP_i_T4_A(core, regex_match, bitdiffs):
     def aarch32_ADD_SP_i_T4_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (result, nzcv) = core.AddWithCarry(core.R[13], imm32, '0');
+            (result, nzcv) = core.AddWithCarry(core.readR(13), imm32, '0');
             if d == 15:
                           # Can only occur for A32 encoding
                 if setflags:
@@ -384,8 +399,8 @@ def aarch32_ADD_SP_r_T1_A(core, regex_match, bitdiffs):
     def aarch32_ADD_SP_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[13], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(13), shifted, '0');
             if d == 15:
                 if setflags:
                     core.ALUExceptionReturn(result);
@@ -413,8 +428,8 @@ def aarch32_ADD_SP_r_T2_A(core, regex_match, bitdiffs):
     def aarch32_ADD_SP_r_T2_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[13], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(13), shifted, '0');
             if d == 15:
                 if setflags:
                     core.ALUExceptionReturn(result);
@@ -460,8 +475,8 @@ def aarch32_ADD_SP_r_T3_A(core, regex_match, bitdiffs):
     def aarch32_ADD_SP_r_T3_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            shifted = core.Shift(core.R[m], shift_t, shift_n, core.APSR.C);
-            (result, nzcv) = core.AddWithCarry(core.R[13], shifted, '0');
+            shifted = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
+            (result, nzcv) = core.AddWithCarry(core.readR(13), shifted, '0');
             if d == 15:
                 if setflags:
                     core.ALUExceptionReturn(result);
@@ -482,9 +497,9 @@ patterns = {
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdm>\w+),\sSP,\s(?P=Rdm)$', re.I), aarch32_ADD_SP_r_T1_A, {}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\sSP,\s(?P<Rdm>\w+)$', re.I), aarch32_ADD_SP_r_T1_A, {}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:SP,\s)?SP,\s(?P<Rm>\w+)$', re.I), aarch32_ADD_SP_r_T2_A, {}),
-        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {}),
-        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {}),
-        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {'S': '0'}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {'S': '0'}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {'S': '0'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T2_A, {'DN': '1'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T2_A, {'DN': '1'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T2_A, {'DN': '1'}),
@@ -493,11 +508,11 @@ patterns = {
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_SP_i_T3_A, {'S': '0'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_SP_i_T4_A, {}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?SP,\s(?P<Rm>\w+)$', re.I), aarch32_ADD_SP_r_T3_A, {'S': '0', 'stype': '11'}),
-        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T1_A, {}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T1_A, {'S': '0'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T3_A, {'S': '0'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T3_A, {'S': '0'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T4_A, {}),
-        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T1_A, {}),
+        (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T1_A, {'S': '0'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T3_A, {'S': '0', 'stype': '11'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T3_A, {'S': '0', 'stype': '11'}),
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s(?P<Rm>\w+),\s(?P<shift_t>RRX)$', re.I), aarch32_ADD_SP_r_T3_A, {'S': '0', 'stype': '11'}),
@@ -506,12 +521,12 @@ patterns = {
         (re.compile(r'^ADD(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)(?:,\s(?P<shift_t>[LAR][SO][LR])\s#(?P<shift_n>\d+))?$', re.I), aarch32_ADD_r_T3_A, {'S': '0', 'stype': '11'}),
     ],
     'ADDS': [
-        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {}),
-        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {}),
-        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {}),
-        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T1_A, {}),
+        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {'S': '1'}),
+        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s(?P=Rdn),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {'S': '1'}),
+        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rdn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T2_A, {'S': '1'}),
+        (re.compile(r'^ADDS(?:\.[NW])?\s(?P<Rd>\w+),\s(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T1_A, {'S': '1'}),
         (re.compile(r'^ADDS.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T3_A, {'S': '1'}),
-        (re.compile(r'^ADDS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T1_A, {}),
+        (re.compile(r'^ADDS(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T1_A, {'S': '1'}),
         (re.compile(r'^ADDS.W\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s(?P<Rm>\w+)$', re.I), aarch32_ADD_r_T3_A, {'S': '1', 'stype': '11'}),
         (re.compile(r'^ADDS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?SP,\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_SP_i_T3_A, {'S': '1'}),
         (re.compile(r'^ADDS(?P<c>[ACEGHLMNPV][CEILQST])?(?:\.[NW])?\s(?:(?P<Rd>\w+),\s)?(?P<Rn>\w+),\s#(?P<imm32>\d+)$', re.I), aarch32_ADD_i_T3_A, {'S': '1'}),

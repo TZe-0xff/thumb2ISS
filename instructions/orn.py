@@ -25,7 +25,7 @@ def aarch32_ORN_i_T1_A(core, regex_match, bitdiffs):
     def aarch32_ORN_i_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            result = core.R[n] | core.NOT(imm32);
+            result = core.readR(n) | core.NOT(imm32);
             core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
             if setflags:
                 core.APSR.N = core.Bit(result,31);
@@ -71,8 +71,8 @@ def aarch32_ORN_r_T1_A(core, regex_match, bitdiffs):
     def aarch32_ORN_r_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            (shifted, carry) = core.Shift_C(core.R[m], shift_t, shift_n, core.APSR.C);
-            result = core.R[n] | core.NOT(shifted);
+            (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
+            result = core.readR(n) | core.NOT(shifted);
             core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
             if setflags:
                 core.APSR.N = core.Bit(result,31);

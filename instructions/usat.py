@@ -28,7 +28,7 @@ def aarch32_USAT_T1_A(core, regex_match, bitdiffs):
     def aarch32_USAT_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            operand = core.Shift(core.R[n], shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
+            operand = core.Shift(core.readR(n), shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
             (result, sat) = core.UnsignedSatQ(core.SInt(operand), imm32);
             core.R[d] = core.ZeroExtend(result, 32);
             if sat:
