@@ -3,7 +3,7 @@ import logging
 from itertools import groupby
 from intelhex import IntelHex
 import re,sys,time,os,subprocess,tempfile
-from sim import Simulator, EndOfExecutionException, Core
+from .sim import Simulator, EndOfExecutionException, Core
 
 @click.command()
 @click.argument('elf_file', type=click.Path(exists=True))
@@ -102,7 +102,7 @@ def run(elf_file, cpu, debug, log, verbose, timeout, profile):
             log.info('Simulation ended by cancelation')
     else:
         # starting debugger
-        from debugger import Debugger
+        from .debugger import Debugger
         end_of_exec = False
         d = Debugger()
         try:

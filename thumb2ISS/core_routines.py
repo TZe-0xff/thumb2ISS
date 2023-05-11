@@ -1,6 +1,6 @@
-from register import Register
+from .register import Register
 import struct
-import semihosting
+from .semihosting import ExecuteCmd as semihostExecuteCmd
 
 
 class Api():
@@ -379,7 +379,7 @@ class Api():
         value = self.UInt(value)
         if value == 0xab:
             #semihosting
-            semihosting.ExecuteCmd(self)
+            semihostExecuteCmd(self)
         else:
             self.log.info(f'Breakpoint #{hex(value)} executed as NOP')
 

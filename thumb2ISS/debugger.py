@@ -3,7 +3,7 @@ from InquirerPy.prompts.expand import ExpandChoice
 from InquirerPy.base.control import Choice
 from InquirerPy.separator import Separator
 import re, os
-from sim import Simulator, Core
+from .sim import Simulator, Core
 
 
 class Debugger():

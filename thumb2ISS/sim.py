@@ -3,7 +3,7 @@ import logging
 import binascii
 import struct
 from itertools import groupby
-from core import Core, EndOfExecutionException,Singleton
+from .core import Core, EndOfExecutionException,Singleton
 
 class Architecture:
     CortexM0 = 0

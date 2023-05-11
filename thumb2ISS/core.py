@@ -4,8 +4,8 @@ import binascii
 import importlib
 import logging
 import glob
-import core_routines
-from register import Register
+from .core_routines import Api as coreApi
+from .register import Register
 
 class Singleton(type):
     _instances = {}
@@ -40,7 +40,7 @@ class ProgramStatus:
         ge_bits = ''.join(str(int(v)) for v in self.GE)
         return f'N: {int(self.N)} | Z: {int(self.Z)} | C: {int(self.C)} | V: {int(self.V)} | Q: {int(self.Q)} | GE: {ge_bits[::-1]}'
 
-class Core(core_routines.Api, metaclass=Singleton):
+class Core(coreApi, metaclass=Singleton):
     def __init__(self, log_root=None, profile=False):
         self.initializeRegisters()
         self.reg_num = {f'{p}{i}':i for i in range(16) for p in 'rR'}
@@ -56,7 +56,7 @@ class Core(core_routines.Api, metaclass=Singleton):
             self.matched_patterns = {}
             self.exec_called = {}
             self.exec_by_mnem = {}
-        from instructions._all import patterns
+        from .instructions._all import patterns
         self.instructions = patterns
 
 
