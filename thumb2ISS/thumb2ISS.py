@@ -8,12 +8,13 @@ from .sim import Simulator, EndOfExecutionException, Core
 @click.command()
 @click.argument('elf_file', type=click.Path(exists=True))
 @click.option('-d', '--debug', is_flag=True, default=False, help='Launch with debugger CLI')
-@click.option('-c', '--cpu', type=click.Choice(['M0', 'M0+', 'M3', 'M4', 'M23', 'M33'], case_sensitive=False), default='M4', help='Tune target (supported instructions, cycles)')
+#@click.option('-c', '--cpu', type=click.Choice(['M0', 'M0+', 'M3', 'M4', 'M23', 'M33'], case_sensitive=False), default='M4', help='Tune target (supported instructions, cycles)')
 @click.option('-l', '--log', type=click.File('w'), help='Full debug log in target file')
 @click.option('-v', '--verbose', count=True, help='Tune stderr output verbosity')
 @click.option('-t', '--timeout', default=10, show_default=True, help='Simulation timeout (s) (not applicable on debugger)')
 @click.option('-p', '--profile', is_flag=True, default=False, help='Extract statistics about instruction coverage')
-def run(elf_file, cpu, debug, log, verbose, timeout, profile):
+#def run(elf_file, cpu, debug, log, verbose, timeout, profile):
+def run(elf_file, debug, log, verbose, timeout, profile):
     ''' Runs ELF_FILE on thumb2 Instruction Set Simulator'''
 
 
