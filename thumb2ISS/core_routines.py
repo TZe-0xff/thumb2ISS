@@ -222,7 +222,7 @@ class Api():
         # load as unsigned
         value = struct.unpack(self.bytes_to_Uint[size], byte_seq)[0]
         self.log.info(f'Read {size} bytes as unsigned from {hex(address.ival)} : {hex(value)}')
-        return Register(struct.pack('<L', value))
+        return self.Field(value, msb=8*size-1)
 
     def ReadSpecReg(self, spec_reg):
         if spec_reg.upper() in ['MSP', 'PSP']:
