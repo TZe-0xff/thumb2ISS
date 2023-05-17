@@ -84,6 +84,7 @@ def run(elf_file, debug, log, verbose, timeout, profile):
                 for minaddr,maxaddr in s.address_limits:
                     print(f'Memory range : {hex(minaddr)} - {hex(maxaddr)}', file=sys.stderr)
 
+    err_code = 0
     if not debug:
         step_cnt = 0
         start_time = time.time()
@@ -95,6 +96,7 @@ def run(elf_file, debug, log, verbose, timeout, profile):
                 if step_cnt%100 == 0:
                     if time_limit and time.time() > time_limit:
                         log.info(f'Simulation ended by timeout : {step_cnt} steps simulated in {timeout} s')
+                        err_code = 124 # posix timeout err code
                         break
         except EndOfExecutionException:
             elapsed_time = time.time() - start_time
@@ -159,7 +161,8 @@ def run(elf_file, debug, log, verbose, timeout, profile):
                 for mnem in sorted(c.exec_by_mnem):
                     for exc in sorted(c.exec_by_mnem[mnem]):
                         print(';'.join([mnem, exc, str(c.exec_called[exc])]), file=f)     
-                        print(';'.join([mnem, exc, str(c.exec_called[exc]+sum_exec[exc])]), file=s)            
+                        print(';'.join([mnem, exc, str(c.exec_called[exc]+sum_exec[exc])]), file=s)
+    sys.exit(err_code)
 
 if __name__ == '__main__':
     run()
