@@ -1,5 +1,5 @@
 import os,sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from thumb2ISS.core import Core, Register
 
 os.chdir('..')
