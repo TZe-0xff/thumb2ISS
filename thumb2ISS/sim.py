@@ -27,7 +27,7 @@ class Simulator(object, metaclass=Singleton):
             (re.compile(r'^(?P<address>[\da-f]{8}) <(?P<label>[^>]+)>: *'), 
                 lambda m: self.genLbl(m.group('label'), int(m.group('address'), 16))),
             # code
-            (re.compile(r'^ +(?P<address>[\da-f]+):\s+(?P<lowWord>[\da-f ]{4})(?: +(?P<higWord>[\da-f]{4}))?\s+(?P<mnem>[a-z][\w.]+)\s*(?P<args>[^;\n\t]+)?.*'),
+            (re.compile(r'^ +(?P<address>[\da-f]+):\s+(?P<lowWord>[\da-f][\da-f ]{3})(?: +(?P<higWord>[\da-f]{4}))?\s+(?P<mnem>[a-z][\w.]+)\s*(?P<args>[^;\n\t]+)?.*'),
                 lambda m : self.genIsn(int(m.group('address'), 16), m.group('mnem'), m.group('args'), (m.group('lowWord'),m.group('higWord')))),
             # const data
             (re.compile(r'^ +(?P<address>[\da-f]+):\t(?P<value>[\da-f]+)\s+(?P<mnem>\.[\w.]+).*'),
@@ -47,9 +47,13 @@ class Simulator(object, metaclass=Singleton):
     def genIsn(self, address, mnemonic, args, encoding):
         self.log.getChild('genIsn').debug(f'Creating instruction <{mnemonic}({args})>@{hex(address)}')
         lowWord, highWord = encoding
-        data = binascii.unhexlify(lowWord)[::-1]
-        if highWord:
-            data+= binascii.unhexlify(highWord)[::-1]
+        try:
+            data = binascii.unhexlify(lowWord)[::-1]
+            if highWord:
+                data+= binascii.unhexlify(highWord)[::-1]
+        except:
+            print(f'Decoding exception {mnemonic}+{args} @ {hex(address)}', file=sys.stderr, flush=True)
+            raise
 
         self.log.getChild('genIsn').debug(f'Got {len(data)} from {hex(address)} to {hex(address+len(data)-1)}')
 
