@@ -58,6 +58,10 @@ class Core(coreApi, metaclass=Singleton):
             self.exec_by_mnem = {}
         from .instructions._all import patterns
         self.instructions = patterns
+        self.lastUpdatedRegs = []
+        self._load_result = 0
+        self._stall_cycle = False
+        self._loaded_regs = set()
 
 
         if self.profile:
@@ -74,13 +78,19 @@ class Core(coreApi, metaclass=Singleton):
         self.R[14] = self.Field(0xffffffff) # initial LR
         self.APSR = ProgramStatus()
         self.pc_updated = False
-        self.break_reached = False
 
     def readR(self, reg_id):
+        if reg_id in self._loaded_regs:
+            self._stall_cycle = True
         if reg_id < 15:
             return self.R[reg_id]
         else:
             return self.PC
+
+    def writeR(self, reg_id, reg_val):
+        self.R[reg_id] = reg_val
+        self.log.info(f'Setting R{reg_id}={hex(self.UInt(self.Field(reg_val)))}')
+        self.lastUpdatedRegs.append(reg_id)
 
     @property
     def PC(self):
@@ -120,6 +130,7 @@ class Core(coreApi, metaclass=Singleton):
         return self.UInt(self.R[14])
 
     def incPC(self, step):
+        branch_penalty = False
         if not self.pc_updated:
             #raise(Exception('#### PC increment'))
             self.R[15] = self.R[15] + step
@@ -128,10 +139,25 @@ class Core(coreApi, metaclass=Singleton):
                 if self.APSR.ITsteps == 0:
                     self.APSR.ITcond = None
         else:
+            branch_penalty = True
             self.pc_updated = False
             self.APSR.ITsteps = 0
             self.APSR.ITcond = None
-        return self.break_reached
+
+        cycle_adder = self._load_result
+        if self._load_result > 0:
+            # capture updated regs to determine if following instruction uses any of them to apply stall penalty
+            self._load_result = 0
+            self._loaded_regs = set(self.lastUpdatedRegs)
+        else:
+            self._loaded_regs = set()
+        if self._stall_cycle:
+            self._stall_cycle = False
+            cycle_adder += 1
+
+        self.lastUpdatedRegs = []
+
+        return cycle_adder, branch_penalty
 
 
     def showRegisters(self, indent=0):
@@ -146,7 +172,7 @@ class Core(coreApi, metaclass=Singleton):
         print(f'pc: {hex(self.UInt(self.R[15]))}')
         print(' '*indent, self.APSR, sep='')
 
-    def getExec(self, mnem, full_assembly, expected_pc):
+    def getExec(self, mnem, full_assembly, expected_pc, timings=None):
         m = None
         if mnem.upper() not in self.instructions:
             if mnem.upper() == 'LDMIA' or mnem.upper() == 'STMIA':
@@ -167,6 +193,10 @@ class Core(coreApi, metaclass=Singleton):
             if self.profile:
                 self.matched_patterns[mnem.upper()][pat.pattern] += 1
             instr_exec = action(self, m, bitdiffs)
+            if timings is not None:
+                instr_timing = timings.getTiming(mnem.upper(), expected_pc)
+            else:
+                instr_timing = 1
             def mnem_exec():
                 try:
                     assert(expected_pc == self.UInt(self.R[15]))
@@ -175,6 +205,7 @@ class Core(coreApi, metaclass=Singleton):
                 if self.profile:
                     self.exec_called[instr_exec.__name__] += 1
                 instr_exec()
+                return instr_timing
             return mnem_exec
 
         if mnem.upper() not in ['CPSIE', 'CPSID', 'DMB', 'DSB', 'ISB', 'WFE', 'WFI', 'SEV', 'SVC', 'PLD', 'PLI']:

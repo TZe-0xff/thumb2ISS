@@ -142,7 +142,6 @@ exec_subst = [
     (False, 'FALSE',                                    'False'),
     (False, 'core.bits(32) UNKNOWN',                    'core.Field(0xdeadbeef)'),
     (False, 'AArch32.core',                             'core'),
-    (True, re.compile(r'( *)(core\.R\[([^]]+)\] = (\w+);)'), r"\1\2 log.info(f'Setting R{\3}={hex(core.UInt(core.Field(\4)))}')"),
     (False, '= result;',                                '= core.Field(result);'),
 ]
 
@@ -427,6 +426,7 @@ def emitExecute(exec, ofile, existing_vars=[], indent=0):
                      r'\1mask = 0xffffffff >> (31 - \g<msbit> + \g<lsbit>);\n\1tmp_R\g<dst> = core.R[\g<dst>] & ~((mask) << \g<lsbit>);\n\1core.R[\g<dst>] = tmp_R\g<dst> | ((core.UInt(core.R[\g<src>]) & mask) << \g<lsbit>);',
                      working)
     working = re.sub(r'core\.R\[(\w+)\](?!.*=)', r'core.readR(\1)', working)
+    working = re.sub(r'core\.R\[(\w+)\]\s*=\s*([^;]+)', r'core.writeR(\1, \2)', working)
     for line in working.splitlines():
         if len(line.strip()) > 0:
             print(' '*indent, line, sep='', file=ofile)

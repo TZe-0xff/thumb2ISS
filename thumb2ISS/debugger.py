@@ -200,6 +200,9 @@ class Debugger():
             for l in range(4):
                 lines.append('    '.join([f'{r}: {h}' for r,h in regs[l*4:(l+1)*4]]))
             lines.append(apsr)
+            sc = sim.cycles['step']
+            tc = sim.cycles['total']
+            lines.append(f'Cycles:     {sc} (step)    {tc} (total)')
             print('\n'.join(lines))
             print('\n','_'*50, '\n')
             cmd = inquirer.expand(message='Next action:', choices=self.main_cmd, qmark='.', amark='.').execute()

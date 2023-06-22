@@ -213,6 +213,7 @@ class Api():
         return self.ReadMemU(address, size)
 
     def ReadMemU(self, address, size):
+        self._load_result += 1
         assert(size in [1,2,4])
         try:
             byte_seq = b''.join(self.memory[i] for i in range(address.ival, address.ival + size))

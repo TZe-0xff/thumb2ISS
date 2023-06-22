@@ -4,14 +4,7 @@ import binascii
 import struct
 from itertools import groupby
 from .core import Core, EndOfExecutionException,Singleton
-
-class Architecture:
-    CortexM0 = 0
-    CortexM0p= 1
-    CortexM3 = 2
-    CortexM4 = 3
-    CortexM23= 4
-    CortexM33= 5
+from .timings import Architecture, Timings
 
 class Simulator(object, metaclass=Singleton):
 
@@ -21,7 +14,7 @@ class Simulator(object, metaclass=Singleton):
             self.log = log_root.getChild('Sim')
         else:
             self.log = logging.getLogger('Simulator')
-        #self.timings_table = timings.load(t_arch)
+        self.timings_logic = Timings(t_arch)
         self.dis_patt = [
             # Labels
             (re.compile(r'^(?P<address>[\da-f]{8}) <(?P<label>[^>]+)>: *'), 
@@ -62,7 +55,7 @@ class Simulator(object, metaclass=Singleton):
             full_assembly+=f' {args}'
         mnemonic = mnemonic.split('.')[0]
         self.log.getChild('genIsn').debug(f'Get Execution for <{mnemonic}> ({full_assembly}) {self.core}')
-        self.code[address] = (self.core.getExec(mnemonic, full_assembly, address), len(data))
+        self.code[address] = (self.core.getExec(mnemonic, full_assembly, address, self.timings_logic), len(data))
         self.dis[address] = f'    {full_assembly}'
 
     def genConst(self, address, value_str, data_type):
@@ -93,6 +86,7 @@ class Simulator(object, metaclass=Singleton):
         self.dis    = {}
         self.breakpoints = {}
         self.core = Core(self.log, profile=profile)
+        self.cycles = {'step' : 0, 'total': 0}
         
         for line in disassembly.splitlines():
             if len(line.strip()) > 0:
@@ -129,6 +123,7 @@ class Simulator(object, metaclass=Singleton):
         byte_seq = b''.join(self.memory[i] for i in range(vector_table, vector_table + 8))
         initial_sp, initial_pc = struct.unpack('<LL', byte_seq)
         core.configure(initial_pc, initial_sp, self.memory)
+        self.cycles = {'step' : 0, 'total': 0}
 
     def step_in(self):
         core = Core(self.log)
@@ -136,8 +131,13 @@ class Simulator(object, metaclass=Singleton):
         if ex == 'break':
             # execute original instruction
             ex, pc_step = self.breakpoints[core.getPC()]
-        ex()
-        core.incPC(pc_step)
+        base_cnt = ex()
+        cycle_adder, branch_penalty = core.incPC(pc_step)
+        cycle_cnt = base_cnt + cycle_adder
+        if branch_penalty:
+            cycle_cnt += self.timings_logic._branch_penalty
+        self.cycles['step'] = cycle_cnt
+        self.cycles['total'] += cycle_cnt
 
     def step_out(self):
         core = Core(self.log)
@@ -159,6 +159,7 @@ class Simulator(object, metaclass=Singleton):
     def run(self):
         core = Core(self.log)
         step_cnt = 0
+        self.cycles['step'] = 0
         while True:
             cur_pc = core.getPC()
             ex, pc_step = self.code[cur_pc]
@@ -167,8 +168,13 @@ class Simulator(object, metaclass=Singleton):
                     break
                 # execute original instruction
                 ex, pc_step = self.breakpoints[cur_pc]
-            ex()
-            core.incPC(pc_step)
+            base_cnt = ex()
+            cycle_adder, branch_penalty = core.incPC(pc_step)
+            cycle_cnt = base_cnt + cycle_adder
+            if branch_penalty:
+                cycle_cnt += self.timings_logic._branch_penalty
+            self.cycles['step'] += cycle_cnt
+            self.cycles['total'] += cycle_cnt
             step_cnt+=1
 
 

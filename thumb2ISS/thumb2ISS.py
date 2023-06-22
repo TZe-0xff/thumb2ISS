@@ -13,7 +13,6 @@ from .sim import Simulator, EndOfExecutionException, Core
 @click.option('-v', '--verbose', count=True, help='Tune stderr output verbosity')
 @click.option('-t', '--timeout', default=10, show_default=True, help='Simulation timeout (s) (not applicable on debugger)')
 @click.option('-p', '--profile', is_flag=True, default=False, help='Extract statistics about instruction coverage')
-#def run(elf_file, cpu, debug, log, verbose, timeout, profile):
 def run(elf_file, debug, log, verbose, timeout, profile):
     ''' Runs ELF_FILE on thumb2 Instruction Set Simulator'''
 
@@ -95,12 +94,14 @@ def run(elf_file, debug, log, verbose, timeout, profile):
                 step_cnt+=1
                 if step_cnt%100 == 0:
                     if time_limit and time.time() > time_limit:
-                        log.info(f'Simulation ended by timeout : {step_cnt} steps simulated in {timeout} s')
+                        total_cycles = s.cycles['total']
+                        log.info(f'Simulation ended by timeout : {total_cycles} cycles simulated in {timeout} s')
                         err_code = 124 # posix timeout err code
                         break
         except EndOfExecutionException:
             elapsed_time = time.time() - start_time
-            log.info(f'Simulation ended by end of execution ({step_cnt} steps simulated in {elapsed_time:.3f} s)')
+            total_cycles = s.cycles['total']
+            log.info(f'Simulation ended by end of execution ({total_cycles} cycles simulated in {elapsed_time:.3f} s)')
         except KeyboardInterrupt:
             log.info('Simulation ended by cancelation')
     else:
