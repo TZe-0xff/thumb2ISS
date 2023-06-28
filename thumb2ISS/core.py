@@ -60,6 +60,7 @@ class Core(coreApi, metaclass=Singleton):
         self.instructions = patterns
         self.lastUpdatedRegs = []
         self._load_result = 0
+        self._store_result = 0
         self._stall_cycle = False
         self._loaded_regs = set()
 
@@ -144,7 +145,7 @@ class Core(coreApi, metaclass=Singleton):
             self.APSR.ITsteps = 0
             self.APSR.ITcond = None
 
-        cycle_adder = self._load_result
+        cycle_adder = self._load_result + self._store_result
         if self._load_result > 0:
             if not branch_penalty:
                 cycle_adder -= 1
@@ -153,6 +154,7 @@ class Core(coreApi, metaclass=Singleton):
             self._loaded_regs = set(self.lastUpdatedRegs)
         else:
             self._loaded_regs = set()
+        self._store_result = 0
         if self._stall_cycle:
             self._stall_cycle = False
             cycle_adder += 1

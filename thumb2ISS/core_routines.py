@@ -443,6 +443,7 @@ class Api():
 
     def WriteMemU(self, address, size, value):
         assert(size in [1,2,4])
+        self._store_result += 1
         value = self.UInt(value)
         self.log.info(f'Write {size} bytes as unsigned to {hex(address.ival)} : {hex(value)}')
         try:
