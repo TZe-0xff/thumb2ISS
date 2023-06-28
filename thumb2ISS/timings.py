@@ -17,10 +17,10 @@ class Timings:
             {'BL' : 2, 'MRS': 3, 'MSR' : 3, 'branchpenalty' : 1},
 
         Architecture.CortexM3 : 
-            {'MLA' : 2, 'MLS' : 2, 'SMULL' : 5, 'UMULL' : 5, 'SMLAL' : 7, 'UMLAL' : 7, 'SDIV': 12, 'UDIV': 12, 'TBB' : 2, 'TBH': 2,  'MRS': 3, 'MSR' : 3, 'branchpenalty' : 2},
+            {'MLA' : 2, 'MLS' : 2, 'SMULL' : 5, 'UMULL' : 5, 'SMLAL' : 7, 'UMLAL' : 7, 'SDIV': 12, 'UDIV': 12, 'TBB' : 3, 'TBH': 3,  'MRS': 3, 'MSR' : 3, 'branchpenalty' : 2},
 
         Architecture.CortexM4 : 
-            {'MLA' : 2, 'MLS' : 2, 'SDIV': 12, 'UDIV': 12, 'TBB' : 2, 'TBH': 2,  'MRS': 3, 'MSR' : 3, 'branchpenalty' : 2},
+            {'MLA' : 2, 'MLS' : 2, 'SDIV': 12, 'UDIV': 12, 'TBB' : 3, 'TBH': 3,  'MRS': 3, 'MSR' : 3, 'branchpenalty' : 2},
     }
 
     def __init__(self, arch):
