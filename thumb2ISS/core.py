@@ -146,6 +146,8 @@ class Core(coreApi, metaclass=Singleton):
 
         cycle_adder = self._load_result
         if self._load_result > 0:
+            if not branch_penalty:
+                cycle_adder -= 1
             # capture updated regs to determine if following instruction uses any of them to apply stall penalty
             self._load_result = 0
             self._loaded_regs = set(self.lastUpdatedRegs)
