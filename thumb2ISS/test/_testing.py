@@ -5,15 +5,18 @@ from thumb2ISS.core import Core, Register
 os.chdir('..')
 
 
-# default test : no memory access, 0 in registers
-def test(c, steps, initial_mem={}, intial_regs={13:0x20001000, 15:0}):
-    
+def setup(c, initial_mem={}, intial_regs={13:0x20001000, 15:0}):
     for k in intial_regs:
         intial_regs[k] = c.Field(intial_regs[k])
     c.configure(intial_regs[15], intial_regs[13], initial_mem)
     for i in list(range(13))+[14]:
         if i in intial_regs:
             c.R[i] = Register(intial_regs[i])
+
+# default test : no memory access, 0 in registers
+def test(c, steps, initial_mem={}, intial_regs={13:0x20001000, 15:0}):
+    
+    setup(c, initial_mem, intial_regs)
 
     c.showRegisters(4)
     print('-'*20)
