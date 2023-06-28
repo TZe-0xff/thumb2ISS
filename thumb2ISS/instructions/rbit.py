@@ -19,7 +19,7 @@ def aarch32_RBIT_T1_A(core, regex_match, bitdiffs):
     def aarch32_RBIT_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.Field(int(f'{core.UInt(core.readR(m)):032b}'[::-1],2))
+            core.writeR(d, core.Field(int(f'{core.UInt(core.readR(m)):032b}'[::-1],2)))
         else:
             log.debug(f'aarch32_RBIT_T1_A_exec skipped')
     return aarch32_RBIT_T1_A_exec

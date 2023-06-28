@@ -20,7 +20,7 @@ def aarch32_LDREXB_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             address = core.readR(n);
             core.SetExclusiveMonitors(address,1);
-            core.R[t] = core.ZeroExtend(core.ReadMemA(address,1), 32);
+            core.writeR(t, core.ZeroExtend(core.ReadMemA(address,1), 32));
         else:
             log.debug(f'aarch32_LDREXB_T1_A_exec skipped')
     return aarch32_LDREXB_T1_A_exec

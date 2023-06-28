@@ -37,7 +37,7 @@ def aarch32_PUSH_T1_A(core, regex_match, bitdiffs):
                     core.WriteMemU(address,4, core.PCStoreValue());
                 else:
                     core.WriteMemA(address,4, core.PCStoreValue());
-            core.R[13] = core.readR(13) - 4*registers.count('1');
+            core.writeR(13, core.readR(13) - 4*registers.count('1'));
         else:
             log.debug(f'aarch32_PUSH_T1_A_exec skipped')
     return aarch32_PUSH_T1_A_exec

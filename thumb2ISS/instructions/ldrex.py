@@ -23,7 +23,7 @@ def aarch32_LDREX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             address = core.readR(n) + imm32;
             core.SetExclusiveMonitors(address,4);
-            core.R[t] = core.ReadMemA(address,4);
+            core.writeR(t, core.ReadMemA(address,4));
         else:
             log.debug(f'aarch32_LDREX_T1_A_exec skipped')
     return aarch32_LDREX_T1_A_exec

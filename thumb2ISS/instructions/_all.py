@@ -32,7 +32,7 @@ def aarch32_ADC_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -70,7 +70,7 @@ def aarch32_ADC_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -123,7 +123,7 @@ def aarch32_ADC_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -152,7 +152,7 @@ def aarch32_ADD_i_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             if True:
                 (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -184,7 +184,7 @@ def aarch32_ADD_i_T2_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             if True:
                 (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -219,7 +219,7 @@ def aarch32_ADD_i_T3_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             if True:
                 (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -249,7 +249,7 @@ def aarch32_ADD_i_T4_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             if True:
                 (result, nzcv) = core.AddWithCarry(core.readR(n), imm32, '0');
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -287,7 +287,7 @@ def aarch32_ADD_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -322,7 +322,7 @@ def aarch32_ADD_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -377,7 +377,7 @@ def aarch32_ADD_r_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -408,7 +408,7 @@ def aarch32_ADD_SP_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -436,7 +436,7 @@ def aarch32_ADD_SP_i_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -472,7 +472,7 @@ def aarch32_ADD_SP_i_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -505,7 +505,7 @@ def aarch32_ADD_SP_i_T4_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -537,7 +537,7 @@ def aarch32_ADD_SP_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -566,7 +566,7 @@ def aarch32_ADD_SP_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -613,7 +613,7 @@ def aarch32_ADD_SP_r_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -646,7 +646,7 @@ def aarch32_ADR_T1_A(core, regex_match, bitdiffs):
                           # Can only occur for A32 encodings
                 core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_ADR_T1_A_exec skipped')
     return aarch32_ADR_T1_A_exec
@@ -677,7 +677,7 @@ def aarch32_ADR_T2_A(core, regex_match, bitdiffs):
                           # Can only occur for A32 encodings
                 core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_ADR_T2_A_exec skipped')
     return aarch32_ADR_T2_A_exec
@@ -712,7 +712,7 @@ def aarch32_ADR_T3_A(core, regex_match, bitdiffs):
                           # Can only occur for A32 encodings
                 core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_ADR_T3_A_exec skipped')
     return aarch32_ADR_T3_A_exec
@@ -750,7 +750,7 @@ def aarch32_AND_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -791,7 +791,7 @@ def aarch32_AND_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -848,7 +848,7 @@ def aarch32_AND_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -957,7 +957,7 @@ def aarch32_BFC_T1_A(core, regex_match, bitdiffs):
     def aarch32_BFC_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.readR(d) & ~((0xffffffff >> (31 - msbit + lsbit)) << lsbit);
+            core.writeR(d, core.readR(d) & ~((0xffffffff >> (31 - msbit + lsbit)) << lsbit));
             # Other bits of core.readR(d) are unchanged
         else:
             log.debug(f'aarch32_BFC_T1_A_exec skipped')
@@ -987,7 +987,7 @@ def aarch32_BFI_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             mask = 0xffffffff >> (31 - msbit + lsbit);
             tmp_Rd = core.readR(d) & ~((mask) << lsbit);
-            core.R[d] = tmp_Rd | ((core.UInt(core.readR(n)) & mask) << lsbit);
+            core.writeR(d, tmp_Rd | ((core.UInt(core.readR(n)) & mask) << lsbit));
             # Other bits of core.readR(d) are unchanged
         else:
             log.debug(f'aarch32_BFI_T1_A_exec skipped')
@@ -1026,7 +1026,7 @@ def aarch32_BIC_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -1067,7 +1067,7 @@ def aarch32_BIC_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -1123,7 +1123,7 @@ def aarch32_BIC_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -1297,7 +1297,7 @@ def aarch32_CLZ_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.CountLeadingZeroBits(core.readR(m));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_CLZ_T1_A_exec skipped')
     return aarch32_CLZ_T1_A_exec
@@ -1544,7 +1544,7 @@ def aarch32_EOR_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -1585,7 +1585,7 @@ def aarch32_EOR_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -1642,7 +1642,7 @@ def aarch32_EOR_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -1697,13 +1697,13 @@ def aarch32_LDM_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n);
             for i in range(0,14+1):
                 if registers[i] == '1':
-                    core.R[i] = core.ReadMemS(address,4);  address = address + 4;
+                    core.writeR(i, core.ReadMemS(address,4));  address = address + 4;
             if registers[15] == '1':
                 core.LoadWritePC(core.ReadMemS(address,4));
             if wback and registers[n] == '0':
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
             if wback and registers[n] == '1':
-                 core.R[n] = UNKNOWN = 0;
+                 core.writeR(n, UNKNOWN = 0);
         else:
             log.debug(f'aarch32_LDM_T1_A_exec skipped')
     return aarch32_LDM_T1_A_exec
@@ -1746,13 +1746,13 @@ def aarch32_LDM_T2_A(core, regex_match, bitdiffs):
             address = core.readR(n);
             for i in range(0,14+1):
                 if registers[i] == '1':
-                    core.R[i] = core.ReadMemS(address,4);  address = address + 4;
+                    core.writeR(i, core.ReadMemS(address,4));  address = address + 4;
             if registers[15] == '1':
                 core.LoadWritePC(core.ReadMemS(address,4));
             if wback and registers[n] == '0':
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
             if wback and registers[n] == '1':
-                 core.R[n] = UNKNOWN = 0;
+                 core.writeR(n, UNKNOWN = 0);
         else:
             log.debug(f'aarch32_LDM_T2_A_exec skipped')
     return aarch32_LDM_T2_A_exec
@@ -1791,13 +1791,13 @@ def aarch32_LDMDB_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) - 4*registers.count('1');
             for i in range(0,14+1):
                 if registers[i] == '1':
-                    core.R[i] = core.ReadMemS(address,4);  address = address + 4;
+                    core.writeR(i, core.ReadMemS(address,4));  address = address + 4;
             if registers[15] == '1':
                 core.LoadWritePC(core.ReadMemS(address,4));
             if wback and registers[n] == '0':
-                 core.R[n] = core.readR(n) - 4*registers.count('1');
+                 core.writeR(n, core.readR(n) - 4*registers.count('1'));
             if wback and registers[n] == '1':
-                 core.R[n] = UNKNOWN = 0;
+                 core.writeR(n, UNKNOWN = 0);
         else:
             log.debug(f'aarch32_LDMDB_T1_A_exec skipped')
     return aarch32_LDMDB_T1_A_exec
@@ -1829,9 +1829,9 @@ def aarch32_LDRBT_T1_A(core, regex_match, bitdiffs):
             offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C) if register_form else imm32;
             offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
             address = core.readR(n) if postindex else offset_addr;
-            core.R[t] = core.ZeroExtend(MemU_unpriv[address,1],32);
+            core.writeR(t, core.ZeroExtend(MemU_unpriv[address,1],32));
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRBT_T1_A_exec skipped')
     return aarch32_LDRBT_T1_A_exec
@@ -1859,9 +1859,9 @@ def aarch32_LDRB_i_T1_A(core, regex_match, bitdiffs):
             if True:
                 offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
                 address = offset_addr if index else core.readR(n);
-                core.R[t] = core.ZeroExtend(core.ReadMemU(address,1), 32);
+                core.writeR(t, core.ZeroExtend(core.ReadMemU(address,1), 32));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRB_i_T1_A_exec skipped')
     return aarch32_LDRB_i_T1_A_exec
@@ -1890,9 +1890,9 @@ def aarch32_LDRB_i_T2_A(core, regex_match, bitdiffs):
             if True:
                 offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
                 address = offset_addr if index else core.readR(n);
-                core.R[t] = core.ZeroExtend(core.ReadMemU(address,1), 32);
+                core.writeR(t, core.ZeroExtend(core.ReadMemU(address,1), 32));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRB_i_T2_A_exec skipped')
     return aarch32_LDRB_i_T2_A_exec
@@ -1930,9 +1930,9 @@ def aarch32_LDRB_i_T3_A(core, regex_match, bitdiffs):
             if True:
                 offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
                 address = offset_addr if index else core.readR(n);
-                core.R[t] = core.ZeroExtend(core.ReadMemU(address,1), 32);
+                core.writeR(t, core.ZeroExtend(core.ReadMemU(address,1), 32));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRB_i_T3_A_exec skipped')
     return aarch32_LDRB_i_T3_A_exec
@@ -1965,7 +1965,7 @@ def aarch32_LDRB_l_T1_A(core, regex_match, bitdiffs):
                 address = (base + imm32) if add else (base - imm32);
             else:
                 address = abs_address;
-            core.R[t] = core.ZeroExtend(core.ReadMemU(address,1), 32);
+            core.writeR(t, core.ZeroExtend(core.ReadMemU(address,1), 32));
         else:
             log.debug(f'aarch32_LDRB_l_T1_A_exec skipped')
     return aarch32_LDRB_l_T1_A_exec
@@ -1992,9 +1992,9 @@ def aarch32_LDRB_r_T1_A(core, regex_match, bitdiffs):
             offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
             offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
             address = offset_addr if index else core.readR(n);
-            core.R[t] = core.ZeroExtend(core.ReadMemU(address,1),32);
+            core.writeR(t, core.ZeroExtend(core.ReadMemU(address,1),32));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRB_r_T1_A_exec skipped')
     return aarch32_LDRB_r_T1_A_exec
@@ -2028,9 +2028,9 @@ def aarch32_LDRB_r_T2_A(core, regex_match, bitdiffs):
             offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
             offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
             address = offset_addr if index else core.readR(n);
-            core.R[t] = core.ZeroExtend(core.ReadMemU(address,1),32);
+            core.writeR(t, core.ZeroExtend(core.ReadMemU(address,1),32));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRB_r_T2_A_exec skipped')
     return aarch32_LDRB_r_T2_A_exec
@@ -2072,16 +2072,16 @@ def aarch32_LDRD_i_T1_A(core, regex_match, bitdiffs):
             if core.IsAligned(address, 8):
                 data = core.ReadMemA(address,8);
                 if core.BigEndian(AccessType_GPR) :
-                    core.R[t] = core.Field(data,63,32);
-                    core.R[t2] = core.Field(data,31,0);
+                    core.writeR(t, core.Field(data,63,32));
+                    core.writeR(t2, core.Field(data,31,0));
                 else:
-                    core.R[t] = core.Field(data,31,0);
-                    core.R[t2] = core.Field(data,63,32);
+                    core.writeR(t, core.Field(data,31,0));
+                    core.writeR(t2, core.Field(data,63,32));
             else:
-                core.R[t] = core.ReadMemA(address,4);
-                core.R[t2] = core.ReadMemA(address+4,4);
+                core.writeR(t, core.ReadMemA(address,4));
+                core.writeR(t2, core.ReadMemA(address+4,4));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRD_i_T1_A_exec skipped')
     return aarch32_LDRD_i_T1_A_exec
@@ -2123,11 +2123,11 @@ def aarch32_LDRD_l_T1_A(core, regex_match, bitdiffs):
             if core.IsAligned(address, 8):
                 data = core.ReadMemA(address,8);
                 if True:
-                    core.R[t] = core.Field(data,31,0);
-                    core.R[t2] = core.Field(data,63,32);
+                    core.writeR(t, core.Field(data,31,0));
+                    core.writeR(t2, core.Field(data,63,32));
             else:
-                core.R[t] = core.ReadMemA(address,4);
-                core.R[t2] = core.ReadMemA(address+4,4);
+                core.writeR(t, core.ReadMemA(address,4));
+                core.writeR(t2, core.ReadMemA(address+4,4));
         else:
             log.debug(f'aarch32_LDRD_l_T1_A_exec skipped')
     return aarch32_LDRD_l_T1_A_exec
@@ -2155,7 +2155,7 @@ def aarch32_LDREX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             address = core.readR(n) + imm32;
             core.SetExclusiveMonitors(address,4);
-            core.R[t] = core.ReadMemA(address,4);
+            core.writeR(t, core.ReadMemA(address,4));
         else:
             log.debug(f'aarch32_LDREX_T1_A_exec skipped')
     return aarch32_LDREX_T1_A_exec
@@ -2180,7 +2180,7 @@ def aarch32_LDREXB_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             address = core.readR(n);
             core.SetExclusiveMonitors(address,1);
-            core.R[t] = core.ZeroExtend(core.ReadMemA(address,1), 32);
+            core.writeR(t, core.ZeroExtend(core.ReadMemA(address,1), 32));
         else:
             log.debug(f'aarch32_LDREXB_T1_A_exec skipped')
     return aarch32_LDREXB_T1_A_exec
@@ -2205,7 +2205,7 @@ def aarch32_LDREXH_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             address = core.readR(n);
             core.SetExclusiveMonitors(address,2);
-            core.R[t] = core.ZeroExtend(core.ReadMemA(address,2), 32);
+            core.writeR(t, core.ZeroExtend(core.ReadMemA(address,2), 32));
         else:
             log.debug(f'aarch32_LDREXH_T1_A_exec skipped')
     return aarch32_LDREXH_T1_A_exec
@@ -2239,8 +2239,8 @@ def aarch32_LDRHT_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) if postindex else offset_addr;
             data = MemU_unpriv[address,2];
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.ZeroExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.ZeroExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRHT_T1_A_exec skipped')
     return aarch32_LDRHT_T1_A_exec
@@ -2270,8 +2270,8 @@ def aarch32_LDRH_i_T1_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,2);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-                core.R[t] = core.ZeroExtend(data, 32);
+                     core.writeR(n, offset_addr);
+                core.writeR(t, core.ZeroExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRH_i_T1_A_exec skipped')
     return aarch32_LDRH_i_T1_A_exec
@@ -2302,8 +2302,8 @@ def aarch32_LDRH_i_T2_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,2);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-                core.R[t] = core.ZeroExtend(data, 32);
+                     core.writeR(n, offset_addr);
+                core.writeR(t, core.ZeroExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRH_i_T2_A_exec skipped')
     return aarch32_LDRH_i_T2_A_exec
@@ -2343,8 +2343,8 @@ def aarch32_LDRH_i_T3_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,2);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-                core.R[t] = core.ZeroExtend(data, 32);
+                     core.writeR(n, offset_addr);
+                core.writeR(t, core.ZeroExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRH_i_T3_A_exec skipped')
     return aarch32_LDRH_i_T3_A_exec
@@ -2378,7 +2378,7 @@ def aarch32_LDRH_l_T1_A(core, regex_match, bitdiffs):
             else:
                 address = abs_address;
             data = core.ReadMemU(address,2);
-            core.R[t] = core.ZeroExtend(data, 32);
+            core.writeR(t, core.ZeroExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRH_l_T1_A_exec skipped')
     return aarch32_LDRH_l_T1_A_exec
@@ -2407,8 +2407,8 @@ def aarch32_LDRH_r_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.ZeroExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.ZeroExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRH_r_T1_A_exec skipped')
     return aarch32_LDRH_r_T1_A_exec
@@ -2444,8 +2444,8 @@ def aarch32_LDRH_r_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.ZeroExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.ZeroExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRH_r_T2_A_exec skipped')
     return aarch32_LDRH_r_T2_A_exec
@@ -2477,9 +2477,9 @@ def aarch32_LDRSBT_T1_A(core, regex_match, bitdiffs):
             offset = core.readR(m) if register_form else imm32;
             offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
             address = core.readR(n) if postindex else offset_addr;
-            core.R[t] = core.SignExtend(MemU_unpriv[address,1], 32);
+            core.writeR(t, core.SignExtend(MemU_unpriv[address,1], 32));
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRSBT_T1_A_exec skipped')
     return aarch32_LDRSBT_T1_A_exec
@@ -2507,9 +2507,9 @@ def aarch32_LDRSB_i_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
             address = offset_addr if index else core.readR(n);
-            core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
+            core.writeR(t, core.SignExtend(core.ReadMemU(address,1), 32));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRSB_i_T1_A_exec skipped')
     return aarch32_LDRSB_i_T1_A_exec
@@ -2546,9 +2546,9 @@ def aarch32_LDRSB_i_T2_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             offset_addr = (core.readR(n) + imm32) if add else (core.readR(n) - imm32);
             address = offset_addr if index else core.readR(n);
-            core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
+            core.writeR(t, core.SignExtend(core.ReadMemU(address,1), 32));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRSB_i_T2_A_exec skipped')
     return aarch32_LDRSB_i_T2_A_exec
@@ -2581,7 +2581,7 @@ def aarch32_LDRSB_l_T1_A(core, regex_match, bitdiffs):
                 address = (base + imm32) if add else (base - imm32);
             else:
                 address = abs_address;
-            core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
+            core.writeR(t, core.SignExtend(core.ReadMemU(address,1), 32));
         else:
             log.debug(f'aarch32_LDRSB_l_T1_A_exec skipped')
     return aarch32_LDRSB_l_T1_A_exec
@@ -2608,9 +2608,9 @@ def aarch32_LDRSB_r_T1_A(core, regex_match, bitdiffs):
             offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
             offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
             address = offset_addr if index else core.readR(n);
-            core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
+            core.writeR(t, core.SignExtend(core.ReadMemU(address,1), 32));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRSB_r_T1_A_exec skipped')
     return aarch32_LDRSB_r_T1_A_exec
@@ -2644,9 +2644,9 @@ def aarch32_LDRSB_r_T2_A(core, regex_match, bitdiffs):
             offset = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);
             offset_addr = (core.readR(n) + offset) if add else (core.readR(n) - offset);
             address = offset_addr if index else core.readR(n);
-            core.R[t] = core.SignExtend(core.ReadMemU(address,1), 32);
+            core.writeR(t, core.SignExtend(core.ReadMemU(address,1), 32));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRSB_r_T2_A_exec skipped')
     return aarch32_LDRSB_r_T2_A_exec
@@ -2680,8 +2680,8 @@ def aarch32_LDRSHT_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) if postindex else offset_addr;
             data = MemU_unpriv[address,2];
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.SignExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.SignExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRSHT_T1_A_exec skipped')
     return aarch32_LDRSHT_T1_A_exec
@@ -2711,8 +2711,8 @@ def aarch32_LDRSH_i_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.SignExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.SignExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRSH_i_T1_A_exec skipped')
     return aarch32_LDRSH_i_T1_A_exec
@@ -2751,8 +2751,8 @@ def aarch32_LDRSH_i_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.SignExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.SignExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRSH_i_T2_A_exec skipped')
     return aarch32_LDRSH_i_T2_A_exec
@@ -2786,7 +2786,7 @@ def aarch32_LDRSH_l_T1_A(core, regex_match, bitdiffs):
             else:
                 address = abs_address;
             data = core.ReadMemU(address,2);
-            core.R[t] = core.SignExtend(data, 32);
+            core.writeR(t, core.SignExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRSH_l_T1_A_exec skipped')
     return aarch32_LDRSH_l_T1_A_exec
@@ -2815,8 +2815,8 @@ def aarch32_LDRSH_r_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.SignExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.SignExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRSH_r_T1_A_exec skipped')
     return aarch32_LDRSH_r_T1_A_exec
@@ -2852,8 +2852,8 @@ def aarch32_LDRSH_r_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             data = core.ReadMemU(address,2);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = core.SignExtend(data, 32);
+                 core.writeR(n, offset_addr);
+            core.writeR(t, core.SignExtend(data, 32));
         else:
             log.debug(f'aarch32_LDRSH_r_T2_A_exec skipped')
     return aarch32_LDRSH_r_T2_A_exec
@@ -2887,8 +2887,8 @@ def aarch32_LDRT_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) if postindex else offset_addr;
             data = MemU_unpriv[address,4];
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
-            core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                 core.writeR(n, offset_addr);
+            core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDRT_T1_A_exec skipped')
     return aarch32_LDRT_T1_A_exec
@@ -2918,14 +2918,14 @@ def aarch32_LDR_i_T1_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T1_A_exec skipped')
     return aarch32_LDR_i_T1_A_exec
@@ -2952,14 +2952,14 @@ def aarch32_LDR_i_T2_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T2_A_exec skipped')
     return aarch32_LDR_i_T2_A_exec
@@ -2989,14 +2989,14 @@ def aarch32_LDR_i_T3_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T3_A_exec skipped')
     return aarch32_LDR_i_T3_A_exec
@@ -3033,14 +3033,14 @@ def aarch32_LDR_i_T4_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T4_A_exec skipped')
     return aarch32_LDR_i_T4_A_exec
@@ -3071,7 +3071,7 @@ def aarch32_LDR_l_T1_A(core, regex_match, bitdiffs):
                 else:
                     raise Exception('UNPREDICTABLE');
             else:
-                core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_l_T1_A_exec skipped')
     return aarch32_LDR_l_T1_A_exec
@@ -3110,7 +3110,7 @@ def aarch32_LDR_l_T2_A(core, regex_match, bitdiffs):
                 else:
                     raise Exception('UNPREDICTABLE');
             else:
-                core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_l_T2_A_exec skipped')
     return aarch32_LDR_l_T2_A_exec
@@ -3144,7 +3144,7 @@ def aarch32_LDR_r_T1_A(core, regex_match, bitdiffs):
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_r_T1_A_exec skipped')
     return aarch32_LDR_r_T1_A_exec
@@ -3185,7 +3185,7 @@ def aarch32_LDR_r_T2_A(core, regex_match, bitdiffs):
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_r_T2_A_exec skipped')
     return aarch32_LDR_r_T2_A_exec
@@ -3214,7 +3214,7 @@ def aarch32_MLA_T1_A(core, regex_match, bitdiffs):
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             addend   = core.SInt(core.R[a]);  # addend   = core.UInt(core.readR(a)) produces the same final results
             result = operand1 * operand2 + addend;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,31,0));
@@ -3248,7 +3248,7 @@ def aarch32_MLS_T1_A(core, regex_match, bitdiffs):
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             addend   = core.SInt(core.R[a]);  # addend   = core.UInt(core.readR(a)) produces the same final results
             result = addend - operand1 * operand2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_MLS_T1_A_exec skipped')
     return aarch32_MLS_T1_A_exec
@@ -3271,7 +3271,7 @@ def aarch32_MOVT_T1_A(core, regex_match, bitdiffs):
     def aarch32_MOVT_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.SetField(core.readR(d),31,16,imm32);
+            core.writeR(d, core.SetField(core.readR(d),31,16,imm32));
             # core.Field(core.readR(d),15,0) unchanged
         else:
             log.debug(f'aarch32_MOVT_T1_A_exec skipped')
@@ -3304,7 +3304,7 @@ def aarch32_MOV_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3345,7 +3345,7 @@ def aarch32_MOV_i_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3381,7 +3381,7 @@ def aarch32_MOV_i_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3416,7 +3416,7 @@ def aarch32_MOV_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3469,7 +3469,7 @@ def aarch32_MOV_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3555,7 +3555,7 @@ def aarch32_MOV_r_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3625,7 +3625,7 @@ def aarch32_MOV_rr_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             shift_n = core.UInt(core.Field(core.readR(s),7,0));
             (result, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(result);
@@ -3695,7 +3695,7 @@ def aarch32_MOV_rr_T2_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             shift_n = core.UInt(core.Field(core.readR(s),7,0));
             (result, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(result);
@@ -3724,7 +3724,7 @@ def aarch32_MRS_T1_AS(core, regex_match, bitdiffs):
     def aarch32_MRS_T1_AS_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.ReadSpecReg(spec_reg);
+            core.writeR(d, core.ReadSpecReg(spec_reg));
         else:
             log.debug(f'aarch32_MRS_T1_AS_exec skipped')
     return aarch32_MRS_T1_AS_exec
@@ -3779,7 +3779,7 @@ def aarch32_MUL_T1_A(core, regex_match, bitdiffs):
             operand1 = core.SInt(core.R[n]);  # operand1 = core.UInt(core.readR(n)) produces the same final results
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             result = operand1 * operand2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,31,0));
@@ -3812,7 +3812,7 @@ def aarch32_MUL_T2_A(core, regex_match, bitdiffs):
             operand1 = core.SInt(core.R[n]);  # operand1 = core.UInt(core.readR(n)) produces the same final results
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             result = operand1 * operand2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,31,0));
@@ -3851,7 +3851,7 @@ def aarch32_MVN_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3890,7 +3890,7 @@ def aarch32_MVN_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -3943,7 +3943,7 @@ def aarch32_MVN_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -4015,7 +4015,7 @@ def aarch32_ORN_i_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.readR(n) | core.NOT(imm32);
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(result);
@@ -4062,7 +4062,7 @@ def aarch32_ORN_r_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             (shifted, carry) = core.Shift_C(core.readR(m), shift_t, shift_n, core.APSR.C);
             result = core.readR(n) | core.NOT(shifted);
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(result);
@@ -4105,7 +4105,7 @@ def aarch32_ORR_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -4146,7 +4146,7 @@ def aarch32_ORR_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -4202,7 +4202,7 @@ def aarch32_ORR_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.N = core.Bit(result,31);
                     core.APSR.Z = core.IsZeroBit(result);
@@ -4247,8 +4247,8 @@ def aarch32_PKH_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             operand2 = core.Shift(core.readR(m), shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(operand2,15,0) if tbform else core.Field(core.readR(n),15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16)    if tbform else core.Field(operand2,31,16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(operand2,15,0) if tbform else core.Field(core.readR(n),15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16)    if tbform else core.Field(operand2,31,16)));
         else:
             log.debug(f'aarch32_PKH_T1_A_exec skipped')
     return aarch32_PKH_T1_A_exec
@@ -4276,7 +4276,7 @@ def aarch32_POP_T1_A(core, regex_match, bitdiffs):
             address = core.readR(13);
             for i in range(0,14+1):
                 if registers[i] == '1':
-                    core.R[i] = core.ReadMemU(address,4) if UnalignedAllowed else core.ReadMemA(address,4);
+                    core.writeR(i, core.ReadMemU(address,4) if UnalignedAllowed else core.ReadMemA(address,4));
                     address = address + 4;
             if registers[15] == '1':
                 if UnalignedAllowed:
@@ -4287,9 +4287,9 @@ def aarch32_POP_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.LoadWritePC(core.ReadMemA(address,4));
             if registers[13] == '0':
-                 core.R[13] = core.readR(13) + 4*registers.count('1');
+                 core.writeR(13, core.readR(13) + 4*registers.count('1'));
             if registers[13] == '1':
-                 core.R[13] = UNKNOWN = 0;
+                 core.writeR(13, UNKNOWN = 0);
         else:
             log.debug(f'aarch32_POP_T1_A_exec skipped')
     return aarch32_POP_T1_A_exec
@@ -4331,7 +4331,7 @@ def aarch32_PUSH_T1_A(core, regex_match, bitdiffs):
                     core.WriteMemU(address,4, core.PCStoreValue());
                 else:
                     core.WriteMemA(address,4, core.PCStoreValue());
-            core.R[13] = core.readR(13) - 4*registers.count('1');
+            core.writeR(13, core.readR(13) - 4*registers.count('1'));
         else:
             log.debug(f'aarch32_PUSH_T1_A_exec skipped')
     return aarch32_PUSH_T1_A_exec
@@ -4388,8 +4388,8 @@ def aarch32_QADD16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum1 = core.SInt(core.Field(core.readR(n),15,0)) + core.SInt(core.Field(core.readR(m),15,0));
             sum2 = core.SInt(core.Field(core.readR(n),31,16)) + core.SInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.SignedSat(sum1, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.SignedSat(sum2, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.SignedSat(sum1, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.SignedSat(sum2, 16)));
         else:
             log.debug(f'aarch32_QADD16_T1_A_exec skipped')
     return aarch32_QADD16_T1_A_exec
@@ -4419,10 +4419,10 @@ def aarch32_QADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.SInt(core.Field(core.readR(n),15,8)) + core.SInt(core.Field(core.readR(m),15,8));
             sum3 = core.SInt(core.Field(core.readR(n),23,16)) + core.SInt(core.Field(core.readR(m),23,16));
             sum4 = core.SInt(core.Field(core.readR(n),31,24)) + core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.SignedSat(sum1, 8));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.SignedSat(sum2, 8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.SignedSat(sum3, 8));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.SignedSat(sum4, 8));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.SignedSat(sum1, 8)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.SignedSat(sum2, 8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.SignedSat(sum3, 8)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.SignedSat(sum4, 8)));
         else:
             log.debug(f'aarch32_QADD8_T1_A_exec skipped')
     return aarch32_QADD8_T1_A_exec
@@ -4450,8 +4450,8 @@ def aarch32_QASX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff = core.SInt(core.Field(core.readR(n),15,0)) - core.SInt(core.Field(core.readR(m),31,16));
             sum  = core.SInt(core.Field(core.readR(n),31,16)) + core.SInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.SignedSat(diff, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.SignedSat(sum, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.SignedSat(diff, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.SignedSat(sum, 16)));
         else:
             log.debug(f'aarch32_QASX_T1_A_exec skipped')
     return aarch32_QASX_T1_A_exec
@@ -4539,8 +4539,8 @@ def aarch32_QSAX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum  = core.SInt(core.Field(core.readR(n),15,0)) + core.SInt(core.Field(core.readR(m),31,16));
             diff = core.SInt(core.Field(core.readR(n),31,16)) - core.SInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.SignedSat(sum, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.SignedSat(diff, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.SignedSat(sum, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.SignedSat(diff, 16)));
         else:
             log.debug(f'aarch32_QSAX_T1_A_exec skipped')
     return aarch32_QSAX_T1_A_exec
@@ -4597,8 +4597,8 @@ def aarch32_QSUB16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff1 = core.SInt(core.Field(core.readR(n),15,0)) - core.SInt(core.Field(core.readR(m),15,0));
             diff2 = core.SInt(core.Field(core.readR(n),31,16)) - core.SInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.SignedSat(diff1, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.SignedSat(diff2, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.SignedSat(diff1, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.SignedSat(diff2, 16)));
         else:
             log.debug(f'aarch32_QSUB16_T1_A_exec skipped')
     return aarch32_QSUB16_T1_A_exec
@@ -4628,10 +4628,10 @@ def aarch32_QSUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.SInt(core.Field(core.readR(n),15,8)) - core.SInt(core.Field(core.readR(m),15,8));
             diff3 = core.SInt(core.Field(core.readR(n),23,16)) - core.SInt(core.Field(core.readR(m),23,16));
             diff4 = core.SInt(core.Field(core.readR(n),31,24)) - core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.SignedSat(diff1, 8));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.SignedSat(diff2, 8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.SignedSat(diff3, 8));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.SignedSat(diff4, 8));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.SignedSat(diff1, 8)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.SignedSat(diff2, 8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.SignedSat(diff3, 8)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.SignedSat(diff4, 8)));
         else:
             log.debug(f'aarch32_QSUB8_T1_A_exec skipped')
     return aarch32_QSUB8_T1_A_exec
@@ -4655,7 +4655,7 @@ def aarch32_RBIT_T1_A(core, regex_match, bitdiffs):
     def aarch32_RBIT_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.Field(int(f'{core.UInt(core.readR(m)):032b}'[::-1],2))
+            core.writeR(d, core.Field(int(f'{core.UInt(core.readR(m)):032b}'[::-1],2)))
         else:
             log.debug(f'aarch32_RBIT_T1_A_exec skipped')
     return aarch32_RBIT_T1_A_exec
@@ -4681,7 +4681,7 @@ def aarch32_REV_T1_A(core, regex_match, bitdiffs):
             result = core.SetField(result,23,16,core.Field(core.readR(m),15,8));
             result = core.SetField(result,15,8,core.Field(core.readR(m),23,16));
             result = core.SetField(result,7,0,core.Field(core.readR(m),31,24));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REV_T1_A_exec skipped')
     return aarch32_REV_T1_A_exec
@@ -4709,7 +4709,7 @@ def aarch32_REV_T2_A(core, regex_match, bitdiffs):
             result = core.SetField(result,23,16,core.Field(core.readR(m),15,8));
             result = core.SetField(result,15,8,core.Field(core.readR(m),23,16));
             result = core.SetField(result,7,0,core.Field(core.readR(m),31,24));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REV_T2_A_exec skipped')
     return aarch32_REV_T2_A_exec
@@ -4735,7 +4735,7 @@ def aarch32_REV16_T1_A(core, regex_match, bitdiffs):
             result = core.SetField(result,23,16,core.Field(core.readR(m),31,24));
             result = core.SetField(result,15,8,core.Field(core.readR(m),7,0));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REV16_T1_A_exec skipped')
     return aarch32_REV16_T1_A_exec
@@ -4763,7 +4763,7 @@ def aarch32_REV16_T2_A(core, regex_match, bitdiffs):
             result = core.SetField(result,23,16,core.Field(core.readR(m),31,24));
             result = core.SetField(result,15,8,core.Field(core.readR(m),7,0));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REV16_T2_A_exec skipped')
     return aarch32_REV16_T2_A_exec
@@ -4787,7 +4787,7 @@ def aarch32_REVSH_T1_A(core, regex_match, bitdiffs):
             result = 0;
             result = core.SetField(result,31,8,core.SignExtend(core.Field(core.readR(m),7,0), 24));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REVSH_T1_A_exec skipped')
     return aarch32_REVSH_T1_A_exec
@@ -4813,7 +4813,7 @@ def aarch32_REVSH_T2_A(core, regex_match, bitdiffs):
             result = 0;
             result = core.SetField(result,31,8,core.SignExtend(core.Field(core.readR(m),7,0), 24));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REVSH_T2_A_exec skipped')
     return aarch32_REVSH_T2_A_exec
@@ -4851,7 +4851,7 @@ def aarch32_RSB_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -4892,7 +4892,7 @@ def aarch32_RSB_i_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -4943,7 +4943,7 @@ def aarch32_RSB_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -4973,8 +4973,8 @@ def aarch32_SADD16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum1 = core.SInt(core.Field(core.readR(n),15,0)) + core.SInt(core.Field(core.readR(m),15,0));
             sum2 = core.SInt(core.Field(core.readR(n),31,16)) + core.SInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum1,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum2,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum1,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum2,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if sum1 >= 0 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if sum2 >= 0 else '00');
         else:
@@ -5006,10 +5006,10 @@ def aarch32_SADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.SInt(core.Field(core.readR(n),15,8)) + core.SInt(core.Field(core.readR(m),15,8));
             sum3 = core.SInt(core.Field(core.readR(n),23,16)) + core.SInt(core.Field(core.readR(m),23,16));
             sum4 = core.SInt(core.Field(core.readR(n),31,24)) + core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(sum1,7,0));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(sum2,7,0));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(sum3,7,0));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(sum4,7,0));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(sum1,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(sum2,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(sum3,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(sum4,7,0)));
             core.APSR.GE = core.SetBit(core.APSR.GE,0,'1' if sum1 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,1,'1' if sum2 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,2,'1' if sum3 >= 0 else '0')
@@ -5041,8 +5041,8 @@ def aarch32_SASX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff = core.SInt(core.Field(core.readR(n),15,0)) - core.SInt(core.Field(core.readR(m),31,16));
             sum  = core.SInt(core.Field(core.readR(n),31,16)) + core.SInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if diff >= 0 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if sum  >= 0 else '00');
         else:
@@ -5081,7 +5081,7 @@ def aarch32_SBC_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -5119,7 +5119,7 @@ def aarch32_SBC_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -5172,7 +5172,7 @@ def aarch32_SBC_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -5203,7 +5203,7 @@ def aarch32_SBFX_T1_A(core, regex_match, bitdiffs):
     def aarch32_SBFX_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.SignExtendSubField(core.readR(n), msbit, lsbit, 32);
+            core.writeR(d, core.SignExtendSubField(core.readR(n), msbit, lsbit, 32));
         else:
             log.debug(f'aarch32_SBFX_T1_A_exec skipped')
     return aarch32_SBFX_T1_A_exec
@@ -5235,7 +5235,7 @@ def aarch32_SDIV_T1_A(core, regex_match, bitdiffs):
                 result = 0;
             else:
                 result = core.RoundTowardsZero(core.Real(core.SInt(core.readR(n))) / core.Real(core.SInt(core.readR(m))));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_SDIV_T1_A_exec skipped')
     return aarch32_SDIV_T1_A_exec
@@ -5261,10 +5261,10 @@ def aarch32_SEL_T1_A(core, regex_match, bitdiffs):
     def aarch32_SEL_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(core.readR(n),7,0)   if core.APSR.GE[0] else core.Field(core.readR(m),7,0));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(core.readR(n),15,8)  if core.APSR.GE[1] else core.Field(core.readR(m),15,8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(core.readR(n),23,16) if core.APSR.GE[2] else core.Field(core.readR(m),23,16));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(core.readR(n),31,24) if core.APSR.GE[3] else core.Field(core.readR(m),31,24));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(core.readR(n),7,0)   if core.APSR.GE[0] else core.Field(core.readR(m),7,0)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(core.readR(n),15,8)  if core.APSR.GE[1] else core.Field(core.readR(m),15,8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(core.readR(n),23,16) if core.APSR.GE[2] else core.Field(core.readR(m),23,16)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(core.readR(n),31,24) if core.APSR.GE[3] else core.Field(core.readR(m),31,24)));
         else:
             log.debug(f'aarch32_SEL_T1_A_exec skipped')
     return aarch32_SEL_T1_A_exec
@@ -5292,8 +5292,8 @@ def aarch32_SHADD16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum1 = core.SInt(core.Field(core.readR(n),15,0)) + core.SInt(core.Field(core.readR(m),15,0));
             sum2 = core.SInt(core.Field(core.readR(n),31,16)) + core.SInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum1,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum2,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum1,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum2,16,1)));
         else:
             log.debug(f'aarch32_SHADD16_T1_A_exec skipped')
     return aarch32_SHADD16_T1_A_exec
@@ -5323,10 +5323,10 @@ def aarch32_SHADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.SInt(core.Field(core.readR(n),15,8)) + core.SInt(core.Field(core.readR(m),15,8));
             sum3 = core.SInt(core.Field(core.readR(n),23,16)) + core.SInt(core.Field(core.readR(m),23,16));
             sum4 = core.SInt(core.Field(core.readR(n),31,24)) + core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(sum1,8,1));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(sum2,8,1));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(sum3,8,1));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(sum4,8,1));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(sum1,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(sum2,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(sum3,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(sum4,8,1)));
         else:
             log.debug(f'aarch32_SHADD8_T1_A_exec skipped')
     return aarch32_SHADD8_T1_A_exec
@@ -5354,8 +5354,8 @@ def aarch32_SHASX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff = core.SInt(core.Field(core.readR(n),15,0)) - core.SInt(core.Field(core.readR(m),31,16));
             sum  = core.SInt(core.Field(core.readR(n),31,16)) + core.SInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum,16,1)));
         else:
             log.debug(f'aarch32_SHASX_T1_A_exec skipped')
     return aarch32_SHASX_T1_A_exec
@@ -5383,8 +5383,8 @@ def aarch32_SHSAX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum  = core.SInt(core.Field(core.readR(n),15,0)) + core.SInt(core.Field(core.readR(m),31,16));
             diff = core.SInt(core.Field(core.readR(n),31,16)) - core.SInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff,16,1)));
         else:
             log.debug(f'aarch32_SHSAX_T1_A_exec skipped')
     return aarch32_SHSAX_T1_A_exec
@@ -5412,8 +5412,8 @@ def aarch32_SHSUB16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff1 = core.SInt(core.Field(core.readR(n),15,0)) - core.SInt(core.Field(core.readR(m),15,0));
             diff2 = core.SInt(core.Field(core.readR(n),31,16)) - core.SInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff1,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff2,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff1,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff2,16,1)));
         else:
             log.debug(f'aarch32_SHSUB16_T1_A_exec skipped')
     return aarch32_SHSUB16_T1_A_exec
@@ -5443,10 +5443,10 @@ def aarch32_SHSUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.SInt(core.Field(core.readR(n),15,8)) - core.SInt(core.Field(core.readR(m),15,8));
             diff3 = core.SInt(core.Field(core.readR(n),23,16)) - core.SInt(core.Field(core.readR(m),23,16));
             diff4 = core.SInt(core.Field(core.readR(n),31,24)) - core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(diff1,8,1));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(diff2,8,1));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(diff3,8,1));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(diff4,8,1));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(diff1,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(diff2,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(diff3,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(diff4,8,1)));
         else:
             log.debug(f'aarch32_SHSUB8_T1_A_exec skipped')
     return aarch32_SHSUB8_T1_A_exec
@@ -5483,7 +5483,7 @@ def aarch32_SMLABB_T1_A(core, regex_match, bitdiffs):
             operand1 = core.Field(core.readR(n),31,16) if n_high else core.Field(core.readR(n),15,0);
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             result = core.SInt(operand1) * core.SInt(operand2) + core.SInt(core.readR(a));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if result != core.SInt(core.Field(result,31,0)):
                   # Signed overflow
                 core.APSR.Q = bool(1);
@@ -5519,7 +5519,7 @@ def aarch32_SMLAD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = product1 + product2 + core.SInt(core.readR(a));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if result != core.SInt(core.Field(result,31,0)):
                   # Signed overflow
                 core.APSR.Q = bool(1);
@@ -5551,8 +5551,8 @@ def aarch32_SMLAL_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.SInt(core.readR(n)) * core.SInt(core.readR(m)) + core.SInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,63);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,63,0));
@@ -5596,8 +5596,8 @@ def aarch32_SMLALBB_T1_A(core, regex_match, bitdiffs):
             operand1 = core.Field(core.readR(n),31,16) if n_high else core.Field(core.readR(n),15,0);
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             result = core.SInt(operand1) * core.SInt(operand2) + core.SInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_SMLALBB_T1_A_exec skipped')
     return aarch32_SMLALBB_T1_A_exec
@@ -5632,8 +5632,8 @@ def aarch32_SMLALD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = product1 + product2 + core.SInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_SMLALD_T1_A_exec skipped')
     return aarch32_SMLALD_T1_A_exec
@@ -5663,7 +5663,7 @@ def aarch32_SMLAWB_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             result = core.SInt(core.readR(n)) * core.SInt(operand2) + (core.SInt(core.readR(a)) << 16);
-            core.R[d] = core.Field(result,47,16);
+            core.writeR(d, core.Field(result,47,16));
             if (result >> 16) != core.SInt(core.readR(d)):
                   # Signed overflow
                 core.APSR.Q = bool(1);
@@ -5698,7 +5698,7 @@ def aarch32_SMLSD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = (product1 - product2) + core.SInt(core.readR(a));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if result != core.SInt(core.Field(result,31,0)):
                   # Signed overflow
                 core.APSR.Q = bool(1);
@@ -5736,8 +5736,8 @@ def aarch32_SMLSLD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = (product1 - product2) + core.SInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_SMLSLD_T1_A_exec skipped')
     return aarch32_SMLSLD_T1_A_exec
@@ -5768,7 +5768,7 @@ def aarch32_SMMLA_T1_A(core, regex_match, bitdiffs):
             result = (core.SInt(core.readR(a)) << 32) + core.SInt(core.readR(n)) * core.SInt(core.readR(m));
             if round:
                  result = result + 0x80000000;
-            core.R[d] = core.Field(result,63,32);
+            core.writeR(d, core.Field(result,63,32));
         else:
             log.debug(f'aarch32_SMMLA_T1_A_exec skipped')
     return aarch32_SMMLA_T1_A_exec
@@ -5800,7 +5800,7 @@ def aarch32_SMMLS_T1_A(core, regex_match, bitdiffs):
             result = (core.SInt(core.readR(a)) << 32) - core.SInt(core.readR(n)) * core.SInt(core.readR(m));
             if round:
                  result = result + 0x80000000;
-            core.R[d] = core.Field(result,63,32);
+            core.writeR(d, core.Field(result,63,32));
         else:
             log.debug(f'aarch32_SMMLS_T1_A_exec skipped')
     return aarch32_SMMLS_T1_A_exec
@@ -5832,7 +5832,7 @@ def aarch32_SMMUL_T1_A(core, regex_match, bitdiffs):
             result = core.SInt(core.readR(n)) * core.SInt(core.readR(m));
             if round:
                  result = result + 0x80000000;
-            core.R[d] = core.Field(result,63,32);
+            core.writeR(d, core.Field(result,63,32));
         else:
             log.debug(f'aarch32_SMMUL_T1_A_exec skipped')
     return aarch32_SMMUL_T1_A_exec
@@ -5865,7 +5865,7 @@ def aarch32_SMUAD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = product1 + product2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if result != core.SInt(core.Field(result,31,0)):
                   # Signed overflow
                 core.APSR.Q = bool(1);
@@ -5906,7 +5906,7 @@ def aarch32_SMULBB_T1_A(core, regex_match, bitdiffs):
             operand1 = core.Field(core.readR(n),31,16) if n_high else core.Field(core.readR(n),15,0);
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             result = core.SInt(operand1) * core.SInt(operand2);
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             # Signed overflow cannot occur
         else:
             log.debug(f'aarch32_SMULBB_T1_A_exec skipped')
@@ -5936,8 +5936,8 @@ def aarch32_SMULL_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.SInt(core.readR(n)) * core.SInt(core.readR(m));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,63);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,63,0));
@@ -5972,7 +5972,7 @@ def aarch32_SMULWB_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             product = core.SInt(core.readR(n)) * core.SInt(operand2);
-            core.R[d] = core.Field(product,47,16);
+            core.writeR(d, core.Field(product,47,16));
             # Signed overflow cannot occur
         else:
             log.debug(f'aarch32_SMULWB_T1_A_exec skipped')
@@ -6006,7 +6006,7 @@ def aarch32_SMUSD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = product1 - product2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             # Signed overflow cannot occur
         else:
             log.debug(f'aarch32_SMUSD_T1_A_exec skipped')
@@ -6042,7 +6042,7 @@ def aarch32_SSAT_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             operand = core.Shift(core.readR(n), shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
             (result, sat) = core.SignedSatQ(core.SInt(operand), imm32);
-            core.R[d] = core.SignExtend(result, 32);
+            core.writeR(d, core.SignExtend(result, 32));
             if sat:
                 core.APSR.Q = bool(1);
         else:
@@ -6070,8 +6070,8 @@ def aarch32_SSAT16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             (result1, sat1) = core.SignedSatQ(core.SInt(core.Field(core.readR(n),15,0)), imm32);
             (result2, sat2) = core.SignedSatQ(core.SInt(core.Field(core.readR(n),31,16)), imm32);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.SignExtend(result1, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.SignExtend(result2, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.SignExtend(result1, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.SignExtend(result2, 16)));
             if sat1 or sat2:
                 core.APSR.Q = bool(1);
         else:
@@ -6101,8 +6101,8 @@ def aarch32_SSAX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum  = core.SInt(core.Field(core.readR(n),15,0)) + core.SInt(core.Field(core.readR(m),31,16));
             diff = core.SInt(core.Field(core.readR(n),31,16)) - core.SInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if sum  >= 0 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if diff >= 0 else '00');
         else:
@@ -6132,8 +6132,8 @@ def aarch32_SSUB16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff1 = core.SInt(core.Field(core.readR(n),15,0)) - core.SInt(core.Field(core.readR(m),15,0));
             diff2 = core.SInt(core.Field(core.readR(n),31,16)) - core.SInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff1,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff2,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff1,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff2,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if diff1 >= 0 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if diff2 >= 0 else '00');
         else:
@@ -6165,10 +6165,10 @@ def aarch32_SSUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.SInt(core.Field(core.readR(n),15,8)) - core.SInt(core.Field(core.readR(m),15,8));
             diff3 = core.SInt(core.Field(core.readR(n),23,16)) - core.SInt(core.Field(core.readR(m),23,16));
             diff4 = core.SInt(core.Field(core.readR(n),31,24)) - core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(diff1,7,0));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(diff2,7,0));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(diff3,7,0));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(diff4,7,0));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(diff1,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(diff2,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(diff3,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(diff4,7,0)));
             core.APSR.GE = core.SetBit(core.APSR.GE,0,'1' if diff1 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,1,'1' if diff2 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,2,'1' if diff3 >= 0 else '0')
@@ -6210,7 +6210,7 @@ def aarch32_STM_T1_A(core, regex_match, bitdiffs):
                   # Only possible for encoding A1
                 core.WriteMemS(address,4, core.PCStoreValue());
             if wback:
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
         else:
             log.debug(f'aarch32_STM_T1_A_exec skipped')
     return aarch32_STM_T1_A_exec
@@ -6262,7 +6262,7 @@ def aarch32_STM_T2_A(core, regex_match, bitdiffs):
                   # Only possible for encoding A1
                 core.WriteMemS(address,4, core.PCStoreValue());
             if wback:
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
         else:
             log.debug(f'aarch32_STM_T2_A_exec skipped')
     return aarch32_STM_T2_A_exec
@@ -6310,7 +6310,7 @@ def aarch32_STMDB_T1_A(core, regex_match, bitdiffs):
                   # Only possible for encoding A1
                 core.WriteMemS(address,4, core.PCStoreValue());
             if wback:
-                 core.R[n] = core.readR(n) - 4*registers.count('1');
+                 core.writeR(n, core.readR(n) - 4*registers.count('1'));
         else:
             log.debug(f'aarch32_STMDB_T1_A_exec skipped')
     return aarch32_STMDB_T1_A_exec
@@ -6346,7 +6346,7 @@ def aarch32_STRBT_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) if postindex else offset_addr;
             MemU_unpriv[address,1] = core.Field(core.readR(t),7,0);
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRBT_T1_A_exec skipped')
     return aarch32_STRBT_T1_A_exec
@@ -6376,7 +6376,7 @@ def aarch32_STRB_i_T1_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,1, core.Field(core.readR(t),7,0));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRB_i_T1_A_exec skipped')
     return aarch32_STRB_i_T1_A_exec
@@ -6410,7 +6410,7 @@ def aarch32_STRB_i_T2_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,1, core.Field(core.readR(t),7,0));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRB_i_T2_A_exec skipped')
     return aarch32_STRB_i_T2_A_exec
@@ -6449,7 +6449,7 @@ def aarch32_STRB_i_T3_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,1, core.Field(core.readR(t),7,0));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRB_i_T3_A_exec skipped')
     return aarch32_STRB_i_T3_A_exec
@@ -6478,7 +6478,7 @@ def aarch32_STRB_r_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             core.WriteMemU(address,1, core.Field(core.readR(t),7,0));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRB_r_T1_A_exec skipped')
     return aarch32_STRB_r_T1_A_exec
@@ -6516,7 +6516,7 @@ def aarch32_STRB_r_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             core.WriteMemU(address,1, core.Field(core.readR(t),7,0));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRB_r_T2_A_exec skipped')
     return aarch32_STRB_r_T2_A_exec
@@ -6565,7 +6565,7 @@ def aarch32_STRD_i_T1_A(core, regex_match, bitdiffs):
                 core.WriteMemA(address,4, core.readR(t));
                 core.WriteMemA(address+4,4, core.readR(t2));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRD_i_T1_A_exec skipped')
     return aarch32_STRD_i_T1_A_exec
@@ -6597,9 +6597,9 @@ def aarch32_STREX_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) + imm32;
             if core.ExclusiveMonitorsPass(address,4):
                 core.WriteMemA(address,4, core.readR(t));
-                core.R[d] = core.ZeroExtend('0', 32);
+                core.writeR(d, core.ZeroExtend('0', 32));
             else:
-                core.R[d] = core.ZeroExtend('1', 32);
+                core.writeR(d, core.ZeroExtend('1', 32));
         else:
             log.debug(f'aarch32_STREX_T1_A_exec skipped')
     return aarch32_STREX_T1_A_exec
@@ -6628,9 +6628,9 @@ def aarch32_STREXB_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n);
             if core.ExclusiveMonitorsPass(address,1):
                 core.WriteMemA(address,1, core.Field(core.readR(t),7,0));
-                core.R[d] = core.ZeroExtend('0', 32);
+                core.writeR(d, core.ZeroExtend('0', 32));
             else:
-                core.R[d] = core.ZeroExtend('1', 32);
+                core.writeR(d, core.ZeroExtend('1', 32));
         else:
             log.debug(f'aarch32_STREXB_T1_A_exec skipped')
     return aarch32_STREXB_T1_A_exec
@@ -6659,9 +6659,9 @@ def aarch32_STREXH_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n);
             if core.ExclusiveMonitorsPass(address,2):
                 core.WriteMemA(address,2, core.Field(core.readR(t),15,0));
-                core.R[d] = core.ZeroExtend('0', 32);
+                core.writeR(d, core.ZeroExtend('0', 32));
             else:
-                core.R[d] = core.ZeroExtend('1', 32);
+                core.writeR(d, core.ZeroExtend('1', 32));
         else:
             log.debug(f'aarch32_STREXH_T1_A_exec skipped')
     return aarch32_STREXH_T1_A_exec
@@ -6697,7 +6697,7 @@ def aarch32_STRHT_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) if postindex else offset_addr;
             MemU_unpriv[address,2] = core.Field(core.readR(t),15,0);
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRHT_T1_A_exec skipped')
     return aarch32_STRHT_T1_A_exec
@@ -6727,7 +6727,7 @@ def aarch32_STRH_i_T1_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,2, core.Field(core.readR(t),15,0));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRH_i_T1_A_exec skipped')
     return aarch32_STRH_i_T1_A_exec
@@ -6761,7 +6761,7 @@ def aarch32_STRH_i_T2_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,2, core.Field(core.readR(t),15,0));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRH_i_T2_A_exec skipped')
     return aarch32_STRH_i_T2_A_exec
@@ -6800,7 +6800,7 @@ def aarch32_STRH_i_T3_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,2, core.Field(core.readR(t),15,0));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRH_i_T3_A_exec skipped')
     return aarch32_STRH_i_T3_A_exec
@@ -6829,7 +6829,7 @@ def aarch32_STRH_r_T1_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             core.WriteMemU(address,2, core.Field(core.readR(t),15,0));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRH_r_T1_A_exec skipped')
     return aarch32_STRH_r_T1_A_exec
@@ -6867,7 +6867,7 @@ def aarch32_STRH_r_T2_A(core, regex_match, bitdiffs):
             address = offset_addr if index else core.readR(n);
             core.WriteMemU(address,2, core.Field(core.readR(t),15,0));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRH_r_T2_A_exec skipped')
     return aarch32_STRH_r_T2_A_exec
@@ -6909,7 +6909,7 @@ def aarch32_STRT_T1_A(core, regex_match, bitdiffs):
                 data = core.readR(t);
             MemU_unpriv[address,4] = data;
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRT_T1_A_exec skipped')
     return aarch32_STRT_T1_A_exec
@@ -6939,7 +6939,7 @@ def aarch32_STR_i_T1_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,4, core.readR(t));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STR_i_T1_A_exec skipped')
     return aarch32_STR_i_T1_A_exec
@@ -6966,7 +6966,7 @@ def aarch32_STR_i_T2_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,4, core.readR(t));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STR_i_T2_A_exec skipped')
     return aarch32_STR_i_T2_A_exec
@@ -7000,7 +7000,7 @@ def aarch32_STR_i_T3_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,4, core.readR(t));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STR_i_T3_A_exec skipped')
     return aarch32_STR_i_T3_A_exec
@@ -7039,7 +7039,7 @@ def aarch32_STR_i_T4_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 core.WriteMemU(address,4, core.readR(t));
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STR_i_T4_A_exec skipped')
     return aarch32_STR_i_T4_A_exec
@@ -7074,7 +7074,7 @@ def aarch32_STR_r_T1_A(core, regex_match, bitdiffs):
                 data = core.readR(t);
             core.WriteMemU(address,4, data);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STR_r_T1_A_exec skipped')
     return aarch32_STR_r_T1_A_exec
@@ -7118,7 +7118,7 @@ def aarch32_STR_r_T2_A(core, regex_match, bitdiffs):
                 data = core.readR(t);
             core.WriteMemU(address,4, data);
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STR_r_T2_A_exec skipped')
     return aarch32_STR_r_T2_A_exec
@@ -7150,7 +7150,7 @@ def aarch32_SUB_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7187,7 +7187,7 @@ def aarch32_SUB_i_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7227,7 +7227,7 @@ def aarch32_SUB_i_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7262,7 +7262,7 @@ def aarch32_SUB_i_T4_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7291,7 +7291,7 @@ def aarch32_SUB_i_T5_AS(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7330,7 +7330,7 @@ def aarch32_SUB_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7384,7 +7384,7 @@ def aarch32_SUB_r_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7414,7 +7414,7 @@ def aarch32_SUB_SP_i_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7450,7 +7450,7 @@ def aarch32_SUB_SP_i_T2_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7483,7 +7483,7 @@ def aarch32_SUB_SP_i_T3_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7533,7 +7533,7 @@ def aarch32_SUB_SP_r_T1_A(core, regex_match, bitdiffs):
                 else:
                     core.ALUWritePC(result);
             else:
-                core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+                core.writeR(d, core.Field(result));
                 if setflags:
                     core.APSR.update(nzcv);
         else:
@@ -7588,7 +7588,7 @@ def aarch32_SXTAB_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.readR(n) + core.SignExtend(core.Field(rotated,7,0), 32);
+            core.writeR(d, core.readR(n) + core.SignExtend(core.Field(rotated,7,0), 32));
         else:
             log.debug(f'aarch32_SXTAB_T1_A_exec skipped')
     return aarch32_SXTAB_T1_A_exec
@@ -7621,8 +7621,8 @@ def aarch32_SXTAB16_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(core.readR(n),15,0) + core.SignExtend(core.Field(rotated,7,0), 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16) + core.SignExtend(core.Field(rotated,23,16), 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(core.readR(n),15,0) + core.SignExtend(core.Field(rotated,7,0), 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16) + core.SignExtend(core.Field(rotated,23,16), 16)));
         else:
             log.debug(f'aarch32_SXTAB16_T1_A_exec skipped')
     return aarch32_SXTAB16_T1_A_exec
@@ -7655,7 +7655,7 @@ def aarch32_SXTAH_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.readR(n) + core.SignExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.readR(n) + core.SignExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_SXTAH_T1_A_exec skipped')
     return aarch32_SXTAH_T1_A_exec
@@ -7677,7 +7677,7 @@ def aarch32_SXTB_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SignExtend(core.Field(rotated,7,0), 32);
+            core.writeR(d, core.SignExtend(core.Field(rotated,7,0), 32));
         else:
             log.debug(f'aarch32_SXTB_T1_A_exec skipped')
     return aarch32_SXTB_T1_A_exec
@@ -7707,7 +7707,7 @@ def aarch32_SXTB_T2_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SignExtend(core.Field(rotated,7,0), 32);
+            core.writeR(d, core.SignExtend(core.Field(rotated,7,0), 32));
         else:
             log.debug(f'aarch32_SXTB_T2_A_exec skipped')
     return aarch32_SXTB_T2_A_exec
@@ -7737,8 +7737,8 @@ def aarch32_SXTB16_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.SignExtend(core.Field(rotated,7,0), 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.SignExtend(core.Field(rotated,23,16), 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.SignExtend(core.Field(rotated,7,0), 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.SignExtend(core.Field(rotated,23,16), 16)));
         else:
             log.debug(f'aarch32_SXTB16_T1_A_exec skipped')
     return aarch32_SXTB16_T1_A_exec
@@ -7760,7 +7760,7 @@ def aarch32_SXTH_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SignExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.SignExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_SXTH_T1_A_exec skipped')
     return aarch32_SXTH_T1_A_exec
@@ -7790,7 +7790,7 @@ def aarch32_SXTH_T2_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SignExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.SignExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_SXTH_T2_A_exec skipped')
     return aarch32_SXTH_T2_A_exec
@@ -8006,8 +8006,8 @@ def aarch32_UADD16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum1 = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),15,0));
             sum2 = core.UInt(core.Field(core.readR(n),31,16)) + core.UInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum1,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum2,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum1,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum2,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if sum1 >= 0x10000 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if sum2 >= 0x10000 else '00');
         else:
@@ -8039,10 +8039,10 @@ def aarch32_UADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.UInt(core.Field(core.readR(n),15,8)) + core.UInt(core.Field(core.readR(m),15,8));
             sum3 = core.UInt(core.Field(core.readR(n),23,16)) + core.UInt(core.Field(core.readR(m),23,16));
             sum4 = core.UInt(core.Field(core.readR(n),31,24)) + core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(sum1,7,0));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(sum2,7,0));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(sum3,7,0));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(sum4,7,0));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(sum1,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(sum2,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(sum3,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(sum4,7,0)));
             core.APSR.GE = core.SetBit(core.APSR.GE,0,'1' if sum1 >= 0x100 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,1,'1' if sum2 >= 0x100 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,2,'1' if sum3 >= 0x100 else '0')
@@ -8074,8 +8074,8 @@ def aarch32_UASX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff = core.UInt(core.Field(core.readR(n),15,0)) - core.UInt(core.Field(core.readR(m),31,16));
             sum  = core.UInt(core.Field(core.readR(n),31,16)) + core.UInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if diff >= 0 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if sum  >= 0x10000 else '00');
         else:
@@ -8106,7 +8106,7 @@ def aarch32_UBFX_T1_A(core, regex_match, bitdiffs):
     def aarch32_UBFX_T1_A_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.ZeroExtendSubField(core.readR(n), msbit, lsbit, 32);
+            core.writeR(d, core.ZeroExtendSubField(core.readR(n), msbit, lsbit, 32));
         else:
             log.debug(f'aarch32_UBFX_T1_A_exec skipped')
     return aarch32_UBFX_T1_A_exec
@@ -8178,7 +8178,7 @@ def aarch32_UDIV_T1_A(core, regex_match, bitdiffs):
                 result = 0;
             else:
                 result = core.RoundTowardsZero(core.Real(core.UInt(core.readR(n))) / core.Real(core.UInt(core.readR(m))));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_UDIV_T1_A_exec skipped')
     return aarch32_UDIV_T1_A_exec
@@ -8206,8 +8206,8 @@ def aarch32_UHADD16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum1 = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),15,0));
             sum2 = core.UInt(core.Field(core.readR(n),31,16)) + core.UInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum1,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum2,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum1,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum2,16,1)));
         else:
             log.debug(f'aarch32_UHADD16_T1_A_exec skipped')
     return aarch32_UHADD16_T1_A_exec
@@ -8237,10 +8237,10 @@ def aarch32_UHADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.UInt(core.Field(core.readR(n),15,8)) + core.UInt(core.Field(core.readR(m),15,8));
             sum3 = core.UInt(core.Field(core.readR(n),23,16)) + core.UInt(core.Field(core.readR(m),23,16));
             sum4 = core.UInt(core.Field(core.readR(n),31,24)) + core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(sum1,8,1));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(sum2,8,1));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(sum3,8,1));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(sum4,8,1));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(sum1,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(sum2,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(sum3,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(sum4,8,1)));
         else:
             log.debug(f'aarch32_UHADD8_T1_A_exec skipped')
     return aarch32_UHADD8_T1_A_exec
@@ -8268,8 +8268,8 @@ def aarch32_UHASX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff = core.UInt(core.Field(core.readR(n),15,0)) - core.UInt(core.Field(core.readR(m),31,16));
             sum  = core.UInt(core.Field(core.readR(n),31,16)) + core.UInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(sum,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(sum,16,1)));
         else:
             log.debug(f'aarch32_UHASX_T1_A_exec skipped')
     return aarch32_UHASX_T1_A_exec
@@ -8297,8 +8297,8 @@ def aarch32_UHSAX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum  = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),31,16));
             diff = core.UInt(core.Field(core.readR(n),31,16)) - core.UInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff,16,1)));
         else:
             log.debug(f'aarch32_UHSAX_T1_A_exec skipped')
     return aarch32_UHSAX_T1_A_exec
@@ -8326,8 +8326,8 @@ def aarch32_UHSUB16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff1 = core.UInt(core.Field(core.readR(n),15,0)) - core.UInt(core.Field(core.readR(m),15,0));
             diff2 = core.UInt(core.Field(core.readR(n),31,16)) - core.UInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff1,16,1));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff2,16,1));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff1,16,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff2,16,1)));
         else:
             log.debug(f'aarch32_UHSUB16_T1_A_exec skipped')
     return aarch32_UHSUB16_T1_A_exec
@@ -8357,10 +8357,10 @@ def aarch32_UHSUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.UInt(core.Field(core.readR(n),15,8)) - core.UInt(core.Field(core.readR(m),15,8));
             diff3 = core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16));
             diff4 = core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(diff1,8,1));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(diff2,8,1));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(diff3,8,1));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(diff4,8,1));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(diff1,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(diff2,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(diff3,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(diff4,8,1)));
         else:
             log.debug(f'aarch32_UHSUB8_T1_A_exec skipped')
     return aarch32_UHSUB8_T1_A_exec
@@ -8389,8 +8389,8 @@ def aarch32_UMAAL_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.UInt(core.readR(n)) * core.UInt(core.readR(m)) + core.UInt(core.readR(dHi)) + core.UInt(core.readR(dLo));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_UMAAL_T1_A_exec skipped')
     return aarch32_UMAAL_T1_A_exec
@@ -8419,8 +8419,8 @@ def aarch32_UMLAL_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.UInt(core.readR(n)) * core.UInt(core.readR(m)) + core.UInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,63);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,63,0));
@@ -8453,8 +8453,8 @@ def aarch32_UMULL_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.UInt(core.readR(n)) * core.UInt(core.readR(m));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,63);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,63,0));
@@ -8486,8 +8486,8 @@ def aarch32_UQADD16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum1 = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),15,0));
             sum2 = core.UInt(core.Field(core.readR(n),31,16)) + core.UInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.UnsignedSat(sum1, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.UnsignedSat(sum2, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.UnsignedSat(sum1, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.UnsignedSat(sum2, 16)));
         else:
             log.debug(f'aarch32_UQADD16_T1_A_exec skipped')
     return aarch32_UQADD16_T1_A_exec
@@ -8517,10 +8517,10 @@ def aarch32_UQADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.UInt(core.Field(core.readR(n),15,8)) + core.UInt(core.Field(core.readR(m),15,8));
             sum3 = core.UInt(core.Field(core.readR(n),23,16)) + core.UInt(core.Field(core.readR(m),23,16));
             sum4 = core.UInt(core.Field(core.readR(n),31,24)) + core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.UnsignedSat(sum1, 8));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.UnsignedSat(sum2, 8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.UnsignedSat(sum3, 8));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.UnsignedSat(sum4, 8));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.UnsignedSat(sum1, 8)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.UnsignedSat(sum2, 8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.UnsignedSat(sum3, 8)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.UnsignedSat(sum4, 8)));
         else:
             log.debug(f'aarch32_UQADD8_T1_A_exec skipped')
     return aarch32_UQADD8_T1_A_exec
@@ -8548,8 +8548,8 @@ def aarch32_UQASX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff = core.UInt(core.Field(core.readR(n),15,0)) - core.UInt(core.Field(core.readR(m),31,16));
             sum  = core.UInt(core.Field(core.readR(n),31,16)) + core.UInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.UnsignedSat(diff, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.UnsignedSat(sum, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.UnsignedSat(diff, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.UnsignedSat(sum, 16)));
         else:
             log.debug(f'aarch32_UQASX_T1_A_exec skipped')
     return aarch32_UQASX_T1_A_exec
@@ -8577,8 +8577,8 @@ def aarch32_UQSAX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum  = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),31,16));
             diff = core.UInt(core.Field(core.readR(n),31,16)) - core.UInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.UnsignedSat(sum, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.UnsignedSat(diff, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.UnsignedSat(sum, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.UnsignedSat(diff, 16)));
         else:
             log.debug(f'aarch32_UQSAX_T1_A_exec skipped')
     return aarch32_UQSAX_T1_A_exec
@@ -8606,8 +8606,8 @@ def aarch32_UQSUB16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff1 = core.UInt(core.Field(core.readR(n),15,0)) - core.UInt(core.Field(core.readR(m),15,0));
             diff2 = core.UInt(core.Field(core.readR(n),31,16)) - core.UInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.UnsignedSat(diff1, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.UnsignedSat(diff2, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.UnsignedSat(diff1, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.UnsignedSat(diff2, 16)));
         else:
             log.debug(f'aarch32_UQSUB16_T1_A_exec skipped')
     return aarch32_UQSUB16_T1_A_exec
@@ -8637,10 +8637,10 @@ def aarch32_UQSUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.UInt(core.Field(core.readR(n),15,8)) - core.UInt(core.Field(core.readR(m),15,8));
             diff3 = core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16));
             diff4 = core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.UnsignedSat(diff1, 8));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.UnsignedSat(diff2, 8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.UnsignedSat(diff3, 8));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.UnsignedSat(diff4, 8));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.UnsignedSat(diff1, 8)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.UnsignedSat(diff2, 8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.UnsignedSat(diff3, 8)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.UnsignedSat(diff4, 8)));
         else:
             log.debug(f'aarch32_UQSUB8_T1_A_exec skipped')
     return aarch32_UQSUB8_T1_A_exec
@@ -8671,7 +8671,7 @@ def aarch32_USAD8_T1_A(core, regex_match, bitdiffs):
             absdiff3 = core.Abs(core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16)));
             absdiff4 = core.Abs(core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24)));
             result = absdiff1 + absdiff2 + absdiff3 + absdiff4;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_USAD8_T1_A_exec skipped')
     return aarch32_USAD8_T1_A_exec
@@ -8701,7 +8701,7 @@ def aarch32_USADA8_T1_A(core, regex_match, bitdiffs):
             absdiff3 = core.Abs(core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16)));
             absdiff4 = core.Abs(core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24)));
             result = core.UInt(core.readR(a)) + absdiff1 + absdiff2 + absdiff3 + absdiff4;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_USADA8_T1_A_exec skipped')
     return aarch32_USADA8_T1_A_exec
@@ -8736,7 +8736,7 @@ def aarch32_USAT_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             operand = core.Shift(core.readR(n), shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
             (result, sat) = core.UnsignedSatQ(core.SInt(operand), imm32);
-            core.R[d] = core.ZeroExtend(result, 32);
+            core.writeR(d, core.ZeroExtend(result, 32));
             if sat:
                 core.APSR.Q = bool(1);
         else:
@@ -8764,8 +8764,8 @@ def aarch32_USAT16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             (result1, sat1) = core.UnsignedSatQ(core.SInt(core.Field(core.readR(n),15,0)), imm32);
             (result2, sat2) = core.UnsignedSatQ(core.SInt(core.Field(core.readR(n),31,16)), imm32);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.ZeroExtend(result1, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.ZeroExtend(result2, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.ZeroExtend(result1, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.ZeroExtend(result2, 16)));
             if sat1 or sat2:
                 core.APSR.Q = bool(1);
         else:
@@ -8795,8 +8795,8 @@ def aarch32_USAX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum  = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),31,16));
             diff = core.UInt(core.Field(core.readR(n),31,16)) - core.UInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(sum,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(sum,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if sum  >= 0x10000 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if diff >= 0 else '00');
         else:
@@ -8826,8 +8826,8 @@ def aarch32_USUB16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             diff1 = core.UInt(core.Field(core.readR(n),15,0)) - core.UInt(core.Field(core.readR(m),15,0));
             diff2 = core.UInt(core.Field(core.readR(n),31,16)) - core.UInt(core.Field(core.readR(m),31,16));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(diff1,15,0));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(diff2,15,0));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(diff1,15,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(diff2,15,0)));
             core.APSR.GE = core.SetField(core.APSR.GE,1,0,'11' if diff1 >= 0 else '00');
             core.APSR.GE = core.SetField(core.APSR.GE,3,2,'11' if diff2 >= 0 else '00');
         else:
@@ -8859,10 +8859,10 @@ def aarch32_USUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.UInt(core.Field(core.readR(n),15,8)) - core.UInt(core.Field(core.readR(m),15,8));
             diff3 = core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16));
             diff4 = core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(diff1,7,0));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(diff2,7,0));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(diff3,7,0));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(diff4,7,0));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(diff1,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(diff2,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(diff3,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(diff4,7,0)));
             core.APSR.GE = core.SetBit(core.APSR.GE,0,'1' if diff1 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,1,'1' if diff2 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,2,'1' if diff3 >= 0 else '0')
@@ -8899,7 +8899,7 @@ def aarch32_UXTAB_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.readR(n) + core.ZeroExtend(core.Field(rotated,7,0), 32);
+            core.writeR(d, core.readR(n) + core.ZeroExtend(core.Field(rotated,7,0), 32));
         else:
             log.debug(f'aarch32_UXTAB_T1_A_exec skipped')
     return aarch32_UXTAB_T1_A_exec
@@ -8932,8 +8932,8 @@ def aarch32_UXTAB16_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(core.readR(n),15,0) + core.ZeroExtend(core.Field(rotated,7,0), 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16) + core.ZeroExtend(core.Field(rotated,23,16), 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(core.readR(n),15,0) + core.ZeroExtend(core.Field(rotated,7,0), 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16) + core.ZeroExtend(core.Field(rotated,23,16), 16)));
         else:
             log.debug(f'aarch32_UXTAB16_T1_A_exec skipped')
     return aarch32_UXTAB16_T1_A_exec
@@ -8966,7 +8966,7 @@ def aarch32_UXTAH_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.readR(n) + core.ZeroExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.readR(n) + core.ZeroExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_UXTAH_T1_A_exec skipped')
     return aarch32_UXTAH_T1_A_exec
@@ -8988,7 +8988,7 @@ def aarch32_UXTB_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.ZeroExtend(core.Field(rotated,7,0), 32);
+            core.writeR(d, core.ZeroExtend(core.Field(rotated,7,0), 32));
         else:
             log.debug(f'aarch32_UXTB_T1_A_exec skipped')
     return aarch32_UXTB_T1_A_exec
@@ -9018,7 +9018,7 @@ def aarch32_UXTB_T2_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.ZeroExtend(core.Field(rotated,7,0), 32);
+            core.writeR(d, core.ZeroExtend(core.Field(rotated,7,0), 32));
         else:
             log.debug(f'aarch32_UXTB_T2_A_exec skipped')
     return aarch32_UXTB_T2_A_exec
@@ -9048,8 +9048,8 @@ def aarch32_UXTB16_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.ZeroExtend(core.Field(rotated,7,0), 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.ZeroExtend(core.Field(rotated,23,16), 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.ZeroExtend(core.Field(rotated,7,0), 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.ZeroExtend(core.Field(rotated,23,16), 16)));
         else:
             log.debug(f'aarch32_UXTB16_T1_A_exec skipped')
     return aarch32_UXTB16_T1_A_exec
@@ -9071,7 +9071,7 @@ def aarch32_UXTH_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.ZeroExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.ZeroExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_UXTH_T1_A_exec skipped')
     return aarch32_UXTH_T1_A_exec
@@ -9101,7 +9101,7 @@ def aarch32_UXTH_T2_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.ZeroExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.ZeroExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_UXTH_T2_A_exec skipped')
     return aarch32_UXTH_T2_A_exec

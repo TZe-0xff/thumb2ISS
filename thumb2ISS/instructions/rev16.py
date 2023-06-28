@@ -21,7 +21,7 @@ def aarch32_REV16_T1_A(core, regex_match, bitdiffs):
             result = core.SetField(result,23,16,core.Field(core.readR(m),31,24));
             result = core.SetField(result,15,8,core.Field(core.readR(m),7,0));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REV16_T1_A_exec skipped')
     return aarch32_REV16_T1_A_exec
@@ -49,7 +49,7 @@ def aarch32_REV16_T2_A(core, regex_match, bitdiffs):
             result = core.SetField(result,23,16,core.Field(core.readR(m),31,24));
             result = core.SetField(result,15,8,core.Field(core.readR(m),7,0));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REV16_T2_A_exec skipped')
     return aarch32_REV16_T2_A_exec

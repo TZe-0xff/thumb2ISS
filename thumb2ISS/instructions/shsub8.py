@@ -25,10 +25,10 @@ def aarch32_SHSUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.SInt(core.Field(core.readR(n),15,8)) - core.SInt(core.Field(core.readR(m),15,8));
             diff3 = core.SInt(core.Field(core.readR(n),23,16)) - core.SInt(core.Field(core.readR(m),23,16));
             diff4 = core.SInt(core.Field(core.readR(n),31,24)) - core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(diff1,8,1));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(diff2,8,1));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(diff3,8,1));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(diff4,8,1));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(diff1,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(diff2,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(diff3,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(diff4,8,1)));
         else:
             log.debug(f'aarch32_SHSUB8_T1_A_exec skipped')
     return aarch32_SHSUB8_T1_A_exec

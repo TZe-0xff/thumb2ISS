@@ -28,8 +28,8 @@ def aarch32_SXTAB16_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.Field(core.readR(n),15,0) + core.SignExtend(core.Field(rotated,7,0), 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16) + core.SignExtend(core.Field(rotated,23,16), 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.Field(core.readR(n),15,0) + core.SignExtend(core.Field(rotated,7,0), 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.Field(core.readR(n),31,16) + core.SignExtend(core.Field(rotated,23,16), 16)));
         else:
             log.debug(f'aarch32_SXTAB16_T1_A_exec skipped')
     return aarch32_SXTAB16_T1_A_exec

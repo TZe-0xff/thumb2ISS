@@ -24,8 +24,8 @@ def aarch32_UMLAL_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.UInt(core.readR(n)) * core.UInt(core.readR(m)) + core.UInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,63);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,63,0));

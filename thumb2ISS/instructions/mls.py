@@ -25,7 +25,7 @@ def aarch32_MLS_T1_A(core, regex_match, bitdiffs):
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             addend   = core.SInt(core.R[a]);  # addend   = core.UInt(core.readR(a)) produces the same final results
             result = addend - operand1 * operand2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_MLS_T1_A_exec skipped')
     return aarch32_MLS_T1_A_exec

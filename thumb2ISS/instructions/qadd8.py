@@ -25,10 +25,10 @@ def aarch32_QADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.SInt(core.Field(core.readR(n),15,8)) + core.SInt(core.Field(core.readR(m),15,8));
             sum3 = core.SInt(core.Field(core.readR(n),23,16)) + core.SInt(core.Field(core.readR(m),23,16));
             sum4 = core.SInt(core.Field(core.readR(n),31,24)) + core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.SignedSat(sum1, 8));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.SignedSat(sum2, 8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.SignedSat(sum3, 8));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.SignedSat(sum4, 8));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.SignedSat(sum1, 8)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.SignedSat(sum2, 8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.SignedSat(sum3, 8)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.SignedSat(sum4, 8)));
         else:
             log.debug(f'aarch32_QADD8_T1_A_exec skipped')
     return aarch32_QADD8_T1_A_exec

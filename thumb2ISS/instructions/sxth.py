@@ -17,7 +17,7 @@ def aarch32_SXTH_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SignExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.SignExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_SXTH_T1_A_exec skipped')
     return aarch32_SXTH_T1_A_exec
@@ -47,7 +47,7 @@ def aarch32_SXTH_T2_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.SignExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.SignExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_SXTH_T2_A_exec skipped')
     return aarch32_SXTH_T2_A_exec

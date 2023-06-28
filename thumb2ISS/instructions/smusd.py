@@ -28,7 +28,7 @@ def aarch32_SMUSD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = product1 - product2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             # Signed overflow cannot occur
         else:
             log.debug(f'aarch32_SMUSD_T1_A_exec skipped')

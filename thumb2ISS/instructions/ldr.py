@@ -25,14 +25,14 @@ def aarch32_LDR_i_T1_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T1_A_exec skipped')
     return aarch32_LDR_i_T1_A_exec
@@ -59,14 +59,14 @@ def aarch32_LDR_i_T2_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T2_A_exec skipped')
     return aarch32_LDR_i_T2_A_exec
@@ -96,14 +96,14 @@ def aarch32_LDR_i_T3_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T3_A_exec skipped')
     return aarch32_LDR_i_T3_A_exec
@@ -140,14 +140,14 @@ def aarch32_LDR_i_T4_A(core, regex_match, bitdiffs):
                 address = offset_addr if index else core.readR(n);
                 data = core.ReadMemU(address,4);
                 if wback:
-                     core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                     core.writeR(n, offset_addr);
                 if t == 15:
                     if core.Field(address,1,0) == '00':
                         core.LoadWritePC(data);
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_i_T4_A_exec skipped')
     return aarch32_LDR_i_T4_A_exec
@@ -178,7 +178,7 @@ def aarch32_LDR_l_T1_A(core, regex_match, bitdiffs):
                 else:
                     raise Exception('UNPREDICTABLE');
             else:
-                core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_l_T1_A_exec skipped')
     return aarch32_LDR_l_T1_A_exec
@@ -217,7 +217,7 @@ def aarch32_LDR_l_T2_A(core, regex_match, bitdiffs):
                 else:
                     raise Exception('UNPREDICTABLE');
             else:
-                core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_l_T2_A_exec skipped')
     return aarch32_LDR_l_T2_A_exec
@@ -251,7 +251,7 @@ def aarch32_LDR_r_T1_A(core, regex_match, bitdiffs):
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_r_T1_A_exec skipped')
     return aarch32_LDR_r_T1_A_exec
@@ -292,7 +292,7 @@ def aarch32_LDR_r_T2_A(core, regex_match, bitdiffs):
                     else:
                         raise Exception('UNPREDICTABLE');
                 else:
-                    core.R[t] = data; log.info(f'Setting R{t}={hex(core.UInt(core.Field(data)))}')
+                    core.writeR(t, data);
         else:
             log.debug(f'aarch32_LDR_r_T2_A_exec skipped')
     return aarch32_LDR_r_T2_A_exec

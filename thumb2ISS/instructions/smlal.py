@@ -24,8 +24,8 @@ def aarch32_SMLAL_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.SInt(core.readR(n)) * core.SInt(core.readR(m)) + core.SInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,63);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,63,0));

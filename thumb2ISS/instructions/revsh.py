@@ -19,7 +19,7 @@ def aarch32_REVSH_T1_A(core, regex_match, bitdiffs):
             result = 0;
             result = core.SetField(result,31,8,core.SignExtend(core.Field(core.readR(m),7,0), 24));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REVSH_T1_A_exec skipped')
     return aarch32_REVSH_T1_A_exec
@@ -45,7 +45,7 @@ def aarch32_REVSH_T2_A(core, regex_match, bitdiffs):
             result = 0;
             result = core.SetField(result,31,8,core.SignExtend(core.Field(core.readR(m),7,0), 24));
             result = core.SetField(result,7,0,core.Field(core.readR(m),15,8));
-            core.R[d] = core.Field(result); log.info(f'Setting R{d}={hex(core.UInt(core.Field(result)))}')
+            core.writeR(d, core.Field(result));
         else:
             log.debug(f'aarch32_REVSH_T2_A_exec skipped')
     return aarch32_REVSH_T2_A_exec

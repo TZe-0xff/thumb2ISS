@@ -37,16 +37,16 @@ def aarch32_LDRD_i_T1_A(core, regex_match, bitdiffs):
             if core.IsAligned(address, 8):
                 data = core.ReadMemA(address,8);
                 if core.BigEndian(AccessType_GPR) :
-                    core.R[t] = core.Field(data,63,32);
-                    core.R[t2] = core.Field(data,31,0);
+                    core.writeR(t, core.Field(data,63,32));
+                    core.writeR(t2, core.Field(data,31,0));
                 else:
-                    core.R[t] = core.Field(data,31,0);
-                    core.R[t2] = core.Field(data,63,32);
+                    core.writeR(t, core.Field(data,31,0));
+                    core.writeR(t2, core.Field(data,63,32));
             else:
-                core.R[t] = core.ReadMemA(address,4);
-                core.R[t2] = core.ReadMemA(address+4,4);
+                core.writeR(t, core.ReadMemA(address,4));
+                core.writeR(t2, core.ReadMemA(address+4,4));
             if wback:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_LDRD_i_T1_A_exec skipped')
     return aarch32_LDRD_i_T1_A_exec
@@ -88,11 +88,11 @@ def aarch32_LDRD_l_T1_A(core, regex_match, bitdiffs):
             if core.IsAligned(address, 8):
                 data = core.ReadMemA(address,8);
                 if True:
-                    core.R[t] = core.Field(data,31,0);
-                    core.R[t2] = core.Field(data,63,32);
+                    core.writeR(t, core.Field(data,31,0));
+                    core.writeR(t2, core.Field(data,63,32));
             else:
-                core.R[t] = core.ReadMemA(address,4);
-                core.R[t2] = core.ReadMemA(address+4,4);
+                core.writeR(t, core.ReadMemA(address,4));
+                core.writeR(t2, core.ReadMemA(address+4,4));
         else:
             log.debug(f'aarch32_LDRD_l_T1_A_exec skipped')
     return aarch32_LDRD_l_T1_A_exec

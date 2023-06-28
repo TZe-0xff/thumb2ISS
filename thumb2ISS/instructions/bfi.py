@@ -24,7 +24,7 @@ def aarch32_BFI_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             mask = 0xffffffff >> (31 - msbit + lsbit);
             tmp_Rd = core.readR(d) & ~((mask) << lsbit);
-            core.R[d] = tmp_Rd | ((core.UInt(core.readR(n)) & mask) << lsbit);
+            core.writeR(d, tmp_Rd | ((core.UInt(core.readR(n)) & mask) << lsbit));
             # Other bits of core.readR(d) are unchanged
         else:
             log.debug(f'aarch32_BFI_T1_A_exec skipped')

@@ -26,7 +26,7 @@ def aarch32_SMMLA_T1_A(core, regex_match, bitdiffs):
             result = (core.SInt(core.readR(a)) << 32) + core.SInt(core.readR(n)) * core.SInt(core.readR(m));
             if round:
                  result = result + 0x80000000;
-            core.R[d] = core.Field(result,63,32);
+            core.writeR(d, core.Field(result,63,32));
         else:
             log.debug(f'aarch32_SMMLA_T1_A_exec skipped')
     return aarch32_SMMLA_T1_A_exec

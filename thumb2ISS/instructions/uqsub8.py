@@ -25,10 +25,10 @@ def aarch32_UQSUB8_T1_A(core, regex_match, bitdiffs):
             diff2 = core.UInt(core.Field(core.readR(n),15,8)) - core.UInt(core.Field(core.readR(m),15,8));
             diff3 = core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16));
             diff4 = core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.UnsignedSat(diff1, 8));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.UnsignedSat(diff2, 8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.UnsignedSat(diff3, 8));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.UnsignedSat(diff4, 8));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.UnsignedSat(diff1, 8)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.UnsignedSat(diff2, 8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.UnsignedSat(diff3, 8)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.UnsignedSat(diff4, 8)));
         else:
             log.debug(f'aarch32_UQSUB8_T1_A_exec skipped')
     return aarch32_UQSUB8_T1_A_exec

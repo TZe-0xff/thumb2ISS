@@ -25,7 +25,7 @@ def aarch32_SMLAWB_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             result = core.SInt(core.readR(n)) * core.SInt(operand2) + (core.SInt(core.readR(a)) << 16);
-            core.R[d] = core.Field(result,47,16);
+            core.writeR(d, core.Field(result,47,16));
             if (result >> 16) != core.SInt(core.readR(d)):
                   # Signed overflow
                 core.APSR.Q = bool(1);

@@ -27,7 +27,7 @@ def aarch32_SDIV_T1_A(core, regex_match, bitdiffs):
                 result = 0;
             else:
                 result = core.RoundTowardsZero(core.Real(core.SInt(core.readR(n))) / core.Real(core.SInt(core.readR(m))));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_SDIV_T1_A_exec skipped')
     return aarch32_SDIV_T1_A_exec

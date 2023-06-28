@@ -28,7 +28,7 @@ def aarch32_SXTAH_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             rotated = core.ROR(core.readR(m), rotation);
-            core.R[d] = core.readR(n) + core.SignExtend(core.Field(rotated,15,0), 32);
+            core.writeR(d, core.readR(n) + core.SignExtend(core.Field(rotated,15,0), 32));
         else:
             log.debug(f'aarch32_SXTAH_T1_A_exec skipped')
     return aarch32_SXTAH_T1_A_exec

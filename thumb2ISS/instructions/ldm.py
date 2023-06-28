@@ -27,13 +27,13 @@ def aarch32_LDM_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n);
             for i in range(0,14+1):
                 if registers[i] == '1':
-                    core.R[i] = core.ReadMemS(address,4);  address = address + 4;
+                    core.writeR(i, core.ReadMemS(address,4));  address = address + 4;
             if registers[15] == '1':
                 core.LoadWritePC(core.ReadMemS(address,4));
             if wback and registers[n] == '0':
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
             if wback and registers[n] == '1':
-                 core.R[n] = UNKNOWN = 0;
+                 core.writeR(n, UNKNOWN = 0);
         else:
             log.debug(f'aarch32_LDM_T1_A_exec skipped')
     return aarch32_LDM_T1_A_exec
@@ -76,13 +76,13 @@ def aarch32_LDM_T2_A(core, regex_match, bitdiffs):
             address = core.readR(n);
             for i in range(0,14+1):
                 if registers[i] == '1':
-                    core.R[i] = core.ReadMemS(address,4);  address = address + 4;
+                    core.writeR(i, core.ReadMemS(address,4));  address = address + 4;
             if registers[15] == '1':
                 core.LoadWritePC(core.ReadMemS(address,4));
             if wback and registers[n] == '0':
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
             if wback and registers[n] == '1':
-                 core.R[n] = UNKNOWN = 0;
+                 core.writeR(n, UNKNOWN = 0);
         else:
             log.debug(f'aarch32_LDM_T2_A_exec skipped')
     return aarch32_LDM_T2_A_exec

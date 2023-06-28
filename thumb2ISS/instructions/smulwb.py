@@ -26,7 +26,7 @@ def aarch32_SMULWB_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             product = core.SInt(core.readR(n)) * core.SInt(operand2);
-            core.R[d] = core.Field(product,47,16);
+            core.writeR(d, core.Field(product,47,16));
             # Signed overflow cannot occur
         else:
             log.debug(f'aarch32_SMULWB_T1_A_exec skipped')

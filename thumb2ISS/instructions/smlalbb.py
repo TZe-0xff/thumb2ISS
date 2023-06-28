@@ -35,8 +35,8 @@ def aarch32_SMLALBB_T1_A(core, regex_match, bitdiffs):
             operand1 = core.Field(core.readR(n),31,16) if n_high else core.Field(core.readR(n),15,0);
             operand2 = core.Field(core.readR(m),31,16) if m_high else core.Field(core.readR(m),15,0);
             result = core.SInt(operand1) * core.SInt(operand2) + core.SInt(core.readR(dLo), core.readR(dHi));
-            core.R[dHi] = core.Field(result,63,32);
-            core.R[dLo] = core.Field(result,31,0);
+            core.writeR(dHi, core.Field(result,63,32));
+            core.writeR(dLo, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_SMLALBB_T1_A_exec skipped')
     return aarch32_SMLALBB_T1_A_exec

@@ -25,10 +25,10 @@ def aarch32_UHADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.UInt(core.Field(core.readR(n),15,8)) + core.UInt(core.Field(core.readR(m),15,8));
             sum3 = core.UInt(core.Field(core.readR(n),23,16)) + core.UInt(core.Field(core.readR(m),23,16));
             sum4 = core.UInt(core.Field(core.readR(n),31,24)) + core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(sum1,8,1));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(sum2,8,1));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(sum3,8,1));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(sum4,8,1));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(sum1,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(sum2,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(sum3,8,1)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(sum4,8,1)));
         else:
             log.debug(f'aarch32_UHADD8_T1_A_exec skipped')
     return aarch32_UHADD8_T1_A_exec

@@ -23,8 +23,8 @@ def aarch32_UQSAX_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             sum  = core.UInt(core.Field(core.readR(n),15,0)) + core.UInt(core.Field(core.readR(m),31,16));
             diff = core.UInt(core.Field(core.readR(n),31,16)) - core.UInt(core.Field(core.readR(m),15,0));
-            core.R[d] = core.SetField(core.readR(d),15,0,core.UnsignedSat(sum, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.UnsignedSat(diff, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.UnsignedSat(sum, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.UnsignedSat(diff, 16)));
         else:
             log.debug(f'aarch32_UQSAX_T1_A_exec skipped')
     return aarch32_UQSAX_T1_A_exec

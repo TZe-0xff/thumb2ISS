@@ -22,7 +22,7 @@ def aarch32_MUL_T1_A(core, regex_match, bitdiffs):
             operand1 = core.SInt(core.R[n]);  # operand1 = core.UInt(core.readR(n)) produces the same final results
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             result = operand1 * operand2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,31,0));
@@ -55,7 +55,7 @@ def aarch32_MUL_T2_A(core, regex_match, bitdiffs):
             operand1 = core.SInt(core.R[n]);  # operand1 = core.UInt(core.readR(n)) produces the same final results
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             result = operand1 * operand2;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,31,0));

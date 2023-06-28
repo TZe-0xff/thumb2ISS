@@ -20,7 +20,7 @@ def aarch32_CLZ_T1_A(core, regex_match, bitdiffs):
         # execute
         if core.ConditionPassed(cond):
             result = core.CountLeadingZeroBits(core.readR(m));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_CLZ_T1_A_exec skipped')
     return aarch32_CLZ_T1_A_exec

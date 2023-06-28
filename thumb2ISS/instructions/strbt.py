@@ -31,7 +31,7 @@ def aarch32_STRBT_T1_A(core, regex_match, bitdiffs):
             address = core.readR(n) if postindex else offset_addr;
             MemU_unpriv[address,1] = core.Field(core.readR(t),7,0);
             if postindex:
-                 core.R[n] = offset_addr; log.info(f'Setting R{n}={hex(core.UInt(core.Field(offset_addr)))}')
+                 core.writeR(n, offset_addr);
         else:
             log.debug(f'aarch32_STRBT_T1_A_exec skipped')
     return aarch32_STRBT_T1_A_exec

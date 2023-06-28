@@ -28,7 +28,7 @@ def aarch32_SMLAD_T1_A(core, regex_match, bitdiffs):
             product1 = core.SInt(core.Field(core.readR(n),15,0)) * core.SInt(core.Field(operand2,15,0));
             product2 = core.SInt(core.Field(core.readR(n),31,16)) * core.SInt(core.Field(operand2,31,16));
             result = product1 + product2 + core.SInt(core.readR(a));
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if result != core.SInt(core.Field(result,31,0)):
                   # Signed overflow
                 core.APSR.Q = bool(1);

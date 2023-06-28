@@ -33,7 +33,7 @@ def aarch32_STM_T1_A(core, regex_match, bitdiffs):
                   # Only possible for encoding A1
                 core.WriteMemS(address,4, core.PCStoreValue());
             if wback:
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
         else:
             log.debug(f'aarch32_STM_T1_A_exec skipped')
     return aarch32_STM_T1_A_exec
@@ -85,7 +85,7 @@ def aarch32_STM_T2_A(core, regex_match, bitdiffs):
                   # Only possible for encoding A1
                 core.WriteMemS(address,4, core.PCStoreValue());
             if wback:
-                 core.R[n] = core.readR(n) + 4*registers.count('1');
+                 core.writeR(n, core.readR(n) + 4*registers.count('1'));
         else:
             log.debug(f'aarch32_STM_T2_A_exec skipped')
     return aarch32_STM_T2_A_exec

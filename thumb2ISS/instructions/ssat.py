@@ -30,7 +30,7 @@ def aarch32_SSAT_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             operand = core.Shift(core.readR(n), shift_t, shift_n, core.APSR.C);  # core.APSR.C ignored
             (result, sat) = core.SignedSatQ(core.SInt(operand), imm32);
-            core.R[d] = core.SignExtend(result, 32);
+            core.writeR(d, core.SignExtend(result, 32));
             if sat:
                 core.APSR.Q = bool(1);
         else:

@@ -21,8 +21,8 @@ def aarch32_SSAT16_T1_A(core, regex_match, bitdiffs):
         if core.ConditionPassed(cond):
             (result1, sat1) = core.SignedSatQ(core.SInt(core.Field(core.readR(n),15,0)), imm32);
             (result2, sat2) = core.SignedSatQ(core.SInt(core.Field(core.readR(n),31,16)), imm32);
-            core.R[d] = core.SetField(core.readR(d),15,0,core.SignExtend(result1, 16));
-            core.R[d] = core.SetField(core.readR(d),31,16,core.SignExtend(result2, 16));
+            core.writeR(d, core.SetField(core.readR(d),15,0,core.SignExtend(result1, 16)));
+            core.writeR(d, core.SetField(core.readR(d),31,16,core.SignExtend(result2, 16)));
             if sat1 or sat2:
                 core.APSR.Q = bool(1);
         else:

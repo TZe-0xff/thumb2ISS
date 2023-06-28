@@ -25,10 +25,10 @@ def aarch32_SADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.SInt(core.Field(core.readR(n),15,8)) + core.SInt(core.Field(core.readR(m),15,8));
             sum3 = core.SInt(core.Field(core.readR(n),23,16)) + core.SInt(core.Field(core.readR(m),23,16));
             sum4 = core.SInt(core.Field(core.readR(n),31,24)) + core.SInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.Field(sum1,7,0));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.Field(sum2,7,0));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.Field(sum3,7,0));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.Field(sum4,7,0));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.Field(sum1,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.Field(sum2,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.Field(sum3,7,0)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.Field(sum4,7,0)));
             core.APSR.GE = core.SetBit(core.APSR.GE,0,'1' if sum1 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,1,'1' if sum2 >= 0 else '0')
             core.APSR.GE = core.SetBit(core.APSR.GE,2,'1' if sum3 >= 0 else '0')

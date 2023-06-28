@@ -25,10 +25,10 @@ def aarch32_UQADD8_T1_A(core, regex_match, bitdiffs):
             sum2 = core.UInt(core.Field(core.readR(n),15,8)) + core.UInt(core.Field(core.readR(m),15,8));
             sum3 = core.UInt(core.Field(core.readR(n),23,16)) + core.UInt(core.Field(core.readR(m),23,16));
             sum4 = core.UInt(core.Field(core.readR(n),31,24)) + core.UInt(core.Field(core.readR(m),31,24));
-            core.R[d] = core.SetField(core.readR(d),7,0,core.UnsignedSat(sum1, 8));
-            core.R[d] = core.SetField(core.readR(d),15,8,core.UnsignedSat(sum2, 8));
-            core.R[d] = core.SetField(core.readR(d),23,16,core.UnsignedSat(sum3, 8));
-            core.R[d] = core.SetField(core.readR(d),31,24,core.UnsignedSat(sum4, 8));
+            core.writeR(d, core.SetField(core.readR(d),7,0,core.UnsignedSat(sum1, 8)));
+            core.writeR(d, core.SetField(core.readR(d),15,8,core.UnsignedSat(sum2, 8)));
+            core.writeR(d, core.SetField(core.readR(d),23,16,core.UnsignedSat(sum3, 8)));
+            core.writeR(d, core.SetField(core.readR(d),31,24,core.UnsignedSat(sum4, 8)));
         else:
             log.debug(f'aarch32_UQADD8_T1_A_exec skipped')
     return aarch32_UQADD8_T1_A_exec

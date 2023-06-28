@@ -26,7 +26,7 @@ def aarch32_USAD8_T1_A(core, regex_match, bitdiffs):
             absdiff3 = core.Abs(core.UInt(core.Field(core.readR(n),23,16)) - core.UInt(core.Field(core.readR(m),23,16)));
             absdiff4 = core.Abs(core.UInt(core.Field(core.readR(n),31,24)) - core.UInt(core.Field(core.readR(m),31,24)));
             result = absdiff1 + absdiff2 + absdiff3 + absdiff4;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
         else:
             log.debug(f'aarch32_USAD8_T1_A_exec skipped')
     return aarch32_USAD8_T1_A_exec

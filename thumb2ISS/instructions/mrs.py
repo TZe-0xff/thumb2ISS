@@ -19,7 +19,7 @@ def aarch32_MRS_T1_AS(core, regex_match, bitdiffs):
     def aarch32_MRS_T1_AS_exec():
         # execute
         if core.ConditionPassed(cond):
-            core.R[d] = core.ReadSpecReg(spec_reg);
+            core.writeR(d, core.ReadSpecReg(spec_reg));
         else:
             log.debug(f'aarch32_MRS_T1_AS_exec skipped')
     return aarch32_MRS_T1_AS_exec

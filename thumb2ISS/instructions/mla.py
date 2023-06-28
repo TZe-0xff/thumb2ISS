@@ -24,7 +24,7 @@ def aarch32_MLA_T1_A(core, regex_match, bitdiffs):
             operand2 = core.SInt(core.R[m]);  # operand2 = core.UInt(core.readR(m)) produces the same final results
             addend   = core.SInt(core.R[a]);  # addend   = core.UInt(core.readR(a)) produces the same final results
             result = operand1 * operand2 + addend;
-            core.R[d] = core.Field(result,31,0);
+            core.writeR(d, core.Field(result,31,0));
             if setflags:
                 core.APSR.N = core.Bit(result,31);
                 core.APSR.Z = core.IsZeroBit(core.Field(result,31,0));
