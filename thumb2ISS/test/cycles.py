@@ -9,6 +9,7 @@ flow = [
     c.getExec('mov', 'mov r1, r2', 2),
     c.getExec('ldrd', 'ldrd r0, r1, [pc, #4]', 4),
     c.getExec('smmul', 'smmul r2, r3, r4', 6),
+    c.getExec('ldr', 'ldr pc, [pc]', 8)
 ]
 
 

@@ -8,6 +8,22 @@ class Architecture:
     CortexM23= 4
     CortexM33= 5
 
+    @staticmethod
+    def fromString(s):
+        if '0+' in s or '0p' in s:
+            return Architecture.CortexM0p
+        elif '23' in s:
+            return Architecture.CortexM23
+        elif '33' in s:
+            return Architecture.CortexM33
+        elif 'M0' in s:
+            return Architecture.CortexM0
+        elif 'M3' in s:
+            return Architecture.CortexM3
+        elif 'M4' in s:
+            return Architecture.CortexM4
+
+
 class Timings:
     core_specific_timings = {
         Architecture.CortexM0 : 

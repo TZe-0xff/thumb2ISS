@@ -4,16 +4,17 @@ from itertools import groupby
 from intelhex import IntelHex
 import re,sys,time,os,subprocess,tempfile
 from .sim import Simulator, EndOfExecutionException, Core
+from .timings import Architecture
 
 @click.command()
 @click.argument('elf_file', type=click.Path(exists=True))
 @click.option('-d', '--debug', is_flag=True, default=False, help='Launch with debugger CLI')
-#@click.option('-c', '--cpu', type=click.Choice(['M0', 'M0+', 'M3', 'M4', 'M23', 'M33'], case_sensitive=False), default='M4', help='Tune target (supported instructions, cycles)')
+@click.option('-c', '--cpu', type=click.Choice(['M0', 'M0+', 'M3', 'M4', 'M23', 'M33'], case_sensitive=False), default='M4', help='Tune target (cycle counting)')
 @click.option('-l', '--log', type=click.File('w'), help='Full debug log in target file')
 @click.option('-v', '--verbose', count=True, help='Tune stderr output verbosity')
 @click.option('-t', '--timeout', default=10, show_default=True, help='Simulation timeout (s) (not applicable on debugger)')
 @click.option('-p', '--profile', is_flag=True, default=False, help='Extract statistics about instruction coverage')
-def run(elf_file, debug, log, verbose, timeout, profile):
+def run(elf_file, debug, cpu, log, verbose, timeout, profile):
     ''' Runs ELF_FILE on thumb2 Instruction Set Simulator'''
 
 
@@ -25,6 +26,11 @@ def run(elf_file, debug, log, verbose, timeout, profile):
         logging.getLogger('thumb2ISS.Sim').setLevel(logging.WARNING)
 
     log = logging.getLogger('thumb2ISS')
+
+    arch = Architecture.fromString(cpu)
+
+    log.info(f'Loaded timings for Cortex {cpu}')
+
     log.info(f'Loading elf {elf_file} ...')
 
     # extract hex from elf
@@ -51,7 +57,7 @@ def run(elf_file, debug, log, verbose, timeout, profile):
 
         rom_memory = ih.gets(ih.minaddr(), len(ih))
 
-        s = Simulator(log_root=log)
+        s = Simulator(t_arch=arch, log_root=log)
         if s.load(dis_str, rom_memory, ih.minaddr(), ram_memories, profile=profile):
             for minaddr,maxaddr in s.address_limits:
                 print(f'Memory range : {hex(minaddr)} - {hex(maxaddr)}', file=sys.stderr)
@@ -78,7 +84,7 @@ def run(elf_file, debug, log, verbose, timeout, profile):
 
             rom_memory = ih.gets(ih.minaddr(), len(ih))
 
-            s = Simulator(log_root=log)
+            s = Simulator(t_arch=arch, log_root=log)
             if s.load(dis_str.decode('ascii'), rom_memory, ih.minaddr(), ram_memories, profile=profile):
                 for minaddr,maxaddr in s.address_limits:
                     print(f'Memory range : {hex(minaddr)} - {hex(maxaddr)}', file=sys.stderr)
