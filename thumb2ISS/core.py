@@ -217,6 +217,7 @@ class Core(coreApi, metaclass=Singleton):
             raise Exception(f'Unmanaged {mnem} : {full_assembly}')
         def debug_exec():
             self.log.warning(f'Unsupported {mnem} executed as NOP')
+            return 1
         return debug_exec
 
     def Exit(self):
