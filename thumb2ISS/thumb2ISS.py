@@ -5,6 +5,7 @@ from intelhex import IntelHex
 import re,sys,time,os,subprocess,tempfile
 from .sim import Simulator, EndOfExecutionException, Core
 from .timings import Architecture
+from .version import __version__
 
 @click.command()
 @click.argument('elf_file', type=click.Path(exists=True))
@@ -14,6 +15,7 @@ from .timings import Architecture
 @click.option('-v', '--verbose', count=True, help='Tune stderr output verbosity')
 @click.option('-t', '--timeout', default=10, show_default=True, help='Simulation timeout (s) (not applicable on debugger)')
 @click.option('-p', '--profile', is_flag=True, default=False, help='Extract statistics about instruction coverage')
+@click.version_option(__version__)
 def run(elf_file, debug, cpu, log, verbose, timeout, profile):
     ''' Runs ELF_FILE on thumb2 Instruction Set Simulator'''
 
