@@ -116,8 +116,16 @@ class Simulator(object, metaclass=Singleton):
         elif '__vector_table' in self.labels:
             vector_table = self.labels['__vector_table']
         else:
-            #raise Exception('__vectors symbol missing')
-            vector_table = self.rom_start
+            # try to found a symbol containing vector
+            candidates = [l for l in self.labels if 'vector' in l]
+            if len(candidates) == 1:
+                vector_table = self.labels[candidates[0]]
+            elif len(candidates) > 0:
+                vector_table = min([self.labels[c] for c in candidates])
+            else:
+                self.log.warning('*vector* symbol missing')
+                self.log.warning(*self.labels)
+                vector_table = self.rom_start
             
         # get initial sp & inital pc from vector table
         byte_seq = b''.join(self.memory[i] for i in range(vector_table, vector_table + 8))
