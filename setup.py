@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 import os, subprocess, glob
 
-package_version = subprocess.check_output('git describe --tags'.split())
-package_version = package_version.strip().decode("utf-8")
+package_version = os.environ.get('GITHUB_REF_NAME', None)
+if package_version is None:
+    package_version = subprocess.check_output('git describe --tags'.split())
+    package_version = package_version.strip().decode("utf-8")
 
 with open('thumb2ISS/version.py', 'w') as f:
     f.write(f'__version__ = {package_version}\n')
