@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import os, subprocess, glob
+from pathlib import Path
 
 package_version = os.environ.get('GITHUB_REF_NAME', None)
 if package_version is None:
@@ -13,6 +14,10 @@ with open('thumb2ISS/version.py', 'w') as f:
 for ins in glob.glob('thumb2ISS/instructions/[a-z]*.py'):
     os.remove(ins)
 
+# read the contents of your README file
+this_directory = Path(__file__).parent
+long_description = (this_directory / "Readme.md").read_text()
+
 setup(
     name='thumb2ISS',
     version=package_version,
@@ -23,6 +28,8 @@ setup(
         'Click>=8.0.0', 'intelhex>=2.3.0'
     ],
     description='Thumb2 Instruction Set Simulator, allowing to run and debug code compiled for ARM Cortex-M on PC.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
