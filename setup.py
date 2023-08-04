@@ -8,7 +8,7 @@ if package_version is None:
     package_version = package_version.strip().decode("utf-8")
 
 with open('thumb2ISS/version.py', 'w') as f:
-    f.write(f'__version__ = {package_version}\n')
+    f.write(f'__version__ = "{package_version}"\n')
 
 # remove duplicate instructions from public package
 for ins in glob.glob('thumb2ISS/instructions/[a-z]*.py'):
